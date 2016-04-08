@@ -1,0 +1,19 @@
+{
+  "name": "xildasm",
+  "description": "Xildasm Front-end",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "react": "^15.0.0",
+    "system.js": "^0.19.25"
+  }
+}

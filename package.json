@@ -1,0 +1,26 @@
+{
+  "name": "xildasm",
+  "version": "1.0.0",
+  "description": "A cross-platform MSIL disassembler",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anurse/xildasm.git"
+  },
+  "keywords": [
+  ],
+  "author": "GitHub",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/anurse/xildasm/issues"
+  },
+  "homepage": "https://github.com/anurse/xildasm#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^2.12.2",
+    "electron-prebuilt": "^0.36.0"
+  }
+}

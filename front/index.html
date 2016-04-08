@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+    <script>
+        require('electron').ipcRenderer.on('server-info', function(event, message) {
+            xildasm_start(message.url);            
+        });
+    </script>
+  </head>
+  <body>
+    <h1>Hello World!</h1>
+    
+    <script src="lib/system.js/system.js"></script>
+    <script src="lib/react/react.js"></script>
+    <script src="lib/react/react-dom.js"></script>
+    <script>
+        System.config({
+           paths: {
+               "*": "*.js"
+           } 
+        });
+        System.import('js/app');
+    </script>
+  </body>
+</html>
