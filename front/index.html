@@ -15,8 +15,8 @@
   <body>
     <div id="app-root">Loading...</div>
     
-    <script src="lib/system.js/system.js"></script>
-    <script src="lib/fetch/fetch.js"></script>
+    <script src="lib/systemjs/system.js"></script>
+    <script src="lib/whatwg-fetch/fetch.js"></script>
     <script>
         System.config({
             packages: {
@@ -28,8 +28,9 @@
             },
             map: {
                 "redux": "lib/redux/redux.js",
+                "redux-thunk": "lib/redux-thunk/redux-thunk.js",
                 "react": "lib/react/react.js",
-                "react-dom": "lib/react/react-dom.js",
+                "react-dom": "lib/react-dom/react-dom.js",
                 "react-redux": "lib/react-redux/react-redux.js"
             }
         });

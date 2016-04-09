@@ -1,19 +1,22 @@
 {
-  "compilerOptions": {
-    "target": "es6",
-    "module": "es2015",
-    "jsx": "react",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "removeComments": false,
-    "noImplicitAny": false
-  },
-  "files": [
-    "main.tsx",
-    "app.tsx",
-    "http.ts",
-    "../typings/main.d.ts"
-  ]
+    "compilerOptions": {
+        "target": "es6",
+        "module": "system",
+        "jsx": "react",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "removeComments": false,
+        "noImplicitAny": false
+    },
+    "files": [
+        "components/root.tsx",
+        "states/all.ts",
+        "states/backend_connection.ts",
+        "ilspect.tredux.ts",
+        "main.tsx",
+        "tredux.ts",
+        "../typings/main.d.ts"
+    ]
 }

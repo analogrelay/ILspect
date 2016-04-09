@@ -80,6 +80,10 @@ gulp.task('copydeps:redux', function() {
     copydep("redux", "dist/redux{.js,.min.js}");
 });
 
+gulp.task('copydeps:redux-thunk', function() {
+    copydep("redux-thunk", "dist/redux-thunk{.js,.min.js}");
+});
+
 gulp.task('copydeps:react-redux', function() {
     copydep("react-redux", "dist/react-redux{.js,.min.js}");
 });
@@ -93,10 +97,10 @@ gulp.task('copydeps:react-dom', function() {
 });
 
 gulp.task('copydeps:fetch', function() {
-    copydep("fetch", "dist/fetch.js");
+    copydep("whatwg-fetch", "fetch.js");
 });
 
-gulp.task('copydeps', ['copydeps:systemjs', 'copydeps:redux', 'copydeps:react-redux', 'copydeps:react', 'copydeps:react-dom', 'copydeps:fetch']);
+gulp.task('copydeps', ['copydeps:systemjs', 'copydeps:redux', 'copydeps:redux-thunk', 'copydeps:react-redux', 'copydeps:react', 'copydeps:react-dom', 'copydeps:fetch']);
 
 gulp.task('build', ['prepare', 'compile', 'copydeps']);
 
