@@ -2,7 +2,7 @@
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 
-namespace Xildasm.Server
+namespace ILspect.Server
 {
     public class Program
     {

@@ -1,9 +1,12 @@
-/// <reference path="../typings/main.d.ts" />
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import {ILspectApp} from './app';
+import {createStore} from 'redux';
 
-import React from 'react';
-
-class XildasmApp extends React.Component<any, any> {
-    render() {
-        return <div>Test</div>;
-    }
+export function start(baseUrl: string)
+{
+    ReactDOM.render(
+        <ILspectApp baseUrl={baseUrl} />,
+        document.getElementById('app-root')
+    );
 }

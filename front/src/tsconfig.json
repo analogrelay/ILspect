@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "system",
+    "target": "es6",
+    "module": "es2015",
     "jsx": "react",
     "moduleResolution": "node",
     "sourceMap": true,
@@ -11,7 +11,9 @@
     "noImplicitAny": false
   },
   "files": [
-    "src/main.ts",
-    "typings/main.d.ts"
+    "main.tsx",
+    "app.tsx",
+    "http.ts",
+    "../typings/main.d.ts"
   ]
 }

@@ -2,26 +2,38 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <title>ILspect</title>
     <script>
         require('electron').ipcRenderer.on('server-info', function(event, message) {
-            xildasm_start(message.url);            
+            System.import('app/main')
+                .then(function(main) {
+                    main.start(message.url);
+                });
         });
     </script>
   </head>
   <body>
-    <h1>Hello World!</h1>
+    <div id="app-root">Loading...</div>
     
     <script src="lib/system.js/system.js"></script>
-    <script src="lib/react/react.js"></script>
-    <script src="lib/react/react-dom.js"></script>
+    <script src="lib/fetch/fetch.js"></script>
     <script>
         System.config({
-           paths: {
-               "*": "*.js"
-           } 
+            packages: {
+                'app': {
+                    main: "main.js",
+                    format: "register",
+                    defaultExtension: "js"
+                }
+            },
+            map: {
+                "redux": "lib/redux/redux.js",
+                "react": "lib/react/react.js",
+                "react-dom": "lib/react/react-dom.js",
+                "react-redux": "lib/react-redux/react-redux.js"
+            }
         });
-        System.import('js/app');
+        System.import('app');
     </script>
   </body>
 </html>
