@@ -10,13 +10,9 @@
         "removeComments": false,
         "noImplicitAny": false
     },
-    "files": [
-        "components/root.tsx",
-        "states/all.ts",
-        "states/backend_connection.ts",
-        "ilspect.tredux.ts",
-        "main.tsx",
-        "tredux.ts",
-        "../typings/main.d.ts"
+    "exclude": [
+        "typings/browser.d.ts",
+        "typings/browser",
+        "typings/main"
     ]
 }

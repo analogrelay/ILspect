@@ -3,14 +3,8 @@
   <head>
     <meta charset="UTF-8">
     <title>ILspect</title>
-    <script>
-        require('electron').ipcRenderer.on('server-info', function(event, message) {
-            System.import('app/main')
-                .then(function(main) {
-                    main.start(message.url);
-                });
-        });
-    </script>
+    <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="app/styles/master.css" type="text/css" />
   </head>
   <body>
     <div id="app-root">Loading...</div>
@@ -18,11 +12,17 @@
     <script src="lib/systemjs/system.js"></script>
     <script src="lib/whatwg-fetch/fetch.js"></script>
     <script>
+        require('electron').ipcRenderer.on('server-info', function(event, message) {
+            System.import('app/main')
+                .then(function(main) {
+                    main.start(message.url);
+                });
+        });
         System.config({
             packages: {
                 'app': {
                     main: "main.js",
-                    format: "register",
+                    format: "amd",
                     defaultExtension: "js"
                 }
             },
@@ -31,7 +31,8 @@
                 "redux-thunk": "lib/redux-thunk/redux-thunk.js",
                 "react": "lib/react/react.js",
                 "react-dom": "lib/react-dom/react-dom.js",
-                "react-redux": "lib/react-redux/react-redux.js"
+                "react-redux": "lib/react-redux/react-redux.js",
+                "bootstrap": "lib/bootstrap/js/bootstrap.js"
             }
         });
         System.import('app');

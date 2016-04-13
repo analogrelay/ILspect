@@ -1,20 +1,18 @@
 import * as React from 'react';
-import {connect} from '../ilspect.tredux';
-import {ILspectState} from '../states/all';
+import {connect} from 'react-redux';
+
+import {Frame} from './layout/frame';
 
 export class ILspectApp extends React.Component<any, any> {
-    render() {
-        return <ILspectRoot />;
+    componentDidMount() {
+        window.onresize = (event) => {
+            this.forceUpdate();
+        }
     }
-}
-
-@connect(
-    (state) => ({connected: state.backend_connection.connected})
-)
-class ILspectRoot extends React.Component<any, any> {
     render() {
-        return <div>
-            {this.props.connected ? "Connected" : "Connecting..."}
-        </div>;
+        var windowSize = { width: window.innerWidth, height: window.innerHeight };
+        
+        return <Frame width={windowSize.width} height={windowSize.height}>    
+        </Frame>
     }
 }

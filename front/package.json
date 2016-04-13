@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bootstrap": "^3.3.6",
     "react": "^15.0.1",
     "react-dom": "^15.0.1",
     "react-redux": "^4.4.2",
