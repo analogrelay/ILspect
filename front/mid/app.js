@@ -3,7 +3,6 @@
 const fs = require('fs');
 const electron = require('electron');
 const child_process = require('child_process');
-const path = require('path');
 
 // Module to control application life.
 const app = electron.app;
@@ -25,7 +24,7 @@ module.exports = function(rootDir) {
     let newEnv = Object.create(process.env);
     newEnv["PORT"] = port;
 
-    let server_executable = path.join(rootDir, "back/src/ILspect.Server/bin/Debug/netcoreapp1.0/publish/ILspect.Server.dll");
+    let server_executable = "./back/src/ILspect.Server/bin/Debug/netcoreapp1.0/publish/ILspect.Server.dll";
 
     if(!fs.existsSync(server_executable)) {
         console.log(`error: unable to find executable: ${server_executable}`)
@@ -51,7 +50,7 @@ module.exports = function(rootDir) {
 
         // Set up the app menu
         Menu.setApplicationMenu(require('./menu')(mainWindow));
-
+        
         mainWindow.webContents.on('did-finish-load', function() {
             mainWindow.webContents.send('server-info', {
                 url: `http://localhost:${port}`

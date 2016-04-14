@@ -3,15 +3,17 @@ var ts = require('gulp-typescript');
 var sourcemaps = require('gulp-sourcemaps');
 var rename = require('gulp-rename');
 var sass = require('gulp-sass');
+var path = require('path');
 
 var spawn = require('child_process').spawn;
 
 var tsProject = ts.createProject('front/src/tsconfig.json');
 
-function exec(cmd, args, cwd, cb) {
+function exec(cmd, args, cwd, cb, shell_if_windows) {
     var proc = spawn(cmd, args, {
         stdio: "inherit",
-        cwd: cwd
+        cwd: cwd,
+        shell: shell_if_windows && process.platform === 'win32'
     });
     proc.on('exit', function(code) {
        if (code != 0) {
@@ -28,11 +30,11 @@ function copydep(mod, subpath) {
 }
 
 gulp.task('prepare:npm-front', function(cb) {
-    exec("npm", [ "install" ], "./front", cb);
+    exec("npm", [ "install" ], "./front", cb, true);
 });
 
 gulp.task('prepare:typings', function(cb) {
-    exec("typings", [ "install" ], "./front/src", cb);
+    exec("typings", [ "install" ], "./front/src", cb, true);
 });
 
 gulp.task('prepare:front', [ 'prepare:npm-front', 'prepare:typings' ]);
@@ -123,10 +125,12 @@ gulp.task('default', ['build']);
 
 gulp.task('run', function() {
     spawn("electron", [ __dirname + "/main.js" ], {
-        stdio: 'inherit'
+        stdio: 'inherit',
+        shell: process.platform === 'win32'
     });
 })
 
-gulp.task('run:back', ['prepare:nuget', 'compile:server'], function(cb) {
-    exec("dotnet", [ "./back/src/Xildasm.Server/bin/Debug/netcoreapp1.0/publish/Xildasm.Server.dll" ], ".", cb);
+gulp.task('run:back', ['prepare:back', 'compile:back'], function(cb) {
+    var p = path.join(__dirname, "/back/src/ILspect.Server/bin/Debug/netcoreapp1.0/publish/ILspect.Server.dll");
+    exec("dotnet", [ p ], ".", cb);
 });
