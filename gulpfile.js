@@ -47,7 +47,7 @@ gulp.task('prepare:back', [ 'prepare:nuget' ]);
 
 gulp.task('prepare', [ 'prepare:front', 'prepare:back' ]);
 
-gulp.task('compile:typescript', [ 'prepare:npm-front', 'prepare:typings' ], function() {
+gulp.task('compile:typescript', function() {
     var tsResult = tsProject.src()
         .pipe(sourcemaps.init())
         .pipe(ts(tsProject));
@@ -64,7 +64,7 @@ gulp.task('compile:typescript', [ 'prepare:npm-front', 'prepare:typings' ], func
         .pipe(gulp.dest('front/app'));
 });
 
-gulp.task('compile:javascript', [ 'prepare:npm-front' ], function() {
+gulp.task('compile:javascript', function() {
     gulp.src("front/src/**/*.js")
         .pipe(gulp.dest("front/app"));
 });
@@ -77,45 +77,49 @@ gulp.task('compile:sass', function() {
 
 gulp.task('compile:front', ['compile:typescript', 'compile:javascript', 'compile:sass']);
 
-gulp.task('compile:back', [ 'prepare:nuget' ], function(cb) {
+gulp.task('compile:back', function(cb) {
     exec("dotnet", [ "publish", `${__dirname}/back/src/ILspect.Server/project.json` ], undefined, cb);
 });
 
 gulp.task('compile', [ 'compile:front', 'compile:back']);
 
-gulp.task('copydeps:systemjs', [ 'prepare:npm-front' ], function() {
+gulp.task('copydeps:systemjs', function() {
     copydep("systemjs", "dist/system{,.src}.js{,.map}");
 });
 
-gulp.task('copydeps:redux', [ 'prepare:npm-front' ], function() {
+gulp.task('copydeps:redux', function() {
     copydep("redux", "dist/redux{.js,.min.js}");
 });
 
-gulp.task('copydeps:redux-thunk', [ 'prepare:npm-front' ], function() {
+gulp.task('copydeps:redux-thunk', function() {
     copydep("redux-thunk", "dist/redux-thunk{.js,.min.js}");
 });
 
-gulp.task('copydeps:react-redux', [ 'prepare:npm-front' ], function() {
+gulp.task('copydeps:react-redux', function() {
     copydep("react-redux", "dist/react-redux{.js,.min.js}");
 });
 
-gulp.task('copydeps:react', [ 'prepare:npm-front' ], function() {
+gulp.task('copydeps:react', function() {
     copydep("react", "dist/react{.js,.min.js}");
 });
 
-gulp.task('copydeps:react-dom', [ 'prepare:npm-front' ], function() {
+gulp.task('copydeps:react-dom', function() {
     copydep("react-dom", "dist/react-dom{.js,.min.js}");
 });
 
-gulp.task('copydeps:fetch', [ 'prepare:npm-front' ], function() {
+gulp.task('copydeps:fetch', function() {
     copydep("whatwg-fetch", "fetch.js");
 });
 
-gulp.task('copydeps:bootstrap', [ 'prepare:npm-front' ], function() {
+gulp.task('copydeps:bootstrap', function() {
     copydep("bootstrap", "dist/*/*"); 
 });
 
-gulp.task('copydeps', ['copydeps:systemjs', 'copydeps:redux', 'copydeps:redux-thunk', 'copydeps:react-redux', 'copydeps:react', 'copydeps:react-dom', 'copydeps:fetch', 'copydeps:bootstrap']);
+gulp.task('copydeps:immutable', function() {
+    copydep("immutable", "dist/immutable{.js,.min.js}"); 
+});
+
+gulp.task('copydeps', ['copydeps:systemjs', 'copydeps:redux', 'copydeps:redux-thunk', 'copydeps:react-redux', 'copydeps:react', 'copydeps:react-dom', 'copydeps:fetch', 'copydeps:bootstrap', 'copydeps:immutable']);
 
 gulp.task('build', ['prepare', 'compile', 'copydeps']);
 gulp.task('build:front', ['prepare:front', 'compile:front', 'copydeps']);
@@ -123,7 +127,7 @@ gulp.task('build:back', ['prepare:back', 'compile:back']);
 
 gulp.task('default', ['build']);
 
-gulp.task('run', function() {
+gulp.task('run', ['compile:front'], function() {
     spawn("electron", [ __dirname + "/main.js" ], {
         stdio: 'inherit',
         shell: process.platform === 'win32'

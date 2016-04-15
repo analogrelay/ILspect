@@ -1,0 +1,29 @@
+@import '_colors.scss';
+
+.f-assemblyList {
+    overflow: scroll;
+    background-color: $color_assemblyList_bg;
+    color: $color_assemblyList_fg;
+}
+
+.f-codeView {
+    background-color: $color_codeView_bg;
+    color: $color_codeView_fg;
+}
+
+ul.c-assemblyList {
+    list-style-type: none;
+    padding: 1em; 
+}
+
+li.c-assemblyListEntry
+{
+    .c-assemblyListEntry-text {
+        padding-left: 0.5em;
+        white-space: pre;
+    }
+    
+    &.c-assemblyListEntry-loading {
+        color: $color_assemblyListEntry_loading;
+    }
+}

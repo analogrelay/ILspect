@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Serialization;
 
 namespace ILspect.Server
 {
@@ -12,7 +13,9 @@ namespace ILspect.Server
         {
             services.AddLogging();
             services.AddMvcCore()
-                .AddJsonFormatters();
+                .AddJsonFormatters((settings) => {
+                    settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                });
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)

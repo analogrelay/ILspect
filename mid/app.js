@@ -43,11 +43,12 @@ module.exports = function(rootDir) {
     server_process.on('exit', (code) => {
         console.log(`server process exited with code ${code}`);
         app.quit();
-    })
+    });
 
     function createWindow () {
         // Create the browser window.
         mainWindow = new BrowserWindow({width: 800, height: 600});
+        mainWindow.maximize();
 
         // Set up the app menu
         Menu.setApplicationMenu(require('./menu')(mainWindow));
@@ -62,7 +63,7 @@ module.exports = function(rootDir) {
         mainWindow.loadURL('file://' + rootDir + '/front/index.html');
 
         // Open the DevTools.
-        mainWindow.webContents.openDevTools();
+        mainWindow.webContents.openDevTools({detach: true});
         
         // Emitted when the window is closed.
         mainWindow.on('closed', function() {

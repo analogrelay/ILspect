@@ -22,7 +22,7 @@
             packages: {
                 'app': {
                     main: "main.js",
-                    format: "amd",
+                    format: "register",
                     defaultExtension: "js"
                 }
             },
@@ -32,9 +32,11 @@
                 "react": "lib/react/react.js",
                 "react-dom": "lib/react-dom/react-dom.js",
                 "react-redux": "lib/react-redux/react-redux.js",
-                "bootstrap": "lib/bootstrap/js/bootstrap.js"
+                "bootstrap": "lib/bootstrap/js/bootstrap.js",
+                "immutable": "lib/immutable/immutable.js"
             }
         });
+        System.set('electron', System.newModule(require('electron')));
         System.import('app');
     </script>
   </body>

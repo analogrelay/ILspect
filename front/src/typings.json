@@ -1,10 +1,15 @@
 {
   "ambientDependencies": {
+    "electron": "registry:env/electron#0.37.4+20160406125549",
+    "node": "registry:env/node#4.0.0+20160410231109",
     "react": "registry:dt/react#0.14.0+20160412154040",
     "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
     "react-redux": "registry:dt/react-redux#4.4.0+20160406115600",
     "redux": "registry:dt/redux#3.3.1+20160326112656",
     "redux-thunk": "registry:dt/redux-thunk#2.0.1+20160317120654",
     "whatwg-fetch": "registry:dt/whatwg-fetch#0.0.0+20160412133644"
+  },
+  "dependencies": {
+    "immutable": "registry:npm/immutable#3.7.6+20160411060006"
   }
 }

@@ -1,3 +1,20 @@
+import * as React from 'react';
+import * as ReactRedux from 'react-redux';
+
+interface IHasProps<T> {
+    props: T
+}
+
+export function isComponent<T extends IHasProps<P>, P>(e: React.ReactElement<any>, ctor: () => T): e is React.ReactElement<P> {
+    return (e.type as any) === ctor;
+}
+
+export function connect<TState, TProps>(mapStateToProps: (state: TState, ownProps?: any) => TProps) {
+    return (component: React.ComponentClass<TProps> | React.StatelessComponent<TProps>) => {
+        return ReactRedux.connect<any, any, any>(mapStateToProps)(component);
+    }
+}
+
 export interface IAction<T> {
     type: string,
     payload: T,
@@ -34,8 +51,8 @@ export interface IReducer<TState, TAction> extends IReducerBase {
     reduce(state: TState, action: TAction): TState;
 }
 
-export abstract class Reducer<TState, TAction> implements IReducer<TState, TAction> {
-    abstract reduce(state: TState, action: TAction): TState;
+export abstract class Reducer<TState, TPayload> implements IReducer<TState, IAction<TPayload>> {
+    abstract reduce(state: TState, action: IAction<TPayload>): TState;
 }
 
 export class MultiReducer<TState> implements IReducer<TState, any> {

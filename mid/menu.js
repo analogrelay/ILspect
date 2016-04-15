@@ -14,6 +14,10 @@ module.exports = function buildMenu(mainWindow) {
                         title: "Add Assembly...",
                         filters: [
                             { name: ".NET Assemblies", extensions: [ 'dll', 'exe', 'winmd' ] }
+                        ],
+                        properties: [
+                            'openFile',
+                            'multiSelections'
                         ]
                     }, function(filenames) {
                         // Send the files over to the browser for the app to use

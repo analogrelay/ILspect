@@ -1,6 +1,8 @@
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using ILspect.Server.ViewModels;
+using ILspect.Server.State;
 
 namespace ILspect.Server.Controllers
 {
@@ -9,13 +11,13 @@ namespace ILspect.Server.Controllers
     public class AssembliesController : ControllerBase
     {
         [Route("")]
-        public AssemblyViewModel Put([FromBody] string path)
+        public IEnumerable<AssemblyModel> Put([FromBody] string[] paths)
         {
-            return new AssemblyViewModel
+            return paths.Select(path => new AssemblyModel
             {
                 Name = Path.GetFileNameWithoutExtension(path),
-                Loaded = false    
-            };
+                Path = path    
+            });
         }
     }
 }
