@@ -1,3 +1,4 @@
+using ILspect.Server.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -13,9 +14,12 @@ namespace ILspect.Server
         {
             services.AddLogging();
             services.AddMvcCore()
+                .AddControllersAsServices()
                 .AddJsonFormatters((settings) => {
                     settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 });
+                
+            services.AddSingleton<AssemblyTable>();
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)

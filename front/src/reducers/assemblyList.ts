@@ -16,7 +16,7 @@ export class AssemblyListReducer extends Reducer<State.AssemblyList, any> {
             return mut(state, { 
                 assemblies: state.assemblies.withMutations((assemblies) => {
                     action.payload.forEach(path => {
-                        let existing = state.assemblies.findIndex((v) => v.path === path);
+                        let existing = assemblies.findIndex((v) => v.path === path);
                         if (existing == -1) {
                             assemblies.push({
                                 name: null,
