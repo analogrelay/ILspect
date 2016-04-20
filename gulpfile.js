@@ -1,13 +1,19 @@
-var gulp = require('gulp');
-var ts = require('gulp-typescript');
-var sourcemaps = require('gulp-sourcemaps');
-var rename = require('gulp-rename');
-var sass = require('gulp-sass');
-var path = require('path');
+const gulp = require('gulp');
+const ts = require('gulp-typescript');
+const sourcemaps = require('gulp-sourcemaps');
+const rename = require('gulp-rename');
+const sass = require('gulp-sass');
+const filter = require('gulp-filter');
+const del = require('del');
 
-var spawn = require('child_process').spawn;
+const path = require('path');
 
-var tsProject = ts.createProject('front/src/tsconfig.json');
+const spawn = require('child_process').spawn;
+
+const tsProject = ts.createProject('src/ILspect.App/tsconfig.json');
+
+const uiStartScript = path.join(__dirname, "src/ILspect.App/electron/app.js");
+const serverExecutable = path.join(__dirname, "src/ILspect.Server/bin/Debug/netcoreapp1.0/publish/ILspect.Server.dll");
 
 function exec(cmd, args, cwd, cb, shell_if_windows) {
     var proc = spawn(cmd, args, {
@@ -25,22 +31,37 @@ function exec(cmd, args, cwd, cb, shell_if_windows) {
 }
 
 function copydep(mod, subpath) {
-    gulp.src(`front/node_modules/${mod}/${subpath}`)
-        .pipe(gulp.dest(`front/lib/${mod}`));
+    gulp.src(`src/ILspect.App/node_modules/${mod}/${subpath}`)
+        .pipe(gulp.dest(`src/ILspect.App/dist/lib/${mod}`));
 }
 
+gulp.task('clean:front', function() {
+    return del([
+        'src/ILspect.App/dist'
+    ]);
+});
+
+gulp.task('clean:back', function() {
+    return del([
+        'src/ILspect.Server/bin',
+        'src/ILspect.Server/obj'
+    ])
+});
+
+gulp.task('clean', ['clean:front', 'clean:back']);
+
 gulp.task('prepare:npm-front', function(cb) {
-    exec("npm", [ "install" ], "./front", cb, true);
+    exec("npm", [ "install" ], "./src/ILspect.App", cb, true);
 });
 
 gulp.task('prepare:typings', function(cb) {
-    exec("typings", [ "install" ], "./front/src", cb, true);
+    exec("typings", [ "install" ], "./src/ILspect.App", cb, true);
 });
 
 gulp.task('prepare:front', [ 'prepare:npm-front', 'prepare:typings' ]);
 
 gulp.task('prepare:nuget', function(cb) {
-    exec("dotnet", [ "restore" ], "./back", cb);
+    exec("dotnet", [ "restore" ], "./src/ILspect.Server", cb);
 });
 
 gulp.task('prepare:back', [ 'prepare:nuget' ]);
@@ -49,36 +70,32 @@ gulp.task('prepare', [ 'prepare:front', 'prepare:back' ]);
 
 gulp.task('compile:typescript', function() {
     var tsResult = tsProject.src()
+        .pipe(filter(['src/**']))
         .pipe(sourcemaps.init())
         .pipe(ts(tsProject));
     tsResult.js
-        .pipe(rename(function(path) {
-            if (path.dirname.startsWith('src/')) {
-                path.dirname = path.dirname.substring(4);
-            }
-            else if (path.dirname.startsWith('src')) {
-                path.dirname = path.dirname.substring(3);
-            }
-        }))
         .pipe(sourcemaps.write())
-        .pipe(gulp.dest('front/app'));
+        .pipe(gulp.dest('./src/ILspect.App/dist'));
 });
 
-gulp.task('compile:javascript', function() {
-    gulp.src("front/src/**/*.js")
-        .pipe(gulp.dest("front/app"));
+gulp.task('compile:other', function() {
+    gulp.src([
+            "./src/ILspect.App/src/**",
+            "!**/*.{ts,tsx,scss,json}"
+        ])
+        .pipe(gulp.dest("./src/ILspect.App/dist"));
 });
 
 gulp.task('compile:sass', function() {
-    return gulp.src("front/src/styles/master.scss")
+    return gulp.src("./src/ILspect.App/src/styles/master.scss")
         .pipe(sass().on('error', sass.logError))
-        .pipe(gulp.dest("front/app/styles")); 
+        .pipe(gulp.dest("./src/ILspect.App/dist/styles/")); 
 });
 
-gulp.task('compile:front', ['compile:typescript', 'compile:javascript', 'compile:sass']);
+gulp.task('compile:front', ['compile:typescript', 'compile:other', 'compile:sass']);
 
 gulp.task('compile:back', function(cb) {
-    exec("dotnet", [ "publish", `${__dirname}/back/src/ILspect.Server/project.json` ], undefined, cb);
+    exec("dotnet", [ "publish", `${__dirname}/src/ILspect.Server/project.json` ], undefined, cb);
 });
 
 gulp.task('compile', [ 'compile:front', 'compile:back']);
@@ -127,14 +144,17 @@ gulp.task('build:back', ['prepare:back', 'compile:back']);
 
 gulp.task('default', ['build']);
 
-gulp.task('run', ['compile:front'], function() {
-    spawn("electron", [ __dirname + "/main.js" ], {
+gulp.task('run', ['copydeps', 'compile:front'], function() {
+    var electronArgs = [ 
+        uiStartScript, 
+        serverExecutable ];
+        
+    spawn("electron", electronArgs, {
         stdio: 'inherit',
         shell: process.platform === 'win32'
     });
 })
 
 gulp.task('run:back', ['prepare:back', 'compile:back'], function(cb) {
-    var p = path.join(__dirname, "/back/src/ILspect.Server/bin/Debug/netcoreapp1.0/publish/ILspect.Server.dll");
-    exec("dotnet", [ p ], ".", cb);
+    exec("dotnet", [ serverExecutable ], ".", cb);
 });

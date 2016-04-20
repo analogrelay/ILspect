@@ -1,0 +1,15 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": ".NET Core Launch (console)",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build",
+			"program": "${workspaceRoot}/back/src/ILspect.Server/bin/Debug/netcoreapp1.0/ILspect.Server.dll",
+			"args": [],
+			"cwd": "${workspaceRoot}/back/src/ILspect.Server",
+			"stopAtEntry": false
+		}
+	]
+}

@@ -1,0 +1,19 @@
+.f-assemblyList {
+  overflow: scroll;
+  background-color: #054985;
+  color: #FFF; }
+
+.f-codeView {
+  background-color: #8C8D91;
+  color: #000; }
+
+ul.c-assemblyList {
+  list-style-type: none;
+  padding: 1em; }
+
+li.c-assemblyListEntry .c-assemblyListEntry-text {
+  padding-left: 0.5em;
+  white-space: pre; }
+
+li.c-assemblyListEntry.c-assemblyListEntry-loading {
+  color: #8C8D91; }

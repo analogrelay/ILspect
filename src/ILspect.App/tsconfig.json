@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "system",
+        "jsx": "react",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "experimentalDecorators": true,
+        "removeComments": false,
+        "noImplicitAny": false
+    },
+    "exclude": [
+        "electron",
+        "node_modules",
+        "dist",
+        "typings/browser.d.ts",
+        "typings/browser",
+        "typings/main"
+    ]
+}
