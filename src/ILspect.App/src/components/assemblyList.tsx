@@ -2,6 +2,8 @@ import * as React from 'react';
 import * as State from '../state';
 import {connect} from '../reducts';
 
+import {Icon} from './widgets'
+
 @connect<State.Application, IAssemblyListProps>(
     (state) => ({ assemblies: state.assemblyList.assemblies.toArray() })
 )
@@ -23,7 +25,8 @@ export class AssemblyListEntry extends React.Component<IAssemblyListEntryProps, 
         }
         
         return <li className={className}>
-            <span className="glyphicon glyphicon-book"></span>
+            <Icon name="menu-right" />
+            <Icon name="book" />
             <span className="c-assemblyListEntry-text">
                 {this.props.assembly.name || "Loading ..."}
             </span>
