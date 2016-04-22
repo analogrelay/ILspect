@@ -35,6 +35,37 @@ export class AssemblyListEntry extends React.Component<IAssemblyListEntryProps, 
             className += ' c-assemblyListEntry-loading';
         }
         
+        function renderMember(m: State.Member) {
+            var children;
+            if(State.memberIsType(m)) {
+                children = m.members.map(renderMember)
+            }
+            
+            var icon;
+            
+            switch(m.kind) {
+                case State.MemberKind.Event:
+                    icon = "asterisk";
+                    break;
+                case State.MemberKind.Field:
+                    icon = "tag";
+                    break;
+                case State.MemberKind.Method:
+                    icon = "fire";
+                    break;
+                case State.MemberKind.Property:
+                    icon = "info-sign";
+                    break;
+                case State.MemberKind.Type:
+                    icon = "list";
+                    break;
+            }
+            
+            return <TreeNode key={m.name} className={className} icon={icon} text={m.name}>
+                {children}
+            </TreeNode>;
+        }
+        
         return <li className={className}>
             <a href="#" onClick={this.onClick.bind(this)}>
                 <Icon name="book" />
@@ -45,9 +76,7 @@ export class AssemblyListEntry extends React.Component<IAssemblyListEntryProps, 
             <Tree expanded={this.state.expanded}>
                 {this.props.assembly.namespaces ? this.props.assembly.namespaces.map((ns) =>
                     <TreeNode key={ns.name} className={className} icon="gift" text={ns.name || "<Default>" }>
-                        {ns.types ? ns.types.map((type) => 
-                            <TreeNode key={type.name} className={className} icon="leaf" text={type.name} />
-                        ) : ""}
+                        {ns.types ? ns.types.map(renderMember) : ""}
                     </TreeNode> 
                 ) : ""}
             </Tree>

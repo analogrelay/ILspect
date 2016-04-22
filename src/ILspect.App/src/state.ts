@@ -20,8 +20,26 @@ export interface Namespace {
     types?: Type[]
 }
 
-export interface Type {
-    name?: string
+export enum MemberKind
+{
+    Field,
+    Method,
+    Property,
+    Event,
+    Type
+}
+
+export interface Member {
+    name?: string,
+    kind?: MemberKind
+}
+
+export interface Type extends Member {
+    members?: Member[]
+}
+
+export function memberIsType(m: Member): m is Type {
+    return m.kind == MemberKind.Type;
 }
 
 export enum AssemblyStatus {

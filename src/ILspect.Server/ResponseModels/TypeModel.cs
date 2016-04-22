@@ -1,7 +1,9 @@
+using System.Collections.Generic;
+
 namespace ILspect.Server.ResponseModels
 {
-    public class TypeModel
+    public class TypeModel : MemberModel
     {
-        public string Name { get; set; }
+        public IEnumerable<MemberModel> Members { get; set; }
     }
 }

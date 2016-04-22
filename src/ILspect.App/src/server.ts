@@ -26,7 +26,26 @@ export interface NamespaceModel
     types?: TypeModel[]
 }
 
-export interface TypeModel
+export enum MemberKind
 {
-    name?: string
+    Field,
+    Method,
+    Property,
+    Event,
+    Type
+}
+
+export interface MemberModel
+{
+    name?: string,
+    kind?: MemberKind
+}
+
+export function memberIsType(m: MemberModel): m is TypeModel {
+    return m.kind == MemberKind.Type;
+}
+
+export interface TypeModel extends MemberModel
+{
+    members?: MemberModel[]
 }
