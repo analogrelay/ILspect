@@ -17,7 +17,13 @@ export function addAssemblies(paths: string[]) {
         let asms = result.filter((r) => r.success && r.result.hasMetadata).map((r) => <State.Assembly>{
             path: r.result.path,
             name: r.result.name,
-            status: State.AssemblyStatus.Loaded
+            status: State.AssemblyStatus.Loaded,
+            namespaces: r.result.namespaces.map((n) => (<State.Namespace>{
+                name: n.name,
+                types: n.types.map((t) => (<State.Type>{
+                    name: t.name
+                }))
+            }))
         });
         
         dispatch(Actions.ResolvedAssemblies.create(asms));

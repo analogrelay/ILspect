@@ -5,10 +5,6 @@ interface IHasProps<T> {
     props: T
 }
 
-export function isComponent<T extends IHasProps<P>, P>(e: React.ReactElement<any>, ctor: () => T): e is React.ReactElement<P> {
-    return (e.type as any) === ctor;
-}
-
 export function connect<TState, TProps>(mapStateToProps: (state: TState, ownProps?: any) => TProps) {
     return (component: React.ComponentClass<TProps> | React.StatelessComponent<TProps>) => {
         return ReactRedux.connect<any, any, any>(mapStateToProps)(component);

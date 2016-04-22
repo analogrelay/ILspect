@@ -155,6 +155,6 @@ gulp.task('run', ['copydeps', 'compile:front'], function() {
     });
 })
 
-gulp.task('run:back', ['prepare:back', 'compile:back'], function(cb) {
+gulp.task('run:back', ['compile:back'], function(cb) {
     exec("dotnet", [ serverExecutable ], ".", cb);
 });

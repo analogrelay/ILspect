@@ -16,12 +16,14 @@ export interface AssemblyModel
     id?: string
     name?: string
     path?: string
-    hasMetadata?: boolean
+    hasMetadata?: boolean,
+    namespaces?: NamespaceModel[]
 }
 
 export interface NamespaceModel
 {
     name?: string
+    types?: TypeModel[]
 }
 
 export interface TypeModel

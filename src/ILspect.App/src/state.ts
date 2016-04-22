@@ -12,6 +12,16 @@ export interface Assembly {
     name?: string
     path?: string
     status?: AssemblyStatus
+    namespaces?: Namespace[]
+}
+
+export interface Namespace {
+    name?: string
+    types?: Type[]
+}
+
+export interface Type {
+    name?: string
 }
 
 export enum AssemblyStatus {
