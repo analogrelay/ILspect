@@ -1,9 +1,23 @@
 @import '_colors.scss';
 
 .f-assemblyList {
-    overflow: scroll;
+    overflow: auto;
+    white-space: nowrap;
     background-color: $color_assemblyList_bg;
     color: $color_assemblyList_fg;
+    
+    a {
+        color: $color_assemblyList_fg;
+        text-decoration: none;
+        
+        &:visited {
+            color: $color_assemblyList_fg
+        }
+    }
+}
+
+.c-assemblyListEntry-loading {
+    color: $color_assemblyListEntry_loading;
 }
 
 .f-codeView {
@@ -11,19 +25,20 @@
     color: $color_codeView_fg;
 }
 
-ul.c-assemblyList {
+ul.l-tree {
     list-style-type: none;
-    padding: 1em; 
+    padding-left: 1em;
 }
-
-li.c-assemblyListEntry
+    
+li.l-treeNode
 {
-    .c-assemblyListEntry-text {
-        padding-left: 0.5em;
-        white-space: pre;
+    cursor: pointer;
+    
+    .glyphicon {
+        padding-right: 0.30em;
     }
     
-    &.c-assemblyListEntry-loading {
-        color: $color_assemblyListEntry_loading;
+    .l-treeNode-text {
+        white-space: pre;
     }
 }

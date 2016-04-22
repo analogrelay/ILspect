@@ -1,16 +1,20 @@
 const gulp = require('gulp');
+const plumber = require('gulp-plumber');
 const ts = require('gulp-typescript');
 const sourcemaps = require('gulp-sourcemaps');
 const rename = require('gulp-rename');
 const sass = require('gulp-sass');
 const filter = require('gulp-filter');
 const del = require('del');
+const typescript = require('typescript')
 
 const path = require('path');
 
 const spawn = require('child_process').spawn;
 
-const tsProject = ts.createProject('src/ILspect.App/tsconfig.json');
+const tsProject = ts.createProject('src/ILspect.App/tsconfig.json', {
+    typescript: typescript
+});
 
 const uiStartScript = path.join(__dirname, "src/ILspect.App/electron/app.js");
 const serverExecutable = path.join(__dirname, "src/ILspect.Server/bin/Debug/netcoreapp1.0/publish/ILspect.Server.dll");
@@ -31,7 +35,7 @@ function exec(cmd, args, cwd, cb, shell_if_windows) {
 }
 
 function copydep(mod, subpath) {
-    gulp.src(`src/ILspect.App/node_modules/${mod}/${subpath}`)
+    return gulp.src(`src/ILspect.App/node_modules/${mod}/${subpath}`)
         .pipe(gulp.dest(`src/ILspect.App/dist/lib/${mod}`));
 }
 
@@ -73,13 +77,13 @@ gulp.task('compile:typescript', function() {
         .pipe(filter(['src/**']))
         .pipe(sourcemaps.init())
         .pipe(ts(tsProject));
-    tsResult.js
+    return tsResult.js
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('./src/ILspect.App/dist'));
 });
 
 gulp.task('compile:other', function() {
-    gulp.src([
+    return gulp.src([
             "./src/ILspect.App/src/**",
             "!**/*.{ts,tsx,scss,json}"
         ])
@@ -101,39 +105,39 @@ gulp.task('compile:back', function(cb) {
 gulp.task('compile', [ 'compile:front', 'compile:back']);
 
 gulp.task('copydeps:systemjs', function() {
-    copydep("systemjs", "dist/system{,.src}.js{,.map}");
+    return copydep("systemjs", "dist/system{,.src}.js{,.map}");
 });
 
 gulp.task('copydeps:redux', function() {
-    copydep("redux", "dist/redux{.js,.min.js}");
+    return copydep("redux", "dist/redux{.js,.min.js}");
 });
 
 gulp.task('copydeps:redux-thunk', function() {
-    copydep("redux-thunk", "dist/redux-thunk{.js,.min.js}");
+    return copydep("redux-thunk", "dist/redux-thunk{.js,.min.js}");
 });
 
 gulp.task('copydeps:react-redux', function() {
-    copydep("react-redux", "dist/react-redux{.js,.min.js}");
+    return copydep("react-redux", "dist/react-redux{.js,.min.js}");
 });
 
 gulp.task('copydeps:react', function() {
-    copydep("react", "dist/react{.js,.min.js}");
+    return copydep("react", "dist/react{.js,.min.js}");
 });
 
 gulp.task('copydeps:react-dom', function() {
-    copydep("react-dom", "dist/react-dom{.js,.min.js}");
+    return copydep("react-dom", "dist/react-dom{.js,.min.js}");
 });
 
 gulp.task('copydeps:fetch', function() {
-    copydep("whatwg-fetch", "fetch.js");
+    return copydep("whatwg-fetch", "fetch.js");
 });
 
 gulp.task('copydeps:bootstrap', function() {
-    copydep("bootstrap", "dist/*/*"); 
+    return copydep("bootstrap", "dist/*/*"); 
 });
 
 gulp.task('copydeps:immutable', function() {
-    copydep("immutable", "dist/immutable{.js,.min.js}"); 
+    return copydep("immutable", "dist/immutable{.js,.min.js}"); 
 });
 
 gulp.task('copydeps', ['copydeps:systemjs', 'copydeps:redux', 'copydeps:redux-thunk', 'copydeps:react-redux', 'copydeps:react', 'copydeps:react-dom', 'copydeps:fetch', 'copydeps:bootstrap', 'copydeps:immutable']);

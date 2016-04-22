@@ -1,19 +1,28 @@
 .f-assemblyList {
-  overflow: scroll;
+  overflow: auto;
+  white-space: nowrap;
   background-color: #054985;
   color: #FFF; }
+  .f-assemblyList a {
+    color: #FFF;
+    text-decoration: none; }
+    .f-assemblyList a:visited {
+      color: #FFF; }
+
+.c-assemblyListEntry-loading {
+  color: #8C8D91; }
 
 .f-codeView {
   background-color: #8C8D91;
   color: #000; }
 
-ul.c-assemblyList {
+ul.l-tree {
   list-style-type: none;
-  padding: 1em; }
+  padding-left: 1em; }
 
-li.c-assemblyListEntry .c-assemblyListEntry-text {
-  padding-left: 0.5em;
-  white-space: pre; }
-
-li.c-assemblyListEntry.c-assemblyListEntry-loading {
-  color: #8C8D91; }
+li.l-treeNode {
+  cursor: pointer; }
+  li.l-treeNode .glyphicon {
+    padding-right: 0.30em; }
+  li.l-treeNode .l-treeNode-text {
+    white-space: pre; }

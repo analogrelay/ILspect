@@ -39,18 +39,31 @@ let mainWindow;
         server_executable
     ], {
         cwd: rootDir,
-        env: newEnv,
-        stdio: "inherit"
+        env: newEnv
+    });
+    
+    server_process.stdout.on('data', (line) => {
+        process.stdout.write(line); 
+    });
+    
+    server_process.stderr.on('data', (line) => {
+        process.stderr.write(line); 
     });
 
     server_process.on('exit', (code) => {
         console.log(`server process exited with code ${code}`);
         app.quit();
-    })
+    });
 
     function createWindow () {
         // Create the browser window.
-        mainWindow = new BrowserWindow({width: 1024, height: 768});
+        mainWindow = new BrowserWindow({
+            width: 1024,
+            height: 768,
+            webPreferences: {
+                directWrite: false // Stops blurry font on Windows
+            }
+        });
 
         // Set up the app menu
         Menu.setApplicationMenu(require('./menu')(mainWindow));
