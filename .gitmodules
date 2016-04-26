@@ -1,0 +1,3 @@
+[submodule "vendor/cecil"]
+	path = vendor/cecil
+	url = git@github.com:anurse/cecil

@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
+using Mono.Cecil;
 
 namespace ILspect.Server.Data
 {
@@ -18,33 +17,23 @@ namespace ILspect.Server.Data
             var model = new AssemblyEntry(id);
             model.Name = Path.GetFileNameWithoutExtension(path);
             model.Path = path;
-
-            // Open the assembly
-            // These must be kept undisposed until the assembly is closed.
-            model.PEReader = new PEReader(File.OpenRead(path));
-            try
+            
+            using(var stream = File.OpenRead(path))
             {
-                if (!model.PEReader.HasMetadata)
+                try
                 {
-                    model.PEReader.Dispose();
-                    model.PEReader = null;
-                    return model;
+                    model.Module = ModuleDefinition.ReadModule(stream);
+                    model.HasMetadata = true;
+                } 
+                catch(Exception)
+                {
+                    model.Module = null;
+                    model.HasMetadata = false;
                 }
-                model.HasMetadata = true;
-
-                var metadataReader = model.PEReader.GetMetadataReader();
-                model.MetadataReader = metadataReader;
-                _index[id] = model;
-                return model;
             }
-            catch (Exception)
-            {
-                model.PEReader?.Dispose();
-                model.PEReader = null;
-                throw;
-            }
+            
+            return model;
         }
-
         public AssemblyEntry GetAssembly(Guid id)
         {
             return _index[id];

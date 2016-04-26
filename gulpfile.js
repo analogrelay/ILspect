@@ -148,7 +148,7 @@ gulp.task('build:back', ['prepare:back', 'compile:back']);
 
 gulp.task('default', ['build']);
 
-gulp.task('run', ['copydeps', 'compile:front'], function() {
+gulp.task('run', ['copydeps', 'compile:front', 'compile:back'], function() {
     var electronArgs = [ 
         uiStartScript, 
         serverExecutable ];

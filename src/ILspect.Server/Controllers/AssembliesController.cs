@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ILspect.Server.ResponseModels;
 using ILspect.Server.Data;
 using System;
-using System.Reflection.Metadata;
+using Mono.Cecil;
 
 namespace ILspect.Server.Controllers
 {
@@ -28,7 +28,7 @@ namespace ILspect.Server.Controllers
                 {
                     var model = _assemblies.OpenAssembly(path);
                     
-                    var namespaces = WalkNamespaces(model.MetadataReader);
+                    var namespaces = EnumerateNamespaces(model.Module);
                     
                     return ApiResponse.Create(path, new AssemblyModel()
                     {
@@ -46,82 +46,67 @@ namespace ILspect.Server.Controllers
             });
         }
         
-        private IEnumerable<NamespaceModel> WalkNamespaces(MetadataReader reader) => WalkNamespaces("", reader, reader.GetNamespaceDefinitionRoot());
-        
-        private IEnumerable<NamespaceModel> WalkNamespaces(string prefix, MetadataReader reader, NamespaceDefinition root)
+        private IEnumerable<NamespaceModel> EnumerateNamespaces(ModuleDefinition module)
         {
-            var name = reader.GetString(root.Name);
-            if (root.TypeDefinitions.Any())
+            var namespaces = module.Types.GroupBy(t => t.Namespace).OrderBy(g => g.Key);
+            
+            foreach(var ns in namespaces)
             {
-                yield return CreateNamespaceModel(prefix + name, reader, root);
-            }
-
-            string newPrefix = string.IsNullOrEmpty(name) ? "" : $"{prefix}{name}.";
-
-            var subnamespaces = root.NamespaceDefinitions
-                .SelectMany(h => WalkNamespaces(newPrefix, reader, reader.GetNamespaceDefinition(h)));
-            foreach (var subnamespace in subnamespaces)
-            {
-                yield return subnamespace;
+                yield return CreateNamespaceModel(ns.Key, ns);
             }
         }
         
-        private NamespaceModel CreateNamespaceModel(string name, MetadataReader reader, NamespaceDefinition ns) {
-            var types = ns.TypeDefinitions.Select(t => CreateTypeModel(t, reader));
-            return new NamespaceModel {
+        private NamespaceModel CreateNamespaceModel(string name, IEnumerable<TypeDefinition> types) {
+            return new NamespaceModel
+            {
                 Name = name,
-                Types = types
+                Types = types.Select(t => CreateTypeModel(t))
             };
         }
         
-        private TypeModel CreateTypeModel(TypeDefinitionHandle typeHandle, MetadataReader reader)
-        {
-            var typ = reader.GetTypeDefinition(typeHandle);
+        private TypeModel CreateTypeModel(TypeDefinition type)
+        {    
             var members = new List<MemberModel>();
-            members.AddRange(typ.GetNestedTypes().Select(t => CreateTypeModel(t, reader)));
-            members.AddRange(typ.GetFields().Select(f => CreateFieldModel(f, reader)));
-            members.AddRange(typ.GetEvents().Select(e => CreateEventModel(e, reader)));
-            members.AddRange(typ.GetMethods().Select(m => CreateMethodModel(m, reader)));
-            members.AddRange(typ.GetProperties().Select(p => CreatePropertyModel(p, reader)));
+            members.AddRange(type.NestedTypes.Select(t => CreateTypeModel(t)));
+            members.AddRange(type.Fields.Select(f => CreateFieldModel(f)));
+            members.AddRange(type.Events.Select(e => CreateEventModel(e)));
+            members.AddRange(type.Methods.Select(m => CreateMethodModel(m)));
+            members.AddRange(type.Properties.Select(p => CreatePropertyModel(p)));
             return new TypeModel() {
-                Name = reader.GetString(typ.Name),
+                Name = type.Name,
                 Kind = MemberKind.Type,
                 Members = members
             };
         }
 
-        private MemberModel CreatePropertyModel(PropertyDefinitionHandle propHandle, MetadataReader reader)
+        private MemberModel CreatePropertyModel(PropertyDefinition prop)
         {
-            var prop = reader.GetPropertyDefinition(propHandle);
             return new MemberModel {
-                Name = reader.GetString(prop.Name),
+                Name = prop.Name,
                 Kind = MemberKind.Property
             };
         }
 
-        private MemberModel CreateMethodModel(MethodDefinitionHandle methodHandle, MetadataReader reader)
+        private MemberModel CreateMethodModel(MethodDefinition method)
         {
-            var method = reader.GetMethodDefinition(methodHandle);
             return new MemberModel {
-                Name = reader.GetString(method.Name),
+                Name = method.Name,
                 Kind = MemberKind.Method
             };
         }
 
-        private MemberModel CreateEventModel(EventDefinitionHandle eventHandle, MetadataReader reader)
+        private MemberModel CreateEventModel(EventDefinition evt)
         {
-            var evt = reader.GetEventDefinition(eventHandle);
             return new MemberModel {
-                Name = reader.GetString(evt.Name),
+                Name = evt.Name,
                 Kind = MemberKind.Event
             };
         }
 
-        private MemberModel CreateFieldModel(FieldDefinitionHandle fieldHandle, MetadataReader reader)
+        private MemberModel CreateFieldModel(FieldDefinition field)
         {
-            var field = reader.GetFieldDefinition(fieldHandle);
             return new MemberModel() {
-                Name = reader.GetString(field.Name),
+                Name = field.Name,
                 Kind = MemberKind.Field
             };
         }
