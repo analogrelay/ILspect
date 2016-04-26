@@ -65,7 +65,7 @@ namespace ILspect.Server.Controllers
         }
         
         private TypeModel CreateTypeModel(TypeDefinition type)
-        {    
+        {
             var members = new List<MemberModel>();
             members.AddRange(type.NestedTypes.Select(t => CreateTypeModel(t)));
             members.AddRange(type.Fields.Select(f => CreateFieldModel(f)));
