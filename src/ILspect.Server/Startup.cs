@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 
+using ILspect.Server.Services;
+
 namespace ILspect.Server
 {
     public class Startup
@@ -20,6 +22,7 @@ namespace ILspect.Server
                 });
                 
             services.AddSingleton<AssemblyTable>();
+            services.AddSingleton<Decompiler>();
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)

@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using ILspect.Server.ResponseModels;
 using ILspect.Server.Data;
 using System;
-using Mono.Cecil;
 
 namespace ILspect.Server.Controllers
 {
@@ -19,6 +18,7 @@ namespace ILspect.Server.Controllers
             _assemblies = assemblies;
         }
 
+        [HttpPut]
         [Route("")]
         public IEnumerable<ApiResponse<AssemblyModel>> Put([FromBody] string[] paths)
         {
@@ -26,18 +26,8 @@ namespace ILspect.Server.Controllers
             {
                 try
                 {
-                    var model = _assemblies.OpenAssembly(path);
-                    
-                    var namespaces = EnumerateNamespaces(model.Module);
-                    
-                    return ApiResponse.Create(path, new AssemblyModel()
-                    {
-                        Id = model.Id.ToString("N"),
-                        Name = model.Name,
-                        Path = model.Path,
-                        HasMetadata = model.HasMetadata,
-                        Namespaces = namespaces
-                    });
+                    var entry = _assemblies.OpenAssembly(path);
+                    return ApiResponse.Create(path, LoadAssembly(entry));
                 }
                 catch (Exception ex)
                 {
@@ -45,69 +35,64 @@ namespace ILspect.Server.Controllers
                 }
             });
         }
-        
-        private IEnumerable<NamespaceModel> EnumerateNamespaces(ModuleDefinition module)
+
+        [HttpGet]
+        [Route("{id}")]
+        public IActionResult Get(string id)
         {
-            var namespaces = module.Types.GroupBy(t => t.Namespace).OrderBy(g => g.Key);
-            
-            foreach(var ns in namespaces)
+            var entry = _assemblies.GetAssemblyOrDefault(id);
+            if (entry == null)
             {
-                yield return CreateNamespaceModel(ns.Key, ns);
+                return NotFound();
+            }
+            else
+            {
+                return Ok(ApiResponse.Create<AssemblyModel>(id, LoadAssembly(entry)));
             }
         }
-        
-        private NamespaceModel CreateNamespaceModel(string name, IEnumerable<TypeDefinition> types) {
-            return new NamespaceModel
+
+        private static AssemblyModel LoadAssembly(AssemblyEntry entry)
+        {
+            return new AssemblyModel()
             {
-                Name = name,
-                Types = types.Select(t => CreateTypeModel(t))
-            };
-        }
-        
-        private TypeModel CreateTypeModel(TypeDefinition type)
-        {
-            var members = new List<MemberModel>();
-            members.AddRange(type.NestedTypes.Select(t => CreateTypeModel(t)));
-            members.AddRange(type.Fields.Select(f => CreateFieldModel(f)));
-            members.AddRange(type.Events.Select(e => CreateEventModel(e)));
-            members.AddRange(type.Methods.Select(m => CreateMethodModel(m)));
-            members.AddRange(type.Properties.Select(p => CreatePropertyModel(p)));
-            return new TypeModel() {
-                Name = type.Name,
-                Kind = MemberKind.Type,
-                Members = members
+                Id = entry.Id.ToString("N"),
+                Name = entry.Name,
+                Path = entry.Path,
+                HasMetadata = entry.Module != null,
+                Namespaces = GetNamespaces(entry)
             };
         }
 
-        private MemberModel CreatePropertyModel(PropertyDefinition prop)
+        private static IEnumerable<NamespaceModel> GetNamespaces(AssemblyEntry entry)
         {
-            return new MemberModel {
-                Name = prop.Name,
-                Kind = MemberKind.Property
+            return entry.Namespaces.Values.OrderBy(n => n.Name).Select(LoadNamespace);
+        }
+
+        private static NamespaceModel LoadNamespace(NamespaceEntry entry)
+        {
+            return new NamespaceModel()
+            {
+                Name = entry.Name,
+                Types = entry.Types.Values.OrderBy(t => t.Name).Select(LoadType)
             };
         }
 
-        private MemberModel CreateMethodModel(MethodDefinition method)
+        private static TypeModel LoadType(TypeEntry entry)
         {
-            return new MemberModel {
-                Name = method.Name,
-                Kind = MemberKind.Method
+            return new TypeModel()
+            {
+                Name = entry.Name,
+                Kind = entry.Kind,
+                Members = entry.Members.Values.OrderBy(t => t.Name).Select(LoadMember)
             };
         }
 
-        private MemberModel CreateEventModel(EventDefinition evt)
+        private static MemberModel LoadMember(MemberEntry entry)
         {
-            return new MemberModel {
-                Name = evt.Name,
-                Kind = MemberKind.Event
-            };
-        }
-
-        private MemberModel CreateFieldModel(FieldDefinition field)
-        {
-            return new MemberModel() {
-                Name = field.Name,
-                Kind = MemberKind.Field
+            return new MemberModel()
+            {
+                Name = entry.Name,
+                Kind = entry.Kind
             };
         }
     }
