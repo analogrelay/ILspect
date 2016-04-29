@@ -1,8 +1,7 @@
 bower_components/
 node_modules/
-front/app/
-front/lib/
-front/src/typings/
+typings/
+wwwroot/
 
 ## VisualStudio.gitignore
 ## Ignore Visual Studio temporary files, build results, and
