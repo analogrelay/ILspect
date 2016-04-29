@@ -28,11 +28,12 @@ namespace ILspect.Server.Controllers
             }
             
             var decompiled = _decompiler.DecompileMember(member);
-            
-            return Ok(new MemberDetailModel() {
+
+            return Ok(new MemberDetailModel()
+            {
                 Name = member.Name,
                 Kind = member.Kind,
-                IL = decompiled.IL
+                Body = decompiled.Body
             });
         }
     }

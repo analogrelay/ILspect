@@ -65,7 +65,16 @@ gulp.task('prepare:typings', function(cb) {
 gulp.task('prepare:front', [ 'prepare:npm-front', 'prepare:typings' ]);
 
 gulp.task('prepare:nuget', function(cb) {
-    exec("dotnet", [ "restore" ], "./src/ILspect.Server", cb);
+    var count = 0;
+    function complete() {
+        count++;
+        if (count >= 2) {
+            cb();
+        }
+    }
+
+    exec("dotnet", [ "restore" ], "./src/ILspect.Server", complete);
+    exec("dotnet", [ "restore" ], "./vendor/cecil/src", complete);
 });
 
 gulp.task('prepare:back', [ 'prepare:nuget' ]);
@@ -142,9 +151,9 @@ gulp.task('copydeps:immutable', function() {
 
 gulp.task('copydeps', ['copydeps:systemjs', 'copydeps:redux', 'copydeps:redux-thunk', 'copydeps:react-redux', 'copydeps:react', 'copydeps:react-dom', 'copydeps:fetch', 'copydeps:bootstrap', 'copydeps:immutable']);
 
-gulp.task('build', ['prepare', 'compile', 'copydeps']);
-gulp.task('build:front', ['prepare:front', 'compile:front', 'copydeps']);
-gulp.task('build:back', ['prepare:back', 'compile:back']);
+gulp.task('build', ['compile', 'copydeps']);
+gulp.task('build:front', ['compile:front', 'copydeps']);
+gulp.task('build:back', ['compile:back']);
 
 gulp.task('default', ['build']);
 
@@ -152,7 +161,7 @@ gulp.task('run', ['copydeps', 'compile:front', 'compile:back'], function() {
     var electronArgs = [ 
         uiStartScript, 
         serverExecutable ];
-        
+
     spawn("electron", electronArgs, {
         stdio: 'inherit',
         shell: process.platform === 'win32'

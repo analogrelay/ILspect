@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using ILspect.Server.Data;
 
@@ -7,8 +8,10 @@ namespace ILspect.Server.Services
     {
         public MemberDecompilation DecompileMember(MemberEntry member)
         {
-            var visitor = new DecompilationVisitor();
-            member.Definition.Accept(visitor);
+            //var visitor = new DecompilationVisitor();
+            //member.Definition.Accept(visitor);
+
+            throw new NotImplementedException();
         }
     }
 }
