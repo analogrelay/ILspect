@@ -8,6 +8,10 @@ export interface AssemblyList {
     assemblies?: Immutable.List<Assembly>
 }
 
+export interface ServerObject {
+    id: string
+}
+
 export interface Assembly {
     name?: string
     path?: string

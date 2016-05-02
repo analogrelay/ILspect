@@ -1,6 +1,6 @@
 using System;
 
-namespace ILspect.Server.ResponseModels
+namespace ILspect.ResponseModels
 {
     public class Error
     {

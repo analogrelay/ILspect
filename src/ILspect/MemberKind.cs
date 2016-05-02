@@ -1,4 +1,4 @@
-namespace ILspect.Server
+namespace ILspect
 {
     public enum MemberKind
     {

@@ -1,4 +1,4 @@
-namespace ILspect.Server.Data
+namespace ILspect.Data
 {
     public class MemberDecompilation
     {

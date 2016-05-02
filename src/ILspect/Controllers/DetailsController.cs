@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using ILspect.Server.Data;
-using ILspect.Server.Services;
-using ILspect.Server.ResponseModels;
+using ILspect.Data;
+using ILspect.Services;
+using ILspect.ResponseModels;
 
-namespace ILspect.Server.Controllers
+namespace ILspect.Controllers
 {
     [Produces("application/json")]
     public class DetailsController : ControllerBase
@@ -14,6 +14,7 @@ namespace ILspect.Server.Controllers
         public DetailsController(AssemblyTable assemblies, Decompiler decompiler)
         {
             _assemblies = assemblies;
+            _decompiler = decompiler;
         }
 
         [HttpGet]

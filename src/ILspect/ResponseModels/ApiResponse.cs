@@ -1,6 +1,6 @@
 using System;
 
-namespace ILspect.Server.ResponseModels
+namespace ILspect.ResponseModels
 {
     public static class ApiResponse
     {
@@ -32,16 +32,14 @@ namespace ILspect.Server.ResponseModels
         }
     }
     
-    public class ApiResponse<T>
+    public class ApiResponse<T> : ServerObject
     {
-        public string Id {get;}
         public bool Success { get; }
         public Error Error { get; }
         public T Result { get; }
 
-        internal ApiResponse(string id, bool success, Error error, T result)
+        internal ApiResponse(string id, bool success, Error error, T result) : base(id)
         {
-            Id = id;
             Success = success;
             Error = error;
             Result = result;

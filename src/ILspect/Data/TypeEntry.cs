@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Mono.Cecil;
 
-namespace ILspect.Server.Data
+namespace ILspect.Data
 {
     public class TypeEntry : MemberEntry
     {

@@ -1,4 +1,4 @@
-namespace ILspect.Server.ResponseModels
+namespace ILspect.ResponseModels
 {
     public class MemberDetailModel : MemberModel
     {

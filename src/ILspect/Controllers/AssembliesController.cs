@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using ILspect.Server.ResponseModels;
-using ILspect.Server.Data;
+using ILspect.ResponseModels;
+using ILspect.Data;
 using System;
 
-namespace ILspect.Server.Controllers
+namespace ILspect.Controllers
 {
-    [Route("api/[controller]")]
     [Produces("application/json")]
     public class AssembliesController : ControllerBase
     {
@@ -19,7 +18,7 @@ namespace ILspect.Server.Controllers
         }
 
         [HttpPut]
-        [Route("")]
+        [Route("api/assemblies")]
         public IEnumerable<ApiResponse<AssemblyModel>> Put([FromBody] string[] paths)
         {
             return paths.Select(path =>
@@ -37,7 +36,14 @@ namespace ILspect.Server.Controllers
         }
 
         [HttpGet]
-        [Route("{id}")]
+        [Route("api/assemblies")]
+        public IActionResult GetAll()
+        {
+            return Ok(ApiResponse.Create("", _assemblies.Assemblies.Select(LoadAssembly)));
+        }
+
+        [HttpGet]
+        [Route("api/assemblies/{id}")]
         public IActionResult Get(string id)
         {
             var entry = _assemblies.GetAssemblyOrDefault(id);
@@ -47,15 +53,14 @@ namespace ILspect.Server.Controllers
             }
             else
             {
-                return Ok(ApiResponse.Create<AssemblyModel>(id, LoadAssembly(entry)));
+                return Ok(ApiResponse.Create(id, LoadAssembly(entry)));
             }
         }
 
         private static AssemblyModel LoadAssembly(AssemblyEntry entry)
         {
-            return new AssemblyModel()
+            return new AssemblyModel(entry.Id.ToString("N"))
             {
-                Id = entry.Id.ToString("N"),
                 Name = entry.Name,
                 Path = entry.Path,
                 HasMetadata = entry.Module != null,

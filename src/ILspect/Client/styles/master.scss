@@ -34,6 +34,10 @@ li.l-treeNode
 {
     cursor: pointer;
     
+    &.l-treeNode-selected > .l-treeNode-header {
+        background-color: $color_assemblyList_bg_selected
+    }
+
     .glyphicon {
         padding-right: 0.30em;
     }

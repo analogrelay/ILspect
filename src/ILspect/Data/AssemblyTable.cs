@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Mono.Cecil;
 
-namespace ILspect.Server.Data
+namespace ILspect.Data
 {
     public class AssemblyTable
     {
@@ -39,6 +39,7 @@ namespace ILspect.Server.Data
 
             AddRange(assembly.Namespaces, namespaces, n => n.Name);
 
+            _index[id] = assembly;
             return assembly;
         }
 

@@ -1,14 +1,12 @@
-using ILspect.Server.Data;
+using ILspect.Data;
+using ILspect.Services;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 
-using ILspect.Server.Services;
-
-namespace ILspect.Server
+namespace ILspect
 {
     public class Startup
     {

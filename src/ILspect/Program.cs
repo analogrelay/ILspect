@@ -4,7 +4,7 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.CommandLineUtils;
 
-namespace ILspect.Server
+namespace ILspect
 {
     public class Program
     {

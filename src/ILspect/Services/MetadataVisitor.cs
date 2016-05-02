@@ -1,6 +1,6 @@
 using Mono.Cecil;
 
-namespace ILspect.Server.Services
+namespace ILspect.Services
 {
     public abstract class MetadataVisitor
     {

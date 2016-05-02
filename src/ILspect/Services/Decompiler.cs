@@ -1,17 +1,15 @@
-using System;
-using System.Text;
-using ILspect.Server.Data;
+using ILspect.Data;
 
-namespace ILspect.Server.Services
+namespace ILspect.Services
 {
     public class Decompiler
     {
         public MemberDecompilation DecompileMember(MemberEntry member)
         {
-            //var visitor = new DecompilationVisitor();
-            //member.Definition.Accept(visitor);
+            var visitor = new DecompilerVisitor();
+            member.Definition.Accept(visitor);
 
-            throw new NotImplementedException();
+            return new MemberDecompilation(member, visitor.Decompilation.ToString());
         }
     }
 }
