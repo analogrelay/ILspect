@@ -8,7 +8,23 @@ namespace ILspect
 {
     public class Program
     {
-        private const string ElectronExeName = "electron.exe";
+        private static readonly string ElectronExeName = GetElectronExeName();
+
+        private static string GetElectronExeName()
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return "electron.exe";
+            }
+            else if(Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                return "Electron.app/Contents/MacOS/Electron";
+            }
+            else
+            {
+                return "electron";
+            }
+        }
 
         public static void Main(string[] args)
         {
