@@ -48,7 +48,8 @@ let mainWindow;
         mainWindow.loadURL('file://' + rootPage);
 
         // Open the DevTools.
-        mainWindow.webContents.openDevTools({detach: true});
+        mainWindow.webContents.openDevTools({ detach: true });
+        mainWindow.focus();
         
         // Emitted when the window is closed.
         mainWindow.on('closed', function() {

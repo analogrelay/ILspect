@@ -6,13 +6,13 @@ using Mono.Cecil;
 
 namespace ILspect.Data
 {
-    public class AssemblyTable
+    public class DataStore
     {
-        private Dictionary<Guid, AssemblyEntity> _index = new Dictionary<Guid, AssemblyEntity>();
+        private Dictionary<string, AssemblyEntity> _assemblies = new Dictionary<string, AssemblyEntity>();
 
         public AssemblyEntity AddAssembly(string path)
         {
-            var assemblyId = Guid.NewGuid();
+            var assemblyId = Guid.NewGuid().ToString("N");
             var name = Path.GetFileNameWithoutExtension(path);
 
             ModuleDefinition module;
@@ -29,7 +29,7 @@ namespace ILspect.Data
             }
 
             var assembly = new AssemblyEntity(assemblyId, name, path, module);
-            _index[assemblyId] = assembly;
+            _assemblies[assemblyId] = assembly;
 
             var namespaces = module.Types
                 .GroupBy(t => t.Namespace)
@@ -42,17 +42,53 @@ namespace ILspect.Data
 
         public IEnumerable<AssemblyEntity> GetAllAssemblies()
         {
-            return _index.Values;
+            return _assemblies.Values;
         }
 
-        public AssemblyEntity GetAssembly(Guid id)
+        public AssemblyEntity GetAssembly(string id)
         {
             AssemblyEntity entity;
-            if (!_index.TryGetValue(id, out entity))
+            if (_assemblies.TryGetValue(id, out entity))
             {
-                return null;
+                return entity;
             }
-            return entity;
+            return null;
+        }
+
+        public NamespaceEntity GetNamespace(string assemblyId, string namespaceName)
+        {
+            // Some callers need to have a non-empty namespace name for the default namespace, so switch that back.
+            namespaceName = string.Equals(namespaceName, Constants.DefaultNamespace, StringComparison.Ordinal) ? "" : namespaceName;
+
+            NamespaceEntity ns;
+            var asm = GetAssembly(assemblyId);
+            if (asm != null && asm.Namespaces.TryGetValue(namespaceName, out ns))
+            {
+                return ns;
+            }
+            return null;
+        }
+
+        public TypeEntity GetType(string assemblyId, string namespaceName, string typeName)
+        {
+            TypeEntity typ;
+            var ns = GetNamespace(assemblyId, namespaceName);
+            if (ns != null && ns.Types.TryGetValue(typeName, out typ))
+            {
+                return typ;
+            }
+            return null;
+        }
+
+        public MemberEntity GetMember(string assemblyId, string namespaceName, string typeName, string memberName)
+        {
+            MemberEntity member;
+            var typ = GetType(assemblyId, namespaceName, typeName);
+            if (typ != null && typ.Members.TryGetValue(memberName, out member))
+            {
+                return member;
+            }
+            return null;
         }
 
         private static NamespaceEntity LoadNamespace(AssemblyEntity assembly, string name, IEnumerable<TypeDefinition> types)

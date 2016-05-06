@@ -1,6 +1,8 @@
 using ILspect.Data;
+using ILspect.ResponseModels;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
@@ -17,8 +19,11 @@ namespace ILspect
                 .AddJsonFormatters((settings) => {
                     settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 });
+
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
                 
-            services.AddSingleton<AssemblyTable>();
+            services.AddSingleton<DataStore>();
+            services.AddSingleton<ModelBuilder>();
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)

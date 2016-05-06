@@ -1,16 +1,22 @@
 import * as React from 'react';
 import * as State from '../state';
+import {selectObject} from '../actionCreators';
 import {connect} from '../reducts';
 
 import {Icon} from './widgets';
 import {Tree, TreeNode} from './layout/tree';
 
 @connect<State.Application, IAssemblyListProps>(
-    (state) => ({ assemblies: state.assemblyList.assemblies.toArray() })
+    (state) => ({ assemblies: state.assemblyList.assemblies.toArray() }),
+    { selectionChanged: selectObject }
 )
 export class AssemblyList extends React.Component<IAssemblyListProps, any> {
+    select(obj: State.ModelBase) {
+        this.props.selectionChanged && this.props.selectionChanged(obj);
+    }
+
     render() {
-        function renderMember(m: State.Member) {
+        let renderMember = (m: State.Member) => {
             var children;
             if (State.memberIsType(m)) {
                 children = m.members.map(renderMember)
@@ -36,18 +42,18 @@ export class AssemblyList extends React.Component<IAssemblyListProps, any> {
                     break;
             }
 
-            return <TreeNode key={m.name} icon={icon} text={m.name}>
+            return <TreeNode key={m.name} icon={icon} text={m.name} onSelect={() => this.select(m) }>
                 {children}
             </TreeNode>;
         }
 
-        function renderNamespace(ns: State.Namespace) {
+        let renderNamespace = (ns: State.Namespace) => {
             return <TreeNode key={ns.name} icon="gift" text={ns.name || "<Default>" }>
                 {ns.types ? ns.types.map(renderMember) : ""}
             </TreeNode>;
         }
 
-        function renderAssembly(assembly: State.Assembly) {
+        let renderAssembly = (assembly: State.Assembly) => {
             var className;
             if (assembly.status == State.AssemblyStatus.Loading) {
                 className = 'c-assemblyListEntry-loading';
@@ -65,4 +71,5 @@ export class AssemblyList extends React.Component<IAssemblyListProps, any> {
 
 interface IAssemblyListProps {
     assemblies?: State.Assembly[]
+    selectionChanged?: (newSelection: State.ModelBase) => void
 }

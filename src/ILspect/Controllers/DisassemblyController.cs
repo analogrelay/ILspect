@@ -1,7 +1,5 @@
-using System;
-using System.Threading;
+﻿using System.Threading;
 using ICSharpCode.Decompiler;
-using ICSharpCode.Decompiler.Ast;
 using ICSharpCode.Decompiler.Disassembler;
 using ILspect.Data;
 using ILspect.ResponseModels;
@@ -10,25 +8,21 @@ using Mono.Cecil;
 
 namespace ILspect.Controllers
 {
-    [Produces("application/json")]
-    public class DetailsController : ControllerBase
+    public class DisassemblyController : ControllerBase
     {
-        private readonly AssemblyTable _assemblies;
+        private readonly DataStore _data;
 
-        public DetailsController(AssemblyTable assemblies)
+        public DisassemblyController(DataStore data)
         {
-            _assemblies = assemblies;
+            _data = data;
         }
 
         [HttpGet]
-        [Route("api/assemblies/{assemblyId}/{namespaceName}/{typeName}/{memberName}")]
-        public IActionResult Get(string assemblyId, string namespaceName, string typeName, string memberName)
+        [Route("api/disassembly/{assemblyId}/{namespaceName}/{typeName}/{memberName}")]
+        public IActionResult DisassembleMember(string assemblyId, string namespaceName, string typeName, string memberName)
         {
-            namespaceName = string.Equals(namespaceName, Constants.DefaultNamespace, StringComparison.Ordinal) ? "" : namespaceName;
-
-            MemberEntity member;
-            var asm = _assemblies.GetAssembly(Guid.ParseExact(assemblyId, "N"));
-            if (asm == null || !asm.TryGetMember(namespaceName, typeName, memberName, out member))
+            var member = _data.GetMember(assemblyId, namespaceName, typeName, memberName);
+            if (member == null)
             {
                 return NotFound();
             }
@@ -36,15 +30,10 @@ namespace ILspect.Controllers
             var output = new PlainTextOutput();
             var disassembler = new ReflectionDisassembler(output, detectControlStructure: false, cancellationToken: CancellationToken.None);
             DisassembleMember(disassembler, member);
+            var disassembly = output.ToString();
 
-            return Ok(new MemberDetailModel()
-            {
-                Name = member.Name,
-                Kind = member.Kind,
-                Body = output.ToString()
-            });
+            return Ok(ApiResponse.Create(string.Empty, disassembly));
         }
-
         private void DisassembleMember(ReflectionDisassembler disassembler, MemberEntity member)
         {
             switch (member.Kind)

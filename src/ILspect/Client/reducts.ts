@@ -5,9 +5,11 @@ interface IHasProps<T> {
     props: T
 }
 
-export function connect<TState, TProps>(mapStateToProps: (state: TState, ownProps?: any) => TProps) {
+export function connect<TState, TProps>(
+    mapStateToProps?: (state: TState, ownProps?: TProps) => TProps,
+    mapDispatchToProps?: TProps): (component: React.ComponentClass<TProps> | React.StatelessComponent<TProps>) => any  {
     return (component: React.ComponentClass<TProps> | React.StatelessComponent<TProps>) => {
-        return ReactRedux.connect<any, any, any>(mapStateToProps)(component);
+        return ReactRedux.connect<any, any, any>(mapStateToProps, mapDispatchToProps as any)(component);
     }
 }
 

@@ -4,25 +4,28 @@ export interface ApiError {
     details?: string
 }
 
-export interface ApiResponse<T> extends ServerObject {
+export interface ApiResponse<T> {
+    id?: string
     success: boolean
     error?: ApiError
     result?: T
 }
 
-export interface ServerObject {
-    id?: string
+export interface ModelBase {
+    url?: string
+    disassemblyUrl?: string
 }
 
-export interface AssemblyModel extends ServerObject
+export interface AssemblyModel extends ModelBase
 {
+    id?: string
     name?: string
     path?: string
     hasMetadata?: boolean,
     namespaces?: NamespaceModel[]
 }
 
-export interface NamespaceModel extends ServerObject
+export interface NamespaceModel extends ModelBase
 {
     name?: string
     types?: TypeModel[]
@@ -37,7 +40,7 @@ export enum MemberKind
     Type
 }
 
-export interface MemberModel extends ServerObject
+export interface MemberModel extends ModelBase
 {
     name?: string,
     kind?: MemberKind

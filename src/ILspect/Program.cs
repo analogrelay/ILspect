@@ -63,7 +63,12 @@ namespace ILspect
         {
             if (string.IsNullOrEmpty(electronPath))
             {
+                // TODO: Change this to the location of electron in the dist package
                 electronPath = Path.Combine(Directory.GetCurrentDirectory(), "node_modules", "electron-prebuilt", "dist", ElectronExeName);
+            }
+            else
+            {
+                electronPath = Path.Combine(Directory.GetCurrentDirectory(), electronPath);
             }
 
             if(!File.Exists(electronPath))

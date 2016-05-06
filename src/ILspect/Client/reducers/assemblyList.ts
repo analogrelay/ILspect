@@ -19,7 +19,6 @@ export class AssemblyListReducer extends Reducer<State.AssemblyList, any> {
                         let existing = assemblies.findIndex((v) => v.path === path);
                         if (existing == -1) {
                             assemblies.push({
-                                name: null,
                                 path: path,
                                 status: State.AssemblyStatus.Loading
                             });

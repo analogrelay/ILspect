@@ -3,6 +3,7 @@ import {connect} from 'react-redux';
 
 import {Frame} from './layout/frame';
 import {AssemblyList} from './assemblyList';
+import {CodeView} from './codeView';
 
 export class ILspectApp extends React.Component<any, any> {
     componentDidMount() {
@@ -21,7 +22,7 @@ export class ILspectApp extends React.Component<any, any> {
                 <AssemblyList />
              </Frame>
              <Frame className="f-codeView" left={assemblyListSize + spacing} width={windowSize.width - assemblyListSize - spacing} height={windowSize.height}>
-                
+                <CodeView />
              </Frame>
         </Frame>
     }

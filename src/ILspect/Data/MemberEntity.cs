@@ -8,7 +8,7 @@ namespace ILspect.Data
         public string Name { get; }
         public MemberKind Kind { get; }
         public IMemberDefinition Definition { get; }
-        
+
         public MemberEntity(TypeEntity type, string name, MemberKind kind, IMemberDefinition definition)
         {
             Type = type;
