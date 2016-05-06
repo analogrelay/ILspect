@@ -1,5 +1,4 @@
 using ILspect.Data;
-using ILspect.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +19,6 @@ namespace ILspect
                 });
                 
             services.AddSingleton<AssemblyTable>();
-            services.AddSingleton<Decompiler>();
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)

@@ -32,14 +32,16 @@ namespace ILspect.ResponseModels
         }
     }
     
-    public class ApiResponse<T> : ServerObject
+    public class ApiResponse<T> 
     {
+        public string Id { get; }
         public bool Success { get; }
         public Error Error { get; }
         public T Result { get; }
 
-        internal ApiResponse(string id, bool success, Error error, T result) : base(id)
+        internal ApiResponse(string id, bool success, Error error, T result)
         {
+            Id = id;
             Success = success;
             Error = error;
             Result = result;

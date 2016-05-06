@@ -25,7 +25,7 @@ namespace ILspect.Controllers
             {
                 try
                 {
-                    var entry = _assemblies.OpenAssembly(path);
+                    var entry = _assemblies.AddAssembly(path);
                     return ApiResponse.Create(path, LoadAssembly(entry));
                 }
                 catch (Exception ex)
@@ -39,14 +39,14 @@ namespace ILspect.Controllers
         [Route("api/assemblies")]
         public IActionResult GetAll()
         {
-            return Ok(ApiResponse.Create("", _assemblies.Assemblies.Select(LoadAssembly)));
+            return Ok(ApiResponse.Create("", _assemblies.GetAllAssemblies().Select(LoadAssembly)));
         }
 
         [HttpGet]
         [Route("api/assemblies/{id}")]
         public IActionResult Get(string id)
         {
-            var entry = _assemblies.GetAssemblyOrDefault(id);
+            var entry = _assemblies.GetAssembly(Guid.ParseExact(id, "N"));
             if (entry == null)
             {
                 return NotFound();
@@ -57,10 +57,11 @@ namespace ILspect.Controllers
             }
         }
 
-        private static AssemblyModel LoadAssembly(AssemblyEntry entry)
+        private AssemblyModel LoadAssembly(AssemblyEntity entry)
         {
-            return new AssemblyModel(entry.Id.ToString("N"))
+            return new AssemblyModel()
             {
+                Id = entry.Id.ToString("N"),
                 Name = entry.Name,
                 Path = entry.Path,
                 HasMetadata = entry.Module != null,
@@ -68,12 +69,12 @@ namespace ILspect.Controllers
             };
         }
 
-        private static IEnumerable<NamespaceModel> GetNamespaces(AssemblyEntry entry)
+        private IEnumerable<NamespaceModel> GetNamespaces(AssemblyEntity entry)
         {
             return entry.Namespaces.Values.OrderBy(n => n.Name).Select(LoadNamespace);
         }
 
-        private static NamespaceModel LoadNamespace(NamespaceEntry entry)
+        private NamespaceModel LoadNamespace(NamespaceEntity entry)
         {
             return new NamespaceModel()
             {
@@ -82,7 +83,7 @@ namespace ILspect.Controllers
             };
         }
 
-        private static TypeModel LoadType(TypeEntry entry)
+        private TypeModel LoadType(Data.TypeEntity entry)
         {
             return new TypeModel()
             {
@@ -92,12 +93,19 @@ namespace ILspect.Controllers
             };
         }
 
-        private static MemberModel LoadMember(MemberEntry entry)
+        private MemberModel LoadMember(MemberEntity entry)
         {
             return new MemberModel()
             {
                 Name = entry.Name,
-                Kind = entry.Kind
+                Kind = entry.Kind,
+                Details = Url.Action("Get", "Details", new
+                {
+                    assemblyId = entry.Type.Namespace.Assembly.Id.ToString("N"),
+                    namespaceName = string.IsNullOrEmpty(entry.Type.Namespace.Name) ? Constants.DefaultNamespace : entry.Type.Namespace.Name,
+                    typeName = entry.Type.Name,
+                    memberName = entry.Name
+                })
             };
         }
     }

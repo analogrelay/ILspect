@@ -2,11 +2,11 @@ namespace ILspect.Data
 {
     public class MemberDecompilation
     {
-        public MemberEntry Member { get; }
+        public MemberEntity Member { get; }
         
         public string Body { get; }
         
-        public MemberDecompilation(MemberEntry member, string body)
+        public MemberDecompilation(MemberEntity member, string body)
         {
             Body = body;
         }    

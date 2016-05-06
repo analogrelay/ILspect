@@ -8,13 +8,11 @@ namespace ILspect.Data
 {
     public class AssemblyTable
     {
-        private Dictionary<Guid, AssemblyEntry> _index = new Dictionary<Guid, AssemblyEntry>();
+        private Dictionary<Guid, AssemblyEntity> _index = new Dictionary<Guid, AssemblyEntity>();
 
-        public IEnumerable<AssemblyEntry> Assemblies => _index.Values;
-
-        public AssemblyEntry OpenAssembly(string path)
+        public AssemblyEntity AddAssembly(string path)
         {
-            var id = Guid.NewGuid();
+            var assemblyId = Guid.NewGuid();
             var name = Path.GetFileNameWithoutExtension(path);
 
             ModuleDefinition module;
@@ -26,45 +24,59 @@ namespace ILspect.Data
                 }
                 catch (Exception)
                 {
-                    return new AssemblyEntry(id, name, path, null);
+                    return new AssemblyEntity(assemblyId, name, path, null);
                 }
             }
 
-            var assembly = new AssemblyEntry(id, name, path, module);
+            var assembly = new AssemblyEntity(assemblyId, name, path, module);
+            _index[assemblyId] = assembly;
 
             var namespaces = module.Types
                 .GroupBy(t => t.Namespace)
                 .OrderBy(g => g.Key)
                 .Select(g => LoadNamespace(assembly, g.Key, g));
-
             AddRange(assembly.Namespaces, namespaces, n => n.Name);
 
-            _index[id] = assembly;
             return assembly;
         }
 
-        private static NamespaceEntry LoadNamespace(AssemblyEntry assembly, string name, IEnumerable<TypeDefinition> types)
+        public IEnumerable<AssemblyEntity> GetAllAssemblies()
         {
-            var ns = new NamespaceEntry(assembly, name);
+            return _index.Values;
+        }
+
+        public AssemblyEntity GetAssembly(Guid id)
+        {
+            AssemblyEntity entity;
+            if (!_index.TryGetValue(id, out entity))
+            {
+                return null;
+            }
+            return entity;
+        }
+
+        private static NamespaceEntity LoadNamespace(AssemblyEntity assembly, string name, IEnumerable<TypeDefinition> types)
+        {
+            var ns = new NamespaceEntity(assembly, name);
 
             AddRange(ns.Types, types.Select(t => LoadType(ns, t)), t => t.Name);
 
             return ns;
         }
 
-        private static TypeEntry LoadType(TypeEntry parent, TypeDefinition type)
+        private static TypeEntity LoadType(TypeEntity parent, TypeDefinition type)
         {
             return LoadType(parent.Namespace, parent, type);
         }
 
-        private static TypeEntry LoadType(NamespaceEntry ns, TypeDefinition type)
+        private static TypeEntity LoadType(NamespaceEntity ns, TypeDefinition type)
         {
             return LoadType(ns, null, type);
         }
 
-        private static TypeEntry LoadType(NamespaceEntry ns, TypeEntry parent, TypeDefinition type)
+        private static TypeEntity LoadType(NamespaceEntity ns, TypeEntity parent, TypeDefinition type)
         {
-            var typ = new TypeEntry(parent, ns, type.Name, type);
+            var typ = new TypeEntity(parent, ns, type.Name, type);
 
             AddRange(typ.Members, type.NestedTypes.Select(t => LoadType(typ, t)), t => t.Name);
             AddRange(typ.Members, type.Fields.Select(f => LoadMember(typ, MemberKind.Field, f)), f => f.Name);
@@ -75,34 +87,18 @@ namespace ILspect.Data
             return typ;
         }
 
-        private static MemberEntry LoadMember(TypeEntry parent, MemberKind kind, IMemberDefinition member)
+        private static MemberEntity LoadMember(TypeEntity parent, MemberKind kind, IMemberDefinition member)
         {
-            return new MemberEntry(parent, member.Name, kind, member);
+            return new MemberEntity(parent, member.Name, kind, member);
         }
 
-        private static void AddRange<T>(IDictionary<string, T> target, IEnumerable<T> items, Func<T, string> keySelector)
+        private static void AddRange<K, V>(IDictionary<K, V> dict, IEnumerable<V> entities, Func<V, K> keySelector)
         {
-            foreach (var item in items)
+            foreach (var entity in entities)
             {
-                target[keySelector(item)] = item;
+                dict[keySelector(entity)] = entity;
             }
         }
 
-        public AssemblyEntry GetAssemblyOrDefault(string id)
-        {
-            AssemblyEntry entry;
-
-            var gid = Guid.ParseExact(id, "N");
-            if (!_index.TryGetValue(gid, out entry))
-            {
-                return null;
-            }
-            return entry;
-        }
-
-        public AssemblyEntry GetAssembly(string id)
-        {
-            return _index[Guid.ParseExact(id, "N")];
-        }
     }
 }

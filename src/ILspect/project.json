@@ -3,8 +3,9 @@
     "compilationOptions": {
         "emitEntryPoint": true
     },
+
     "dependencies": {
-        "Mono.Cecil": { "target": "project" },
+        "ICSharpCode.Decompiler": "2.3.1",
         
         "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc2-*",
         "Microsoft.AspNetCore.Hosting": "1.0.0-rc2-*",
@@ -14,14 +15,6 @@
         "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-*"
     },
     "frameworks": {
-        "netcoreapp1.0": {
-            "imports": ["dnxcore50", "portable-net45+win8"],
-            "dependencies": {
-                "Microsoft.NETCore.App": {
-                    "type": "platform",
-                    "version": "1.0.0-rc2-3002491"
-                }    
-            }
-        }
+        "net46": { }
     }
 }

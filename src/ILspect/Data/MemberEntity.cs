@@ -2,14 +2,14 @@ using Mono.Cecil;
 
 namespace ILspect.Data
 {
-    public class MemberEntry
+    public class MemberEntity
     {
-        public TypeEntry Type { get; }
+        public TypeEntity Type { get; }
         public string Name { get; }
         public MemberKind Kind { get; }
         public IMemberDefinition Definition { get; }
         
-        public MemberEntry(TypeEntry type, string name, MemberKind kind, IMemberDefinition definition)
+        public MemberEntity(TypeEntity type, string name, MemberKind kind, IMemberDefinition definition)
         {
             Type = type;
             Name = name;

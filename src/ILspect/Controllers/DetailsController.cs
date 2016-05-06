@@ -1,7 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading;
+using ICSharpCode.Decompiler;
+using ICSharpCode.Decompiler.Ast;
+using ICSharpCode.Decompiler.Disassembler;
 using ILspect.Data;
-using ILspect.Services;
 using ILspect.ResponseModels;
+using Microsoft.AspNetCore.Mvc;
+using Mono.Cecil;
 
 namespace ILspect.Controllers
 {
@@ -9,33 +14,59 @@ namespace ILspect.Controllers
     public class DetailsController : ControllerBase
     {
         private readonly AssemblyTable _assemblies;
-        private readonly Decompiler _decompiler;
 
-        public DetailsController(AssemblyTable assemblies, Decompiler decompiler)
+        public DetailsController(AssemblyTable assemblies)
         {
             _assemblies = assemblies;
-            _decompiler = decompiler;
         }
 
         [HttpGet]
-        [Route("api/assemblies/{id}/{namespaceName}/{typeName}/{memberName}")]
-        public IActionResult Get(string id, string namespaceName, string typeName, string memberName)
+        [Route("api/assemblies/{assemblyId}/{namespaceName}/{typeName}/{memberName}")]
+        public IActionResult Get(string assemblyId, string namespaceName, string typeName, string memberName)
         {
-            MemberEntry member;
-            var asm = _assemblies.GetAssemblyOrDefault(id);
+            namespaceName = string.Equals(namespaceName, Constants.DefaultNamespace, StringComparison.Ordinal) ? "" : namespaceName;
+
+            MemberEntity member;
+            var asm = _assemblies.GetAssembly(Guid.ParseExact(assemblyId, "N"));
             if (asm == null || !asm.TryGetMember(namespaceName, typeName, memberName, out member))
             {
                 return NotFound();
             }
-            
-            var decompiled = _decompiler.DecompileMember(member);
+
+            var output = new PlainTextOutput();
+            var disassembler = new ReflectionDisassembler(output, detectControlStructure: false, cancellationToken: CancellationToken.None);
+            DisassembleMember(disassembler, member);
 
             return Ok(new MemberDetailModel()
             {
                 Name = member.Name,
                 Kind = member.Kind,
-                Body = decompiled.Body
+                Body = output.ToString()
             });
+        }
+
+        private void DisassembleMember(ReflectionDisassembler disassembler, MemberEntity member)
+        {
+            switch (member.Kind)
+            {
+                case MemberKind.Field:
+                    disassembler.DisassembleField((FieldDefinition)member.Definition);
+                    return;
+                case MemberKind.Method:
+                    disassembler.DisassembleMethod((MethodDefinition)member.Definition);
+                    return;
+                case MemberKind.Property:
+                    disassembler.DisassembleProperty((PropertyDefinition)member.Definition);
+                    return;
+                case MemberKind.Event:
+                    disassembler.DisassembleEvent((EventDefinition)member.Definition);
+                    return;
+                case MemberKind.Type:
+                    disassembler.DisassembleType((TypeDefinition)member.Definition);
+                    return;
+                default:
+                    return;
+            }
         }
     }
 }

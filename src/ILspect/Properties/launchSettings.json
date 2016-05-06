@@ -21,6 +21,13 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    "ILspect (Server Only)": {
+      "commandName": "Project",
+      "commandLineArgs": "--server",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     }
   }
 }
