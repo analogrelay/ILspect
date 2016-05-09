@@ -75,7 +75,7 @@ module.exports = function buildMenu(mainWindow) {
         {
             label: 'Toggle Full Screen',
             accelerator: (function() {
-            if (process.platform == 'darwin')
+            if (process.platform === 'darwin')
                 return 'Ctrl+Command+F';
             else
                 return 'F11';
@@ -88,7 +88,7 @@ module.exports = function buildMenu(mainWindow) {
         {
             label: 'Toggle Developer Tools',
             accelerator: (function() {
-            if (process.platform == 'darwin')
+            if (process.platform === 'darwin')
                 return 'Alt+Command+I';
             else
                 return 'Ctrl+Shift+I';
@@ -128,7 +128,7 @@ module.exports = function buildMenu(mainWindow) {
     },
     ];
 
-    if (process.platform == 'darwin') {
+    if (process.platform === 'darwin') {
     var name = app.getName();
     template.unshift({
         label: name,

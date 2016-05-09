@@ -1,17 +1,15 @@
 import * as React from 'react';
 
-export interface ILayoutComponent {
-    props: ILayoutProps
-}
+export abstract class LayoutComponent<TProps> extends React.Component<TProps, any> implements ILayoutComponent, React.ChildContextProvider<any> {
+    private _childContext: any;
 
-export interface ILayoutProps {
-    layoutContext?: LayoutContext
-}
+    constructor(props: any, context: any) {
+        super(props, context);
 
-export class LayoutContext {
-    constructor(public parent: ILayoutComponent) {}
-}
+        this._childContext = Object.assign({}, this.context, {
+            currentLayoutContext: { }
+        });
+    }
 
-export class LayoutComponent<TProps extends ILayoutProps> extends React.Component<TProps, any> implements ILayoutComponent {
-    get parent(): ILayoutComponent { return this.props.layoutContext.parent; }
-} 
+    protected abstract measure(availableSize: { width: number, height: number });
+}

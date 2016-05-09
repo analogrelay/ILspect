@@ -17,11 +17,9 @@ const Menu = electron.Menu;
 let mainWindow;
 
 (function(rootDir) {
-    console.log("info: Starting backend server process");
-
     // argv[0] => electron
     // argv[1] => "path/to/main/js"
-    // argv[2] => [port] 
+    // argv[2] => [port]
     let port = process.argv[2];
 
     function createWindow () {
@@ -36,7 +34,7 @@ let mainWindow;
 
         // Set up the app menu
         Menu.setApplicationMenu(require('./menu')(mainWindow));
-        
+
         mainWindow.webContents.on('did-finish-load', function() {
             mainWindow.webContents.send('server-info', {
                 url: `http://localhost:${port}`
@@ -50,7 +48,7 @@ let mainWindow;
         // Open the DevTools.
         mainWindow.webContents.openDevTools({ detach: true });
         mainWindow.focus();
-        
+
         // Emitted when the window is closed.
         mainWindow.on('closed', function() {
             // Dereference the window object, usually you would store windows

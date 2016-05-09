@@ -21,7 +21,7 @@ namespace ILspect
                 });
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-                
+
             services.AddSingleton<DataStore>();
             services.AddSingleton<ModelBuilder>();
         }

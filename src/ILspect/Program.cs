@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ILspect
 {
@@ -34,7 +37,7 @@ namespace ILspect
             app.OnExecute(() =>
             {
                 Process electron = null;
-                int port = 5000; // When https://github.com/aspnet/KestrelHttpServer/issues/758 lands we can set this to 0!
+                int port = 5000;
                 if (portOption.HasValue())
                 {
                     port = int.Parse(portOption.Value());
@@ -47,20 +50,32 @@ namespace ILspect
                     .UseStartup<Startup>()
                     .Build();
 
-                // Launch electron if requested
-                if(!serverOnlyFlag.HasValue())
+                host.Start();
+
+                var applicationLifetime = host.Services.GetService<IApplicationLifetime>();
+                var serverAddresses = host.ServerFeatures.Get<IServerAddressesFeature>()?.Addresses;
+
+                Uri serverAddress;
+                if (serverAddresses == null || serverAddresses.Count == 0 || !Uri.TryCreate(serverAddresses.First(), UriKind.Absolute, out serverAddress))
                 {
-                    electron = LaunchElectron(electronPathOption.Value(), electronRootOption.Value(), port);
+                    Console.Error.WriteLine("Unable to detect server port number!");
+                    return 1;
+                }
+
+                // Launch electron if requested
+                if (!serverOnlyFlag.HasValue())
+                {
+                    electron = LaunchElectron(electronPathOption.Value(), electronRootOption.Value(), serverAddress.Port);
                     electron.EnableRaisingEvents = true;
                     electron.Exited += (_, __) =>
                     {
-                        host.Dispose();
+                        applicationLifetime.StopApplication();
                     };
                 }
 
-                host.Run();
+                applicationLifetime.ApplicationStopped.WaitHandle.WaitOne();
 
-                if(electron != null && !electron.HasExited)
+                if (electron != null && !electron.HasExited)
                 {
                     electron.Kill();
                 }
@@ -83,12 +98,12 @@ namespace ILspect
                 electronPath = Path.Combine(Directory.GetCurrentDirectory(), electronPath);
             }
 
-            if(!File.Exists(electronPath))
+            if (!File.Exists(electronPath))
             {
                 throw new FileNotFoundException($"Could not find electron in desired path: {electronPath}");
             }
 
-            if(string.IsNullOrEmpty(electronRoot))
+            if (string.IsNullOrEmpty(electronRoot))
             {
                 electronRoot = "wwwroot";
             }

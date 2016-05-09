@@ -27,7 +27,7 @@ export function start(baseUrl: string) {
     if(!baseUrl.endsWith("/")) {
         baseUrl += "/";
     }
-    
+
     // Replace fetch with a baseUrl-aware one
     let oldFetch = window.fetch;
     window.fetch = function(url: string | Request, init?: RequestInit) {
@@ -37,10 +37,10 @@ export function start(baseUrl: string) {
                 newUrl = baseUrl + url.substring(2)
             }
         }
-        
+
         return oldFetch(newUrl, init);
     }
-    
+
     ReactDOM.render(
         <Provider store={store}>
             <ILspectApp />
