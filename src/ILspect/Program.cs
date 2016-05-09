@@ -16,13 +16,9 @@ namespace ILspect
             {
                 return "electron.exe";
             }
-            else if(Environment.OSVersion.Platform == PlatformID.MacOSX)
-            {
-                return "Electron.app/Contents/MacOS/Electron";
-            }
             else
             {
-                return "electron";
+                return "Electron.app/Contents/MacOS/Electron";
             }
         }
 
