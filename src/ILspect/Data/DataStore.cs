@@ -15,12 +15,15 @@ namespace ILspect.Data
             var assemblyId = Guid.NewGuid().ToString("N");
             var name = Path.GetFileNameWithoutExtension(path);
 
-            ModuleDefinition module;
+            AssemblyDefinition asm;
             using (var stream = File.OpenRead(path))
             {
                 try
                 {
-                    module = ModuleDefinition.ReadModule(stream);
+                    asm = AssemblyDefinition.ReadAssembly(stream, new ReaderParameters()
+                    {
+                        AssemblyResolver = new ILspectAssemblyResolver()
+                    });
                 }
                 catch (Exception)
                 {
@@ -28,10 +31,10 @@ namespace ILspect.Data
                 }
             }
 
-            var assembly = new AssemblyEntity(assemblyId, name, path, module);
+            var assembly = new AssemblyEntity(assemblyId, name, path, asm);
             _assemblies[assemblyId] = assembly;
 
-            var namespaces = module.Types
+            var namespaces = asm.Modules.SelectMany(m => m.Types)
                 .GroupBy(t => t.Namespace)
                 .OrderBy(g => g.Key)
                 .Select(g => LoadNamespace(assembly, g.Key, g));
@@ -71,13 +74,32 @@ namespace ILspect.Data
 
         public TypeEntity GetType(string assemblyId, string namespaceName, string typeName)
         {
-            TypeEntity typ;
             var ns = GetNamespace(assemblyId, namespaceName);
-            if (ns != null && ns.Types.TryGetValue(typeName, out typ))
+
+            // Break the nested type path (if any)
+            TypeEntity typ = null;
+            var segments = typeName.Split('+');
+            foreach (var segment in segments)
             {
-                return typ;
+                if(typ == null)
+                {
+                    if(!ns.Types.TryGetValue(segment, out typ))
+                    {
+                        return null;
+                    }
+                }
+                else
+                {
+                    MemberEntity m;
+                    if(!typ.Members.TryGetValue(segment, out m) || m.Kind != MemberKind.Type)
+                    {
+                        return null;
+                    }
+                    typ = (TypeEntity)m;
+                }
             }
-            return null;
+
+            return typ;
         }
 
         public MemberEntity GetMember(string assemblyId, string namespaceName, string typeName, string memberName)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ILspect.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,7 @@ namespace ILspect.ResponseModels
                 Id = entry.Id,
                 Name = entry.Name,
                 Path = entry.Path,
-                HasMetadata = entry.Module != null,
+                HasMetadata = entry.Definition != null,
                 Namespaces = BuildNamespaces(entry)
             };
         }
@@ -58,11 +59,12 @@ namespace ILspect.ResponseModels
 
         public TypeModel Build(TypeEntity entry)
         {
+            var typeName = BuildName(entry);
             var idValues = new
             {
                 assemblyId = entry.Namespace.Assembly.Id,
                 namespaceName = string.IsNullOrEmpty(entry.Namespace.Name) ? Constants.DefaultNamespace : entry.Namespace.Name,
-                typeName = entry.Name
+                typeName = typeName
             };
 
             return new TypeModel(
@@ -77,11 +79,16 @@ namespace ILspect.ResponseModels
 
         public MemberModel Build(MemberEntity entry)
         {
+            if (entry.Kind == MemberKind.Type)
+            {
+                return Build((TypeEntity)entry);
+            }
+
             var idValues = new
             {
                 assemblyId = entry.Type.Namespace.Assembly.Id,
                 namespaceName = string.IsNullOrEmpty(entry.Type.Namespace.Name) ? Constants.DefaultNamespace : entry.Type.Namespace.Name,
-                typeName = entry.Type.Name,
+                typeName = BuildName(entry.Type),
                 memberName = entry.Name
             };
 
@@ -93,6 +100,17 @@ namespace ILspect.ResponseModels
                 Kind = entry.Kind,
             };
         }
+
+        private string BuildName(TypeEntity entry)
+        {
+            var name = entry.Name;
+            if(entry.Type != null)
+            {
+                name = $"{BuildName(entry.Type)}+{name}";
+            }
+            return name;
+        }
+
 
         private IEnumerable<NamespaceModel> BuildNamespaces(AssemblyEntity entry)
         {

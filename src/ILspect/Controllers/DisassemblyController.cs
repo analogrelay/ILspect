@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using ICSharpCode.Decompiler;
+using ICSharpCode.Decompiler.Ast;
 using ICSharpCode.Decompiler.Disassembler;
 using ILspect.Data;
 using ILspect.ResponseModels;
@@ -18,6 +19,18 @@ namespace ILspect.Controllers
         }
 
         [HttpGet]
+        [Route("api/disassembly/{assemblyId}/{namespaceName}/{typeName}")]
+        public IActionResult DisassembleType(string assemblyId, string namespaceName, string typeName)
+        {
+            var member = _data.GetType(assemblyId, namespaceName, typeName);
+            if (member == null)
+            {
+                return NotFound();
+            }
+            return DisassembleMember(member);
+        }
+
+        [HttpGet]
         [Route("api/disassembly/{assemblyId}/{namespaceName}/{typeName}/{memberName}")]
         public IActionResult DisassembleMember(string assemblyId, string namespaceName, string typeName, string memberName)
         {
@@ -27,31 +40,57 @@ namespace ILspect.Controllers
                 return NotFound();
             }
 
+            return DisassembleMember(member);
+        }
+
+        private IActionResult DisassembleMember(MemberEntity member)
+        {
             var output = new PlainTextOutput();
-            var disassembler = new ReflectionDisassembler(output, detectControlStructure: false, cancellationToken: CancellationToken.None);
-            DisassembleMember(disassembler, member);
+            var settings = new DecompilerSettings();
+            settings.AsyncAwait = true;
+            settings.AnonymousMethods = true;
+            settings.AutomaticEvents = true;
+            settings.AutomaticProperties = true;
+            settings.YieldReturn = true;
+            settings.ObjectOrCollectionInitializers = true;
+            settings.MakeAssignmentExpressions = true;
+            settings.LockStatement = true;
+            settings.ForEachStatement = true;
+            if(member.Kind != MemberKind.Type)
+            {
+                settings.UsingDeclarations = false;
+            }
+            var builder = new AstBuilder(
+                new DecompilerContext(member.Type.Definition.Module)
+                {
+                    Settings = settings,
+                    CurrentType = member.Type.Definition
+                });
+            AddMember(builder, member);
+            builder.GenerateCode(output);
             var disassembly = output.ToString();
 
             return Ok(ApiResponse.Create(string.Empty, disassembly));
         }
-        private void DisassembleMember(ReflectionDisassembler disassembler, MemberEntity member)
+
+        private void AddMember(AstBuilder builder, MemberEntity member)
         {
             switch (member.Kind)
             {
                 case MemberKind.Field:
-                    disassembler.DisassembleField((FieldDefinition)member.Definition);
+                    builder.AddField((FieldDefinition)member.Definition);
                     return;
                 case MemberKind.Method:
-                    disassembler.DisassembleMethod((MethodDefinition)member.Definition);
+                    builder.AddMethod((MethodDefinition)member.Definition);
                     return;
                 case MemberKind.Property:
-                    disassembler.DisassembleProperty((PropertyDefinition)member.Definition);
+                    builder.AddProperty((PropertyDefinition)member.Definition);
                     return;
                 case MemberKind.Event:
-                    disassembler.DisassembleEvent((EventDefinition)member.Definition);
+                    builder.AddEvent((EventDefinition)member.Definition);
                     return;
                 case MemberKind.Type:
-                    disassembler.DisassembleType((TypeDefinition)member.Definition);
+                    builder.AddType((TypeDefinition)member.Definition);
                     return;
                 default:
                     return;
