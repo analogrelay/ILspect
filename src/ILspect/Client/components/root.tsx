@@ -14,7 +14,7 @@ export class ILspectApp extends React.Component<any, any> {
     render() {
         var windowSize = { width: window.innerWidth, height: window.innerHeight };
         
-        var assemblyListSize = 400;
+        var assemblyListSize = 425;
         var spacing = 0;
         
         return <Frame width={windowSize.width} height={windowSize.height}>
