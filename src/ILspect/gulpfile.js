@@ -46,12 +46,6 @@ gulp.task("clean", function () {
     ]);
 });
 
-gulp.task("prepare:typings", function (cb) {
-    exec("typings", ["install"], "Client", cb, true);
-});
-
-gulp.task("prepare", ["prepare:typings"]);
-
 gulp.task("compile:typescript", function () {
     var tsResult = tsProject.src()
         .pipe(filter(["Client/**"]))

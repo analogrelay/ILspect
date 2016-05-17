@@ -2,8 +2,11 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 pushd $DIR/src/ILspect
-npm install
 dotnet restore
+npm install
+pushd $DIR/src/ILspect/Client
+typings install
+popd
+gulp compile
 dotnet build
-gulp
 popd
