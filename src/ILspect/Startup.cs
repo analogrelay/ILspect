@@ -3,6 +3,7 @@ using ILspect.ResponseModels;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
@@ -21,7 +22,6 @@ namespace ILspect
                 });
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-                
             services.AddSingleton<DataStore>();
             services.AddSingleton<ModelBuilder>();
         }

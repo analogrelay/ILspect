@@ -32,10 +32,7 @@ export class TreeNodeList extends React.Component<ITreeNodeListProps, any> {
         if (this.props.className) {
             className += " " + this.props.className;
         }
-        var style = Object.assign({}, this.props.style, {
-            display: this.props.expanded ? "block" : "none"
-        });
-        var props = Object.assign({}, this.props, { className: className, style: style });
+        var props = Object.assign({}, this.props, { className: className });
 
         var children = React.Children.map(this.props.children, (child) => {
             if (React.isValidElement(child)) {
@@ -51,9 +48,9 @@ export class TreeNodeList extends React.Component<ITreeNodeListProps, any> {
             // Ignore non-element content
         });
 
-        return <ul {...props}>
-            {children}
-        </ul>
+        return <ul {...props }>
+            { children }
+        </ul >
     }
 }
 
@@ -107,11 +104,12 @@ export class TreeNode extends React.Component<ITreeNodeProps, ITreeNodeState> {
             icon = <Icon name={this.props.icon} />;
         }
 
-        var expander;
-        var children;
+        var expander, children;
         if (React.Children.count(this.props.children) > 0) {
             expander = <Icon name={this.state.expanded ? "menu-down" : "menu-right"} />;
-            children = <TreeNodeList tree={this.props.owner} expanded={this.state.expanded} parent={this}>{this.props.children}</TreeNodeList>;
+            if (this.state.expanded) {
+                children = <TreeNodeList tree={this.props.owner} expanded={this.state.expanded} parent={this}>{this.props.children}</TreeNodeList>;
+            }
         }
 
         return <li {...props}>
