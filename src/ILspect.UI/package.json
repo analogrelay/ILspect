@@ -1,0 +1,25 @@
+{
+  "name": "ilspect",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andrew Stanton-Nurse <andrew@andrewnurse.net>",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-typescript": "^2.13.6",
+    "jspm": "^0.16.39"
+  },
+  "jspm": {
+    "dependencies": {
+      "aurelia-bootstrapper": "npm:aurelia-bootstrapper@^1.0.0-beta.2.0.1",
+      "html": "github:Hypercubed/systemjs-plugin-html@^0.0.8"
+    },
+    "devDependencies": {}
+  }
+}

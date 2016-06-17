@@ -1,0 +1,16 @@
+{
+  "name": "ilspect",
+  "version": false,
+  "dependencies": {
+    "aurelia-binding": "github:aurelia/binding",
+    "aurelia-dependency-injection": "github:aurelia/dependency-injection",
+    "aurelia-framework": "github:aurelia/framework",
+    "aurelia-loader": "github:aurelia/loader",
+    "aurelia-logging": "github:aurelia/logging",
+    "aurelia-metadata": "github:aurelia/metadata",
+    "aurelia-pal": "github:aurelia/pal",
+    "aurelia-path": "github:aurelia/path",
+    "aurelia-task-queue": "github:aurelia/task-queue",
+    "aurelia-templating": "github:aurelia/templating"
+  }
+}
