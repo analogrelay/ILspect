@@ -4,15 +4,19 @@ System.config({
   transpiler: false,
   paths: {
     "npm:*": "jspm_packages/npm/*",
-    "*": "src/*",
-    "github:*": "jspm_packages/github/*"
+    "github:*": "jspm_packages/github/*",
+    "*": "src/*"
   },
 
   map: {
     "aurelia-bootstrapper": "npm:aurelia-bootstrapper@1.0.0-beta.2.0.1",
+    "html": "github:Hypercubed/systemjs-plugin-html@0.0.8",
     "redux": "npm:redux@3.5.2",
     "redux-logger": "npm:redux-logger@2.6.1",
     "redux-thunk": "npm:redux-thunk@2.1.0",
+    "github:Hypercubed/systemjs-plugin-html@0.0.8": {
+      "webcomponentsjs": "github:webcomponents/webcomponentsjs@0.7.22"
+    },
     "github:jspm/nodelibs-assert@0.1.0": {
       "assert": "npm:assert@1.4.1"
     },

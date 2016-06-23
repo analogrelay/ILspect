@@ -1,4 +1,0 @@
-*.js
-!config.js
-!gulpfile.js
-!electron/*.js

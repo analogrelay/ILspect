@@ -3,6 +3,7 @@ jspm_packages/
 node_modules/
 typings/
 wwwroot/
+dist/
 
 ## VisualStudio.gitignore
 ## Ignore Visual Studio temporary files, build results, and
