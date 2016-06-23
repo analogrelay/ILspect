@@ -1,3 +1,3 @@
-export class App {
+export class AppState {
     message = "Hello, World!"
 }

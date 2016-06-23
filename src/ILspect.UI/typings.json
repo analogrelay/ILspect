@@ -11,6 +11,8 @@
     "aurelia-pal": "github:aurelia/pal",
     "aurelia-path": "github:aurelia/path",
     "aurelia-task-queue": "github:aurelia/task-queue",
-    "aurelia-templating": "github:aurelia/templating"
+    "aurelia-templating": "github:aurelia/templating",
+    "redux": "registry:npm/redux#3.0.6+20160214194820",
+    "redux-thunk": "registry:npm/redux-thunk#2.0.0+20160525185520"
   }
 }
