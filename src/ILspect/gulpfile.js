@@ -1,29 +1,18 @@
-/// <binding AfterBuild="compile" Clean="clean" ProjectOpened="prepare" />
-const gulp = require("gulp");
-const plumber = require("gulp-plumber");
-const ts = require("gulp-typescript");
-const sourcemaps = require("gulp-sourcemaps");
-const rename = require("gulp-rename");
-const sass = require("gulp-sass");
-const filter = require("gulp-filter");
-const del = require("del");
-const typescript = require("typescript");
-
-const path = require("path");
+const gulp = require('gulp');
+const ts = require('gulp-typescript');
+const sourcemaps = require('gulp-sourcemaps');
 
 const spawn = require("child_process").spawn;
+const path = require("path");
 
-const tsProject = ts.createProject("Client/tsconfig.json", {
-    typescript: typescript
-});
+var uiRoot = path.join(__dirname, "ui");
+var tsProject = ts.createProject(path.join(uiRoot, 'tsconfig.json'));
 
-const uiStartScript = path.join(__dirname, "wwwroot/electron/app.js");
-
-function exec(cmd, args, cwd, cb, shell_if_windows) {
+function exec(cmd, args, cwd, cb) {
     var proc = spawn(cmd, args, {
         stdio: "inherit",
         cwd: cwd,
-        shell: shell_if_windows && process.platform === "win32"
+        shell: process.platform === "win32"
     });
     proc.on("exit", function (code) {
         if (code !== 0) {
@@ -34,62 +23,54 @@ function exec(cmd, args, cwd, cb, shell_if_windows) {
     });
 }
 
-function copydep(mod, subpath) {
-    return gulp.src(`node_modules/${mod}/${subpath}`)
-        .pipe(gulp.dest(`wwwroot/lib/${mod}`));
-}
-
-gulp.task("clean", function () {
-    return del([
-        "wwwroot/**",
-        "!wwwroot" // Keep the "wwwroot" directory itself around.
-    ]);
+gulp.task('prepare:typings', function(cb) {
+    exec('typings', ['install'], uiRoot, function(err, stdout, stderr) {
+        cb(err);
+    });
 });
 
-gulp.task("prepare:typings", function (cb) {
-    exec("typings", ["install"], "Client", cb, true);
+gulp.task('prepare:jspm', function(cb) {
+    exec('jspm', ['install'], uiRoot, function(err, stdout, stderr) {
+        cb(err);
+    });
 });
 
-gulp.task("prepare", ["prepare:typings"]);
+gulp.task('prepare:npm', function(cb) {
+    exec('npm', ['install'], uiRoot, function(err, stdout, stderr) {
+        cb(err);
+    });
+});
 
-gulp.task("compile:typescript", function () {
+gulp.task('prepare', [ 'prepare:typings', 'prepare:jspm', 'prepare:npm' ]);
+
+gulp.task('compile:typescript', function() {
     var tsResult = tsProject.src()
-        .pipe(filter(["Client/**"]))
         .pipe(sourcemaps.init())
-        .pipe(ts(tsProject));
+        .pipe(ts(tsProject))
+        .once("error", function() {
+            this.once("finish", function() { process.exit(1); });
+        });
     return tsResult.js
         .pipe(sourcemaps.write())
-        .pipe(gulp.dest("wwwroot"));
+        .pipe(gulp.dest('bin/ui'));
 });
 
-gulp.task("compile:other", function () {
-    return gulp.src([
-            "Client/index.html",
-            "Client/!(typings)/**",
-            "!**/*.{ts,tsx,scss,json}"
-    ]).pipe(gulp.dest("wwwroot"));
+// Copy files from src to dist that don't get compiled
+gulp.task('copysrc', function() {
+    gulp.src([uiRoot + '/src/**/*.{html,js}'])
+        .pipe(gulp.dest('dist/src'));
+    gulp.src([uiRoot + '/jspm_packages/**'])
+        .pipe(gulp.dest('dist/jspm_packages'));
+    gulp.src([uiRoot + '/package.json', uiRoot + '/config.js', uiRoot + '/index.html'])
+        .pipe(gulp.dest('dist'));
+})
+
+gulp.task('compile', [ 'compile:typescript', 'copysrc' ]);
+
+gulp.task('run', [ 'compile' ], function(cb) {
+    exec('electron electron/main.js', function(err, stdout, stderr) {
+        cb(err);
+    });
 });
 
-gulp.task("compile:sass", function () {
-    return gulp.src("Client/styles/master.scss")
-        .pipe(sass().on("error", sass.logError))
-        .pipe(gulp.dest("wwwroot/styles"));
-});
-
-gulp.task("copydeps", function () {
-    return Promise.all([
-        copydep("redux", "dist/redux{.js,.min.js}"),
-        copydep("systemjs", "dist/system{,.src}.js{,.map}"),
-        copydep("redux-thunk", "dist/redux-thunk{.js,.min.js}"),
-        copydep("react-redux", "dist/react-redux{.js,.min.js}"),
-        copydep("react", "dist/react{.js,.min.js}"),
-        copydep("react-dom", "dist/react-dom{.js,.min.js}"),
-        copydep("whatwg-fetch", "fetch.js"),
-        copydep("bootstrap", "dist/*/*"),
-        copydep("immutable", "dist/immutable{.js,.min.js}")
-    ]);
-});
-
-gulp.task("compile", [ "copydeps", "compile:typescript", "compile:other", "compile:sass" ]);
-
-gulp.task("default", [ "compile" ]);
+gulp.task('default', [ 'compile' ]);

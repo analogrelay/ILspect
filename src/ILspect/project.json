@@ -1,21 +1,30 @@
 {
-    "version": "1.0.0-*",
-    "compilationOptions": {
-        "emitEntryPoint": true
-    },
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
 
-    "dependencies": {
-        "ICSharpCode.Decompiler": "2.3.1",
+  "publishOptions": {
+    "include": [
+      "dist"
+      ]
+  },
 
-        "Microsoft.NETCore.Platforms": "1.0.1-rc2-*",
-        "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc2-*",
-        "Microsoft.AspNetCore.Hosting": "1.0.0-rc2-*",
-        "Microsoft.AspNetCore.Mvc.Core": "1.0.0-rc2-*",
-        "Microsoft.AspNetCore.Mvc.Formatters.Json": "1.0.0-rc2-*",
-        "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-*",
-        "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-*"
-    },
-    "frameworks": {
-        "net451": { }
-    }
+  "dependencies": {
+    "ICSharpCode.Decompiler": "2.3.1",
+
+    "Microsoft.NETCore.Platforms": "1.0.1-rc2-*",
+    "Microsoft.Extensions.CommandLineUtils": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Hosting": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Mvc.Core": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Mvc.Formatters.Json": "1.0.0-rc2-*",
+    "Microsoft.AspNetCore.Server.Kestrel": "1.0.0-rc2-*",
+    "Microsoft.Extensions.Logging.Console": "1.0.0-rc2-*"
+  },
+  "frameworks": {
+    "net451": { }
+  },
+  "scripts": {
+    "prepublish": [ "gulp" ]
+  }
 }
