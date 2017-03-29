@@ -20,6 +20,7 @@ namespace ILspect.CommandLine
 
             ListCommand.Register(app);
             GraphCommand.Register(app);
+            DisassembleCommand.Register(app);
 
             CommandHelpers.RegisterHelpCommand(app);
 

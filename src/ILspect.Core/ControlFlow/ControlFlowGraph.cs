@@ -22,46 +22,60 @@ namespace ILspect.ControlFlow
         {
             var body = method.Body;
 
-            var nodes = new List<ControlFlowNode>();
+            var nodes = new Dictionary<string, ControlFlowNode>();
 
-            var counter = 0;
-            var root = new ControlFlowNode($"bb{counter}");
-            nodes.Add(root);
-            counter += 1;
-
-            var current = root;
-
+            var stack = new Stack<ControlFlowNode>();
             var instruction = body.Instructions.First();
-            foreach (var instruction in body.Instructions)
+            var root = new ControlFlowNode(GetNodeName(instruction.Offset));
+            root.Instructions.Add(instruction);
+            stack.Push(root);
+
+
+
+            while (stack.Empt)
             {
-                if (instruction.OpCode == OpCodes.Br_S || instruction.OpCode == OpCodes.Br)
-                {
-                    var target = (Instruction)instruction.Operand;
-                    var next = new ControlFlowNode($"bb{counter}");
-                    nodes.Add(next);
-                    counter += 1;
+                nodes[node.Name] = node;
+                node.Instructions.Add(instruction);
 
-                    // This is unconditional, so there's no split
-                    current.Links.Add(new ControlFlowLink(BranchCondition.Unconditional, next));
-                    current = next;
+                if (root == null)
+                {
+                    root = node;
                 }
-                else if (instruction.OpCode == OpCodes.Brfalse_S || instruction.OpCode == OpCodes.Brfalse)
-                {
-                    var target = (Instruction)instruction.Operand;
-                    var next = new ControlFlowNode($"bb{counter}");
-                    nodes.Add(next);
-                    counter += 1;
 
-                    current.Links.Add(new ControlFlowLink(BranchCondition.False, next));
-                    current = next;
+                if (instruction.OpCode == OpCodes.Br || instruction.OpCode == OpCodes.Br_S)
+                {
+                    var nextName = GetNodeName(((Instruction)instruction.Operand).Offset);
+                    node.Links.Add(new ControlFlowLink(BranchCondition.Unconditional, nextName));
+                }
+                else if (instruction.OpCode == OpCodes.Brfalse || instruction.OpCode == OpCodes.Brfalse_S)
+                {
+                    var falseTarget = GetNodeName(((Instruction)instruction.Operand).Offset);
+                    node.Links.Add(new ControlFlowLink(BranchCondition.False, falseTarget));
+                    var trueTarget = instruction.Next == null ? "end" : GetNodeName(instruction.Next.Offset);
+                    node.Links.Add(new ControlFlowLink(BranchCondition.True, trueTarget));
+                }
+                else if (instruction.OpCode == OpCodes.Brtrue || instruction.OpCode == OpCodes.Brtrue_S)
+                {
+                    var trueTarget = GetNodeName(((Instruction)instruction.Operand).Offset);
+                    node.Links.Add(new ControlFlowLink(BranchCondition.True, trueTarget));
+                    var falseTarget = instruction.Next == null ? "end" : GetNodeName(instruction.Next.Offset);
+                    node.Links.Add(new ControlFlowLink(BranchCondition.False, falseTarget));
                 }
                 else
                 {
-                    current.Instructions.Add(instruction);
+                    var nextName = instruction.Next == null ? "end" : GetNodeName(instruction.Next.Offset);
+                    node.Links.Add(new ControlFlowLink(BranchCondition.Unconditional, nextName));
                 }
+
+                instruction = instruction.Next;
             }
 
-            return new ControlFlowGraph(root, nodes);
+            return new ControlFlowGraph(root, nodes.Values);
+        }
+
+        private static string GetNodeName(int offset)
+        {
+            return $"IL_{offset:X4}";
         }
     }
 }

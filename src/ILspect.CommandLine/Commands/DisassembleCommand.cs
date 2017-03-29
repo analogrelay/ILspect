@@ -10,14 +10,14 @@ using static ILspect.CommandLine.CommandHelpers;
 
 namespace ILspect.CommandLine.Commands
 {
-    public static class GraphCommand
+    public static class DisassembleCommand
     {
-        private static readonly string Name = "graph";
+        private static readonly string Name = "disassemble";
         internal static void Register(CommandLineApplication app)
         {
             app.Command(Name, cmd =>
             {
-                cmd.Description = "Graphs the control flow of the method";
+                cmd.Description = "Disassembles a member";
 
                 var assemblyArgument = cmd.Argument("<ASSEMBLY>", "The path to a .NET assembly to list members from");
 
@@ -70,30 +70,10 @@ namespace ILspect.CommandLine.Commands
 
             if (member.MemberType == MemberType.Method)
             {
-                var graph = ControlFlowGraph.Create((MethodDefinition)member.Definition);
-
-                Console.WriteLine($"Control flow graph for {typeName}.{memberName}");
-                foreach (var node in graph.AllNodes)
+                var method = (MethodDefinition)member.Definition;
+                foreach (var instruction in method.Body.Instructions)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine($" {node.Name} : {{");
-                    foreach (var instruction in node.Instructions)
-                    {
-                        Console.WriteLine($"   {instruction}");
-                    }
-                    if (node.Links.Count == 1)
-                    {
-                        Console.WriteLine($" }} -> {node.Links.First().Destination}");
-                    }
-                    else if (node.Links.Count == 0)
-                    {
-                        Console.WriteLine(" } -> end;");
-                    }
-                    else
-                    {
-                        var targets = string.Join(", ", node.Links.Select(l => $"when {l.Condition} -> {l.Destination}"));
-                        Console.WriteLine($" }} {targets}");
-                    }
+                    Console.WriteLine(instruction);
                 }
             }
             else

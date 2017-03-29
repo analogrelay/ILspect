@@ -4,10 +4,11 @@ namespace ILspect.ControlFlow
     {
         // TODO: Condition
         public BranchCondition Condition { get; }
-        public ControlFlowNode Destination { get; }
+        public string Destination { get; }
 
-        public ControlFlowLink(BranchCondition condition, ControlFlowNode destination)
+        public ControlFlowLink(BranchCondition condition, string destination)
         {
+            Condition = condition;
             Destination = destination;
         }
     }
