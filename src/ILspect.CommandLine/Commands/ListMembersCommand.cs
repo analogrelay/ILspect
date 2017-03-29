@@ -49,7 +49,12 @@ namespace ILspect.CommandLine.Commands
 
             var disassembly = await disassembler.LoadAsync(assemblyPath);
 
-            var type = disassembly.Types.FirstOrDefault(t => t.FullName.Equals(typeName));
+            var type = disassembly.FindType(typeName);
+
+            if (type == null)
+            {
+                return Error($"could not find type: {typeName}");
+            }
 
             foreach (var member in type.Members)
             {

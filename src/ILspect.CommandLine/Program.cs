@@ -19,6 +19,7 @@ namespace ILspect.CommandLine
             app.VersionOption("-v|--version", Program.Version);
 
             ListCommand.Register(app);
+            GraphCommand.Register(app);
 
             CommandHelpers.RegisterHelpCommand(app);
 

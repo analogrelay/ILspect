@@ -9,10 +9,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILspect.Core", "src\ILspect
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILspect.CommandLine", "src\ILspect.CommandLine\ILspect.CommandLine.csproj", "{7345A352-F7D5-430D-8101-4E8BAF1476D0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E7B7CA0F-D14C-46CB-A20A-53BCD4CE1A0D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILspect.TestLibrary", "test\ILspect.TestLibrary\ILspect.TestLibrary.csproj", "{4990A3B7-6B04-4590-B762-A972B8BC13A4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
 		Release|x86 = Release|x86
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{4B362D44-E296-441A-9966-C8BCE32A9C25}.Debug|x86.ActiveCfg = Debug|x86
@@ -25,10 +33,23 @@ Global
 		{7345A352-F7D5-430D-8101-4E8BAF1476D0}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{7345A352-F7D5-430D-8101-4E8BAF1476D0}.Release|x86.ActiveCfg = Release|Any CPU
 		{7345A352-F7D5-430D-8101-4E8BAF1476D0}.Debug|x86.Build.0 = Debug|Any CPU
+		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Debug|x64.ActiveCfg = Debug|x64
+		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Debug|x64.Build.0 = Debug|x64
+		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Debug|x86.ActiveCfg = Debug|x86
+		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Debug|x86.Build.0 = Debug|x86
+		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Release|x64.ActiveCfg = Release|x64
+		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Release|x64.Build.0 = Release|x64
+		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Release|x86.ActiveCfg = Release|x86
+		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4B362D44-E296-441A-9966-C8BCE32A9C25} = {529A7AD9-F0D7-43D9-8370-3CE657500969}
 		{034ABAA9-1FAC-4576-85C4-D70286E293CF} = {529A7AD9-F0D7-43D9-8370-3CE657500969}
 		{7345A352-F7D5-430D-8101-4E8BAF1476D0} = {529A7AD9-F0D7-43D9-8370-3CE657500969}
+		{4990A3B7-6B04-4590-B762-A972B8BC13A4} = {E7B7CA0F-D14C-46CB-A20A-53BCD4CE1A0D}
 	EndGlobalSection
 EndGlobal

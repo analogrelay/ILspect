@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
@@ -28,6 +29,11 @@ namespace ILspect.Model
                 .Select(g => new NamespaceDisassembly(g.Key, g))
                 .OrderBy(n => n.Name)
                 .ToList();
+        }
+
+        public TypeDisassembly FindType(string typeFullName)
+        {
+            return Types.FirstOrDefault(t => t.FullName.Equals(typeFullName));
         }
     }
 }
