@@ -8,6 +8,7 @@ namespace ILspect.ControlFlow
     {
         public string Name { get; }
         public IList<Instruction> Instructions { get; } = new List<Instruction>();
+        public IList<ControlFlowLink> Links { get; } = new List<ControlFlowLink>();
 
         public ControlFlowNode(string name)
         {

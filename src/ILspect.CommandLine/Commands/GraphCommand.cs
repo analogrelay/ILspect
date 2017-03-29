@@ -73,14 +73,23 @@ namespace ILspect.CommandLine.Commands
                 var graph = ControlFlowGraph.Create((MethodDefinition)member.Definition);
 
                 Console.WriteLine($"Control flow graph for {typeName}.{memberName}");
-                Console.WriteLine();
-                var node = graph.Root;
-                Console.WriteLine($" {node.Name} : {{");
-                foreach (var instruction in node.Instructions)
+                foreach (var node in graph.AllNodes)
                 {
-                    Console.WriteLine($"   {instruction}");
+                    Console.WriteLine();
+                    Console.WriteLine($" {node.Name} : {{");
+                    foreach (var instruction in node.Instructions)
+                    {
+                        Console.WriteLine($"   {instruction}");
+                    }
+                    if (node.Links.Count == 1)
+                    {
+                        Console.WriteLine($" }} -> {node.Links.First().Destination.Name}");
+                    }
+                    else
+                    {
+                        Console.WriteLine(" } -> end;");
+                    }
                 }
-                Console.WriteLine(" }");
             }
             else
             {
