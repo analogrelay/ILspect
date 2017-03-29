@@ -24,53 +24,92 @@ namespace ILspect.ControlFlow
 
             var nodes = new Dictionary<string, ControlFlowNode>();
 
-            var stack = new Stack<ControlFlowNode>();
-            var instruction = body.Instructions.First();
-            var root = new ControlFlowNode(GetNodeName(instruction.Offset));
-            root.Instructions.Add(instruction);
-            stack.Push(root);
+            var workQueue = new Queue<ControlFlowNode>();
 
-
-
-            while (stack.Empt)
+            // Create the root node and put it in the queue
+            var instruction = method.Body.Instructions.FirstOrDefault();
+            var root = new ControlFlowNode(GetNodeName(0));
+            nodes[root.Name] = root;
+            if (instruction != null)
             {
-                nodes[node.Name] = node;
-                node.Instructions.Add(instruction);
+                root.Instructions.Add(instruction);
+            }
+            workQueue.Enqueue(root);
 
-                if (root == null)
+            while (workQueue.Count > 0)
+            {
+                var current = workQueue.Dequeue();
+                instruction = current.Instructions.LastOrDefault()?.Next;
+                while (instruction != null)
                 {
-                    root = node;
+                    if (instruction.OpCode == OpCodes.Br || instruction.OpCode == OpCodes.Br_S)
+                    {
+                        var target = (Instruction)instruction.Operand;
+                        var nextName = GetNodeName(target.Offset);
+                        if (!nodes.TryGetValue(nextName, out var nextNode))
+                        {
+                            nextNode = new ControlFlowNode(nextName);
+                            if (instruction.Next != null)
+                            {
+                                nextNode.Instructions.Add(instruction.Next);
+                            }
+                            nodes[nextNode.Name] = nextNode;
+                            workQueue.Enqueue(nextNode);
+                        }
+                        current.Links.Add(new ControlFlowLink(instruction, nextNode));
+                        instruction = null;
+                    }
+                    else if (instruction.OpCode == OpCodes.Brfalse || instruction.OpCode == OpCodes.Brfalse_S ||
+                             instruction.OpCode == OpCodes.Brtrue || instruction.OpCode == OpCodes.Brtrue_S)
+                    {
+                        CreateBranch(nodes, workQueue, current, instruction);
+                        instruction = null;
+                    }
+                    else
+                    {
+                        current.Instructions.Add(instruction);
+                        if (instruction.OpCode != OpCodes.Ret)
+                        {
+                            instruction = instruction.Next;
+                        }
+                        else
+                        {
+                            instruction = null;
+                        }
+                    }
                 }
-
-                if (instruction.OpCode == OpCodes.Br || instruction.OpCode == OpCodes.Br_S)
-                {
-                    var nextName = GetNodeName(((Instruction)instruction.Operand).Offset);
-                    node.Links.Add(new ControlFlowLink(BranchCondition.Unconditional, nextName));
-                }
-                else if (instruction.OpCode == OpCodes.Brfalse || instruction.OpCode == OpCodes.Brfalse_S)
-                {
-                    var falseTarget = GetNodeName(((Instruction)instruction.Operand).Offset);
-                    node.Links.Add(new ControlFlowLink(BranchCondition.False, falseTarget));
-                    var trueTarget = instruction.Next == null ? "end" : GetNodeName(instruction.Next.Offset);
-                    node.Links.Add(new ControlFlowLink(BranchCondition.True, trueTarget));
-                }
-                else if (instruction.OpCode == OpCodes.Brtrue || instruction.OpCode == OpCodes.Brtrue_S)
-                {
-                    var trueTarget = GetNodeName(((Instruction)instruction.Operand).Offset);
-                    node.Links.Add(new ControlFlowLink(BranchCondition.True, trueTarget));
-                    var falseTarget = instruction.Next == null ? "end" : GetNodeName(instruction.Next.Offset);
-                    node.Links.Add(new ControlFlowLink(BranchCondition.False, falseTarget));
-                }
-                else
-                {
-                    var nextName = instruction.Next == null ? "end" : GetNodeName(instruction.Next.Offset);
-                    node.Links.Add(new ControlFlowLink(BranchCondition.Unconditional, nextName));
-                }
-
-                instruction = instruction.Next;
             }
 
+
             return new ControlFlowGraph(root, nodes.Values);
+        }
+
+        private static void CreateBranch(Dictionary<string, ControlFlowNode> nodes, Queue<ControlFlowNode> workQueue, ControlFlowNode current, Instruction instruction)
+        {
+            var branchTarget = (Instruction)instruction.Operand;
+
+            var branchName = GetNodeName(branchTarget.Offset);
+            if (!nodes.TryGetValue(branchName, out var branchNode))
+            {
+                branchNode = new ControlFlowNode(branchName);
+                branchNode.Instructions.Add(branchTarget);
+                nodes[branchNode.Name] = branchNode;
+                workQueue.Enqueue(branchNode);
+            }
+            current.Links.Add(new ControlFlowLink(instruction, branchNode));
+
+            if (instruction.Next != null)
+            {
+                var nextName = GetNodeName(instruction.Next.Offset);
+                if (!nodes.TryGetValue(nextName, out var nextNode))
+                {
+                    nextNode = new ControlFlowNode(nextName);
+                    nextNode.Instructions.Add(instruction.Next);
+                    nodes[nextNode.Name] = nextNode;
+                    workQueue.Enqueue(nextNode);
+                }
+                current.Links.Add(new ControlFlowLink(null, nextNode));
+            }
         }
 
         private static string GetNodeName(int offset)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using ILspect.CommandLine.Commands;
 using Microsoft.Extensions.CommandLineUtils;
@@ -12,6 +13,14 @@ namespace ILspect.CommandLine
         internal static readonly string Version = Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
         static int Main(string[] args)
         {
+            if (args.Any(a => a == "--debug"))
+            {
+                args = args.Where(a => a != "--debug").ToArray();
+                Console.WriteLine($"Waiting for debugger to attach. Process ID: {System.Diagnostics.Process.GetCurrentProcess().Id}");
+                Console.WriteLine("Press ENTER to continue.");
+                Console.ReadLine();
+            }
+
             var app = new CommandLineApplication();
             app.Name = Program.Name;
             app.FullName = "ILspect Command-Line Interface";

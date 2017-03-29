@@ -1,14 +1,16 @@
+using Mono.Cecil.Cil;
+
 namespace ILspect.ControlFlow
 {
     public class ControlFlowLink
     {
         // TODO: Condition
-        public BranchCondition Condition { get; }
-        public string Destination { get; }
+        public Instruction Branch { get; }
+        public ControlFlowNode Destination { get; }
 
-        public ControlFlowLink(BranchCondition condition, string destination)
+        public ControlFlowLink(Instruction branch, ControlFlowNode destination)
         {
-            Condition = condition;
+            Branch = branch;
             Destination = destination;
         }
     }

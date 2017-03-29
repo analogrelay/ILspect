@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -29,6 +30,11 @@ namespace ILspect
             Debug.Assert(disasm != null);
 
             return disasm;
+        }
+
+        public object Disassemble(TypeDisassembly type)
+        {
+            throw new NotImplementedException();
         }
     }
 }
