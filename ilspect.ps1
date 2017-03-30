@@ -1,0 +1,1 @@
+& dotnet run --project "$PSScriptRoot\src\ILspect.CommandLine\ILspect.CommandLine.csproj" -- @args

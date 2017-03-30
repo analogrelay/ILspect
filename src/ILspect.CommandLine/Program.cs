@@ -22,7 +22,7 @@ namespace ILspect.CommandLine
             }
 
             var app = new CommandLineApplication();
-            app.Name = Program.Name;
+            app.Name = Name;
             app.FullName = "ILspect Command-Line Interface";
             app.HelpOption("-h|-?|--help");
             app.VersionOption("-v|--version", Program.Version);
@@ -30,6 +30,7 @@ namespace ILspect.CommandLine
             ListCommand.Register(app);
             GraphCommand.Register(app);
             DisassembleCommand.Register(app);
+            SyntaxCommand.Register(app);
 
             CommandHelpers.RegisterHelpCommand(app);
 

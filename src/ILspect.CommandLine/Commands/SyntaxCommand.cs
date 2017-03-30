@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using ILspect.Model;
+using ILspect.Syntax;
 using ILspect.Text;
 using Microsoft.Extensions.CommandLineUtils;
 using Mono.Cecil;
@@ -10,15 +11,15 @@ using static ILspect.CommandLine.CommandHelpers;
 
 namespace ILspect.CommandLine.Commands
 {
-    public static class DisassembleCommand
+    public static class SyntaxCommand
     {
-        private static readonly string Name = "disassemble";
+        private static readonly string Name = "syntax";
 
         internal static void Register(CommandLineApplication app)
         {
             app.Command(Name, cmd =>
             {
-                cmd.Description = "Disassembles a member";
+                cmd.Description = "Dumps syntax identified in a member";
 
                 var assemblyArgument = cmd.Argument("<ASSEMBLY>", "The path to a .NET assembly to list members from");
 
@@ -75,7 +76,10 @@ namespace ILspect.CommandLine.Commands
             {
                 var method = (MethodDefinition)member.Definition;
 
-                CILDisassembler.DisassembleMethod(method, console);
+                foreach (var statement in StatementBuilder.ParseStatements(method.Body.Instructions.First()))
+                {
+                    Console.WriteLine(statement);
+                }
             }
             else
             {
