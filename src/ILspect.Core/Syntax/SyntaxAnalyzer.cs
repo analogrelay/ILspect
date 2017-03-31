@@ -10,9 +10,33 @@ namespace ILspect.Syntax
 {
     public static class SyntaxAnalyzer
     {
-        private static readonly Dictionary<OpCode, Action<MethodDefinition, Stack<Expression>, SyntaxGraph.Node>> _opCodeHandlers = new Dictionary<OpCode, Action<MethodDefinition, Stack<Expression>, SyntaxGraph.Node>>()
+        private static readonly Dictionary<OpCode, Action<MethodDefinition, Stack<Expression>, Instruction, SyntaxGraph.Node>> _opCodeHandlers = new Dictionary<OpCode, Action<MethodDefinition, Stack<Expression>, Instruction, SyntaxGraph.Node>>()
         {
             { OpCodes.Nop, null }, // Nop does nothing!
+            { OpCodes.Ldarg_0, LdArg(0) },
+            { OpCodes.Ldarg_1, LdArg(1) },
+            { OpCodes.Ldarg_2, LdArg(2) },
+            { OpCodes.Ldarg_3, LdArg(3) },
+            { OpCodes.Stloc_0, StLoc(0) },
+            { OpCodes.Stloc_1, StLoc(1) },
+            { OpCodes.Stloc_2, StLoc(2) },
+            { OpCodes.Stloc_3, StLoc(3) },
+            { OpCodes.Ldloc_0, LdLoc(0) },
+            { OpCodes.Ldloc_1, LdLoc(1) },
+            { OpCodes.Ldloc_2, LdLoc(2) },
+            { OpCodes.Ldloc_3, LdLoc(3) },
+            { OpCodes.Ldc_I4_0, LdcI4(0) },
+            { OpCodes.Ldc_I4_1, LdcI4(1) },
+            { OpCodes.Ldc_I4_2, LdcI4(2) },
+            { OpCodes.Ldc_I4_3, LdcI4(3) },
+            { OpCodes.Ldc_I4_4, LdcI4(4) },
+            { OpCodes.Ldc_I4_5, LdcI4(5) },
+            { OpCodes.Ldc_I4_6, LdcI4(6) },
+            { OpCodes.Ldc_I4_7, LdcI4(7) },
+            { OpCodes.Ldc_I4_8, LdcI4(8) },
+            { OpCodes.Clt, BinExpr(BinaryOperator.LessThan) },
+            { OpCodes.Neg, UnExpr(UnaryOperator.Negate) },
+            { OpCodes.Ret, Return }
         };
 
         public static SyntaxGraph AnalyzeSyntax(ControlFlowGraph graph, MethodDefinition method)
@@ -36,7 +60,8 @@ namespace ILspect.Syntax
                     {
                         throw new NotSupportedException($"Unsupported opcode: {instruction.OpCode}");
                     }
-                    handler?.Invoke(method, evaluationStack, target);
+                    Console.WriteLine($"Processing: {instruction}...");
+                    handler?.Invoke(method, evaluationStack, instruction, target);
                 }
 
                 Debug.Assert(current.Edges.Count < 3, "Control flow graph nodes should never have more than 2 edges");
@@ -45,7 +70,7 @@ namespace ILspect.Syntax
                 foreach (var edge in current.Edges)
                 {
                     Expression expr = null;
-                    if (edge.Payload != null)
+                    if (edge.Payload != null && edge.Payload.OpCode != OpCodes.Br && edge.Payload.OpCode != OpCodes.Br_S)
                     {
                         // Get the expression for this path
                         expr = Pop(evaluationStack);
@@ -65,6 +90,89 @@ namespace ILspect.Syntax
             return new SyntaxGraph(nodes[graph.Root.Name], nodes);
         }
 
+        private static void Return(MethodDefinition method, Stack<Expression> evaluationStack, Instruction instruction, SyntaxGraph.Node node)
+        {
+            var value = PopOrDefault(evaluationStack);
+            node.Payload.Add(new ReturnStatement(value, instruction));
+        }
+
+        private static Action<MethodDefinition, Stack<Expression>, Instruction, SyntaxGraph.Node> LdLoc(int index)
+        {
+            return (method, evaluationStack, instruction, node) =>
+            {
+                var local = method.Body.Variables.FirstOrDefault(v => v.Index == index);
+                if (local == null)
+                {
+                    throw new FormatException($"Method does not have local at index: {index}");
+                }
+                evaluationStack.Push(new VariableReference(local, instruction));
+            };
+        }
+
+        private static Action<MethodDefinition, Stack<Expression>, Instruction, SyntaxGraph.Node> StLoc(int index)
+        {
+            return (method, evaluationStack, instruction, node) =>
+            {
+                var value = Pop(evaluationStack);
+
+                var local = method.Body.Variables.FirstOrDefault(v => v.Index == index);
+                if (local == null)
+                {
+                    throw new FormatException($"Method does not have local at index: {index}");
+                }
+                node.Payload.Add(new AssignmentStatement(local, value, instruction));
+            };
+        }
+
+        private static Action<MethodDefinition, Stack<Expression>, Instruction, SyntaxGraph.Node> UnExpr(UnaryOperator @operator)
+        {
+            return (method, evaluationStack, instruction, node) =>
+            {
+                var value = Pop(evaluationStack);
+                evaluationStack.Push(new UnaryExpression(value, @operator, instruction));
+            };
+        }
+
+        private static Action<MethodDefinition, Stack<Expression>, Instruction, SyntaxGraph.Node> BinExpr(BinaryOperator @operator)
+        {
+            return (method, evaluationStack, instruction, node) =>
+            {
+                var value2 = Pop(evaluationStack);
+                var value1 = Pop(evaluationStack);
+                evaluationStack.Push(new BinaryExpression(value1, value2, @operator, instruction));
+            };
+        }
+
+        private static Action<MethodDefinition, Stack<Expression>, Instruction, SyntaxGraph.Node> LdcI4(int value)
+        {
+            return (method, evaluationStack, instruction, node) =>
+            {
+                evaluationStack.Push(new Constant(value, MetadataType.Int32, instruction));
+            };
+        }
+
+        private static Action<MethodDefinition, Stack<Expression>, Instruction, SyntaxGraph.Node> LdArg(int index)
+        {
+            return (method, evaluationStack, instruction, node) =>
+            {
+                var parameter = method.Parameters.FirstOrDefault(p => p.Index == index);
+                if (parameter == null)
+                {
+                    throw new FormatException($"Method does not have argument at index: {index}");
+                }
+                evaluationStack.Push(new ParameterReference(parameter, instruction));
+            };
+        }
+
+        private static Expression PopOrDefault(Stack<Expression> stack)
+        {
+            if (stack.Count < 1)
+            {
+                return null;
+            }
+            return stack.Pop();
+        }
+
         private static Expression Pop(Stack<Expression> stack)
         {
             if (stack.Count < 1)
@@ -73,96 +181,5 @@ namespace ILspect.Syntax
             }
             return stack.Pop();
         }
-
-        // public static IEnumerable<Statement> ParseStatements(Instruction start)
-        // {
-        //     var stack = new Stack<SyntaxNode>();
-
-        //     var current = start;
-        //     while (current != null)
-        //     {
-        //         if (current.OpCode == OpCodes.Ldarg_0)
-        //         {
-        //             stack.Push(new ArgumentReference(0));
-        //         }
-        //         else if (current.OpCode == OpCodes.Neg)
-        //         {
-        //             if (stack.Count < 1)
-        //             {
-        //                 throw new FormatException("Evaluation Stack underflow!");
-        //             }
-        //             var value = stack.Pop();
-        //             stack.Push(new UnaryExpression(value, UnaryOperator.Negate));
-        //         }
-        //         else if (current.OpCode == OpCodes.Ldc_I4_0)
-        //         {
-        //             stack.Push(new Constant(0, MetadataType.Int32));
-        //         }
-        //         else if (current.OpCode == OpCodes.Clt)
-        //         {
-        //             if (stack.Count < 2)
-        //             {
-        //                 throw new FormatException("Evaluation Stack underflow!");
-        //             }
-        //             var value2 = stack.Pop();
-        //             var value1 = stack.Pop();
-
-        //             stack.Push(new BinaryExpression(value1, value2, BinaryOperator.LessThan));
-        //         }
-        //         else if (current.OpCode == OpCodes.Stloc_0)
-        //         {
-        //             yield return Stloc(stack, 0);
-        //         }
-        //         else if (current.OpCode == OpCodes.Stloc_1)
-        //         {
-        //             yield return Stloc(stack, 1);
-        //         }
-        //         else if (current.OpCode == OpCodes.Ldloc_0)
-        //         {
-        //             stack.Push(new LocalReference(0));
-        //         }
-        //         else if (current.OpCode == OpCodes.Ldloc_1)
-        //         {
-        //             stack.Push(new LocalReference(1));
-        //         }
-        //         else if (current.OpCode == OpCodes.Br_S || current.OpCode == OpCodes.Br)
-        //         {
-        //             yield return new BranchStatement("IL_" + ((Instruction)current.Operand).Offset.ToString("X4"));
-        //         }
-        //         else if (current.OpCode == OpCodes.Brfalse_S || current.OpCode == OpCodes.Brfalse)
-        //         {
-        //             if (stack.Count < 1)
-        //             {
-        //                 throw new FormatException("Evaluation Stack underflow!");
-        //             }
-        //             var value = stack.Pop();
-        //             yield return new BranchStatement(value, false, "IL_" + ((Instruction)current.Operand).Offset.ToString("X4"));
-        //         }
-        //         else if(current.OpCode == OpCodes.Ret)
-        //         {
-        //             if (stack.Count < 1)
-        //             {
-        //                 throw new FormatException("Evaluation Stack underflow!");
-        //             }
-        //             var value = stack.Pop();
-        //             yield return new ReturnStatement(value);
-        //         }
-        //         else if (current.OpCode != OpCodes.Nop)
-        //         {
-        //             yield break;
-        //         }
-        //         current = current.Next;
-        //     }
-        // }
-
-        // private static StoreLocalStatement Stloc(Stack<SyntaxNode> stack, int index)
-        // {
-        //     if (stack.Count < 1)
-        //     {
-        //         throw new FormatException("Evaluation Stack underflow!");
-        //     }
-        //     var value = stack.Pop();
-        //     return new StoreLocalStatement(index, value);
-        // }
     }
 }

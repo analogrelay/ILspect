@@ -75,7 +75,8 @@ namespace ILspect.CommandLine.Commands
             MethodDefinition method = null;
             if (member.MemberType == MemberType.Method)
             {
-                graph = ControlFlowGraph.Create((MethodDefinition)member.Definition);
+                method = (MethodDefinition)member.Definition;
+                graph = ControlFlowGraph.Create(method);
             }
             else
             {
