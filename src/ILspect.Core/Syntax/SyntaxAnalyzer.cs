@@ -35,6 +35,7 @@ namespace ILspect.Syntax
             { OpCodes.Ldc_I4_7, LdcI4(7) },
             { OpCodes.Ldc_I4_8, LdcI4(8) },
             { OpCodes.Clt, BinExpr(BinaryOperator.LessThan) },
+            { OpCodes.Add, BinExpr(BinaryOperator.Add) },
             { OpCodes.Neg, UnExpr(UnaryOperator.Negate) },
             { OpCodes.Ret, Return }
         };
@@ -53,6 +54,11 @@ namespace ILspect.Syntax
             {
                 var current = workQueue.Dequeue();
                 var target = nodes[current.Name];
+
+                if (target.Payload.Count > 0)
+                {
+                    continue;
+                }
 
                 foreach (var instruction in current.Payload)
                 {

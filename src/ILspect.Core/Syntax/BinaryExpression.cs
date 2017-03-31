@@ -8,7 +8,8 @@ namespace ILspect.Syntax
     {
         private static readonly Dictionary<BinaryOperator, string> _operators = new Dictionary<BinaryOperator, string>()
         {
-            {BinaryOperator.LessThan, "<" }
+            { BinaryOperator.Add, "+" },
+            { BinaryOperator.LessThan, "<" }
         };
 
         public Expression Value1 { get; }
@@ -24,7 +25,7 @@ namespace ILspect.Syntax
 
         public override string ToString()
         {
-            if(!_operators.TryGetValue(Operator, out var operatorStr))
+            if (!_operators.TryGetValue(Operator, out var operatorStr))
             {
                 throw new InvalidOperationException($"Unknown operator: {Operator}");
             }
