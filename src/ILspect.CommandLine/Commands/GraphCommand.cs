@@ -103,21 +103,21 @@ namespace ILspect.CommandLine.Commands
                 {
                     Console.WriteLine();
                     Console.WriteLine($" {node.Name} : {{");
-                    foreach (var instruction in node.Instructions)
+                    foreach (var instruction in node.Payload)
                     {
                         Console.WriteLine($"   {instruction}");
                     }
-                    if (node.Links.Count == 1)
+                    if (node.Edges.Count == 1)
                     {
-                        Console.WriteLine($" }} -> {node.Links.First().Destination.Name}");
+                        Console.WriteLine($" }} -> {node.Edges.First().Target}");
                     }
-                    else if (node.Links.Count == 0)
+                    else if (node.Edges.Count == 0)
                     {
                         Console.WriteLine(" } -> end;");
                     }
                     else
                     {
-                        var targets = string.Join(", ", node.Links.Select(FormatLink));
+                        var targets = string.Join(", ", node.Edges.Select(FormatLink));
                         Console.WriteLine($" }} {targets}");
                     }
                 }
@@ -126,15 +126,15 @@ namespace ILspect.CommandLine.Commands
             return 0;
         }
 
-        private static string FormatLink(ControlFlowLink link)
+        private static string FormatLink(ControlFlowGraph.Edge edge)
         {
-            if (link.Branch == null)
+            if (edge.Payload == null)
             {
-                return $"else -> {link.Destination.Name}";
+                return $"else -> {edge.Target}";
             }
             else
             {
-                return $"{link.Branch.OpCode} -> {link.Destination.Name}";
+                return $"{edge.Payload.OpCode} -> {edge.Target}";
             }
         }
 
@@ -151,28 +151,28 @@ namespace ILspect.CommandLine.Commands
 
                 foreach (var node in graph.AllNodes)
                 {
-                    var content = node.Instructions.Count > 0 ?
-                        node.Name + " {\\l" + string.Join("\\l", node.Instructions.Select(FormatInstruction)) + "\\l}\\l" :
+                    var content = node.Payload.Count > 0 ?
+                        node.Name + " {\\l" + string.Join("\\l", node.Payload.Select(FormatInstruction)) + "\\l}\\l" :
                         node.Name;
 
                     await writer.WriteLineAsync($"  {node.Name}[label=\"{content}\"]");
 
-                    if (node.Links.Count == 0)
+                    if (node.Edges.Count == 0)
                     {
                         await writer.WriteLineAsync($"  {node.Name} -> end;");
                     }
                     else
                     {
-                        foreach (var link in node.Links)
+                        foreach (var link in node.Edges)
                         {
-                            if (link.Branch != null)
+                            if (link.Payload != null)
                             {
-                                var label = link.Branch.OpCode.ToString();
-                                await writer.WriteLineAsync($"  {node.Name} -> {link.Destination.Name}[label=\"{label}\"];");
+                                var label = link.Payload.OpCode.ToString();
+                                await writer.WriteLineAsync($"  {node.Name} -> {link.Target}[label=\"{label}\"];");
                             }
                             else
                             {
-                                await writer.WriteLineAsync($"  {node.Name} -> {link.Destination.Name}[label=\"else\"];");
+                                await writer.WriteLineAsync($"  {node.Name} -> {link.Target}[label=\"else\"];");
                             }
                         }
                     }

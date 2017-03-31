@@ -8,11 +8,11 @@ namespace ILspect.ControlFlow
 {
     public class ControlFlowGraph
     {
-        public ControlFlowNode Root { get; }
+        public Node Root { get; }
 
-        public IList<ControlFlowNode> AllNodes { get; }
+        public IList<Node> AllNodes { get; }
 
-        public ControlFlowGraph(ControlFlowNode root, IEnumerable<ControlFlowNode> allNodes)
+        public ControlFlowGraph(Node root, IEnumerable<Node> allNodes)
         {
             Root = root;
             AllNodes = allNodes.ToList();
@@ -22,24 +22,24 @@ namespace ILspect.ControlFlow
         {
             var body = method.Body;
 
-            var nodes = new Dictionary<string, ControlFlowNode>();
+            var nodes = new Dictionary<string, Node>();
 
-            var workQueue = new Queue<ControlFlowNode>();
+            var workQueue = new Queue<Node>();
 
             // Create the root node and put it in the queue
             var instruction = method.Body.Instructions.FirstOrDefault();
-            var root = new ControlFlowNode(GetNodeName(0));
+            var root = new Node(GetNodeName(0));
             nodes[root.Name] = root;
             if (instruction != null)
             {
-                root.Instructions.Add(instruction);
+                root.Payload.Add(instruction);
             }
             workQueue.Enqueue(root);
 
             while (workQueue.Count > 0)
             {
                 var current = workQueue.Dequeue();
-                instruction = current.Instructions.LastOrDefault()?.Next;
+                instruction = current.Payload.LastOrDefault()?.Next;
                 while (instruction != null)
                 {
                     if (instruction.OpCode == OpCodes.Br || instruction.OpCode == OpCodes.Br_S)
@@ -48,15 +48,15 @@ namespace ILspect.ControlFlow
                         var nextName = GetNodeName(target.Offset);
                         if (!nodes.TryGetValue(nextName, out var nextNode))
                         {
-                            nextNode = new ControlFlowNode(nextName);
+                            nextNode = new Node(nextName);
                             if (instruction.Next != null)
                             {
-                                nextNode.Instructions.Add(instruction.Next);
+                                nextNode.Payload.Add(instruction.Next);
                             }
                             nodes[nextNode.Name] = nextNode;
                             workQueue.Enqueue(nextNode);
                         }
-                        current.Links.Add(new ControlFlowLink(instruction, nextNode));
+                        current.Edges.Add(new Edge(instruction, current.Name, nextNode.Name));
                         instruction = null;
                     }
                     else if (instruction.OpCode == OpCodes.Brfalse || instruction.OpCode == OpCodes.Brfalse_S ||
@@ -67,7 +67,7 @@ namespace ILspect.ControlFlow
                     }
                     else
                     {
-                        current.Instructions.Add(instruction);
+                        current.Payload.Add(instruction);
                         if (instruction.OpCode != OpCodes.Ret)
                         {
                             instruction = instruction.Next;
@@ -84,37 +84,47 @@ namespace ILspect.ControlFlow
             return new ControlFlowGraph(root, nodes.Values);
         }
 
-        private static void CreateBranch(Dictionary<string, ControlFlowNode> nodes, Queue<ControlFlowNode> workQueue, ControlFlowNode current, Instruction instruction)
+        private static void CreateBranch(Dictionary<string, Node> nodes, Queue<Node> workQueue, Node current, Instruction instruction)
         {
             var branchTarget = (Instruction)instruction.Operand;
 
             var branchName = GetNodeName(branchTarget.Offset);
             if (!nodes.TryGetValue(branchName, out var branchNode))
             {
-                branchNode = new ControlFlowNode(branchName);
-                branchNode.Instructions.Add(branchTarget);
+                branchNode = new Node(branchName);
+                branchNode.Payload.Add(branchTarget);
                 nodes[branchNode.Name] = branchNode;
                 workQueue.Enqueue(branchNode);
             }
-            current.Links.Add(new ControlFlowLink(instruction, branchNode));
+            current.Edges.Add(new Edge(instruction, current.Name, branchNode.Name));
 
             if (instruction.Next != null)
             {
                 var nextName = GetNodeName(instruction.Next.Offset);
                 if (!nodes.TryGetValue(nextName, out var nextNode))
                 {
-                    nextNode = new ControlFlowNode(nextName);
-                    nextNode.Instructions.Add(instruction.Next);
+                    nextNode = new Node(nextName);
+                    nextNode.Payload.Add(instruction.Next);
                     nodes[nextNode.Name] = nextNode;
                     workQueue.Enqueue(nextNode);
                 }
-                current.Links.Add(new ControlFlowLink(null, nextNode));
+                current.Edges.Add(new Edge(null, current.Name, nextNode.Name));
             }
         }
 
         private static string GetNodeName(int offset)
         {
             return $"IL_{offset:X4}";
+        }
+
+        public class Node : ILspect.Graph.Node<IList<Instruction>, Edge>
+        {
+            public Node(string name) : base(name, new List<Instruction>()) { }
+        }
+
+        public class Edge : ILspect.Graph.Edge<Instruction>
+        {
+            public Edge(Instruction payload, string source, string target) : base(payload, source, target) { }
         }
     }
 }
