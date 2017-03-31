@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using ILspect.ControlFlow;
 using ILspect.Model;
 using ILspect.Syntax;
 using ILspect.Text;
@@ -19,7 +20,7 @@ namespace ILspect.CommandLine.Commands
         {
             app.Command(Name, cmd =>
             {
-                cmd.Description = "Dumps syntax identified in a member";
+                cmd.Description = "Displays syntax analysis results for a member";
 
                 var assemblyArgument = cmd.Argument("<ASSEMBLY>", "The path to a .NET assembly to list members from");
 
@@ -55,8 +56,6 @@ namespace ILspect.CommandLine.Commands
 
         private static async Task<int> Execute(string assemblyPath, string typeName, string memberName)
         {
-            var console = new IndentingWriter(Console.Out);
-
             var disassembler = new DisassemblerSession();
 
             var disassembly = await disassembler.LoadAsync(assemblyPath);
@@ -72,22 +71,54 @@ namespace ILspect.CommandLine.Commands
                 return Error($"could not find member: {memberName} in type {typeName}");
             }
 
+            ControlFlowGraph graph = null;
+            MethodDefinition method = null;
             if (member.MemberType == MemberType.Method)
             {
-                var method = (MethodDefinition)member.Definition;
-
-                foreach (var statement in StatementBuilder.ParseStatements(method.Body.Instructions.First()))
-                {
-                    Console.WriteLine(statement);
-                }
+                graph = ControlFlowGraph.Create((MethodDefinition)member.Definition);
             }
             else
             {
                 return Error($"Member type not supported: {member.MemberType}");
             }
 
+            var syntax = SyntaxAnalyzer.AnalyzeSyntax(graph, method);
+
+            Console.WriteLine($"Syntax analysis for {typeName}.{memberName}");
+            foreach (var node in syntax.Nodes.Values)
+            {
+                Console.WriteLine();
+                Console.WriteLine($" {node.Name} : {{");
+                foreach (var instruction in node.Payload)
+                {
+                    Console.WriteLine($"   {instruction}");
+                }
+                if (node.Edges.Count == 1)
+                {
+                    Console.WriteLine($" }} -> {node.Edges.First().Target}");
+                }
+                else if (node.Edges.Count == 0)
+                {
+                    Console.WriteLine(" } -> end;");
+                }
+                else
+                {
+                    var targets = string.Join(", ", node.Edges.Select(FormatLink));
+                    Console.WriteLine($" }} {targets}");
+                }
+            }
+
             return 0;
         }
 
+        private static string FormatLink(SyntaxGraph.Edge edge)
+        {
+            if (edge.Payload == null)
+            {
+                return $"else -> {edge.Target}";
+            }
+
+            return $"{edge.Payload} -> {edge.Target}";
+        }
     }
 }

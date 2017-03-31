@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax
 {
-    public class UnaryExpression : SyntaxNode
+    public class UnaryExpression : Expression
     {
         private static readonly Dictionary<UnaryOperator, string> _operators = new Dictionary<UnaryOperator, string>()
         {
             {UnaryOperator.Negate, "-" }
         };
 
-        public SyntaxNode Value { get; }
+        public Expression Value { get; }
         public UnaryOperator Operator {get;}
 
-        public UnaryExpression(SyntaxNode value, UnaryOperator @operator)
+        public UnaryExpression(Expression value, UnaryOperator @operator, Instruction instruction) : base(instruction)
         {
             Value = value;
             Operator = @operator;

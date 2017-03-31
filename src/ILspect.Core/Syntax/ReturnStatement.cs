@@ -1,10 +1,12 @@
-﻿namespace ILspect.Syntax
+﻿using Mono.Cecil.Cil;
+
+namespace ILspect.Syntax
 {
     public class ReturnStatement : Statement
     {
-        public SyntaxNode Value { get; }
+        public Expression Value { get; }
 
-        public ReturnStatement(SyntaxNode value)
+        public ReturnStatement(Expression value, Instruction instruction) : base(instruction)
         {
             Value = value;
         }

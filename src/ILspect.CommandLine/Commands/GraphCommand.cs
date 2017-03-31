@@ -99,7 +99,7 @@ namespace ILspect.CommandLine.Commands
             else
             {
                 Console.WriteLine($"Control flow graph for {typeName}.{memberName}");
-                foreach (var node in graph.AllNodes)
+                foreach (var node in graph.Nodes.Values)
                 {
                     Console.WriteLine();
                     Console.WriteLine($" {node.Name} : {{");
@@ -149,7 +149,7 @@ namespace ILspect.CommandLine.Commands
                 await writer.WriteLineAsync("  node[fontname=\"Courier\",shape=\"box\"];");
                 await writer.WriteLineAsync("  edge[fontname=\"Courier\"];");
 
-                foreach (var node in graph.AllNodes)
+                foreach (var node in graph.Nodes.Values)
                 {
                     var content = node.Payload.Count > 0 ?
                         node.Name + " {\\l" + string.Join("\\l", node.Payload.Select(FormatInstruction)) + "\\l}\\l" :

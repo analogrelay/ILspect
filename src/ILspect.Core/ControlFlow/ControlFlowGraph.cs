@@ -10,12 +10,12 @@ namespace ILspect.ControlFlow
     {
         public Node Root { get; }
 
-        public IList<Node> AllNodes { get; }
+        public IDictionary<string, Node> Nodes { get; }
 
-        public ControlFlowGraph(Node root, IEnumerable<Node> allNodes)
+        public ControlFlowGraph(Node root, IDictionary<string, Node> nodes)
         {
             Root = root;
-            AllNodes = allNodes.ToList();
+            Nodes = nodes;
         }
 
         public static ControlFlowGraph Create(MethodDefinition method)
@@ -81,7 +81,7 @@ namespace ILspect.ControlFlow
             }
 
 
-            return new ControlFlowGraph(root, nodes.Values);
+            return new ControlFlowGraph(root, nodes);
         }
 
         private static void CreateBranch(Dictionary<string, Node> nodes, Queue<Node> workQueue, Node current, Instruction instruction)
@@ -117,9 +117,9 @@ namespace ILspect.ControlFlow
             return $"IL_{offset:X4}";
         }
 
-        public class Node : ILspect.Graph.Node<IList<Instruction>, Edge>
+        public class Node : ILspect.Graph.Node<Instruction, Edge>
         {
-            public Node(string name) : base(name, new List<Instruction>()) { }
+            public Node(string name) : base(name) { }
         }
 
         public class Edge : ILspect.Graph.Edge<Instruction>
