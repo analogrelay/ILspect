@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Mono.Cecil;
 
 namespace ILspect
@@ -53,9 +54,27 @@ namespace ILspect
         {
             if (name.FullName.Equals("System.Runtime, Version=4.0.20.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"))
             {
-                return @"C:\Users\anurse\.nuget\packages\system.runtime\4.3.0\ref\netstandard1.3\System.Runtime.dll";
+                return Path.Combine(GetNuGetPackageDir(), "system.runtime", "4.3.0", "ref", "netstandard1.3", "System.Runtime.dll");
             }
-            return null;
+
+            throw new NotSupportedException($"TODO: Find: {name.FullName}");
+        }
+
+        private string GetNuGetPackageDir()
+        {
+            var home = Environment.GetEnvironmentVariable("USERPROFILE");
+
+            if (string.IsNullOrEmpty(home))
+            {
+                home = Environment.GetEnvironmentVariable("HOME");
+            }
+
+            if (string.IsNullOrEmpty(home))
+            {
+                throw new NotImplementedException("TODO: Find NuGet Packages!");
+            }
+
+            return Path.Combine(home, ".nuget", "packages");
         }
     }
 }
