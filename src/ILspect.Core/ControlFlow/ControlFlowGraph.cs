@@ -29,6 +29,24 @@ namespace ILspect.ControlFlow
             }
             workQueue.Enqueue(root);
 
+            // Preload all branch targets into the graph
+            // This is probably not the idea way to do this, but it should work
+            foreach (var instr in method.Body.Instructions)
+            {
+                if (instr.OpCode.FlowControl == FlowControl.Branch || instr.OpCode.FlowControl == FlowControl.Cond_Branch)
+                {
+                    var target = (Instruction)instr.Operand;
+                    var name = GetNodeName(target.Offset);
+                    if (!nodes.TryGetValue(name, out _))
+                    {
+                        var node = new Node(name);
+                        nodes[name] = node;
+                        node.Contents.Add(target);
+                        workQueue.Enqueue(node);
+                    }
+                }
+            }
+
             while (workQueue.Count > 0)
             {
                 var current = workQueue.Dequeue();
@@ -42,7 +60,7 @@ namespace ILspect.ControlFlow
                         current.OutboundEdges.Add(new Edge(null, current.Name, nextName));
                         instruction = null;
                     }
-                    else if (instruction.OpCode == OpCodes.Br || instruction.OpCode == OpCodes.Br_S)
+                    else if (instruction.OpCode.FlowControl == FlowControl.Branch)
                     {
                         var target = (Instruction)instruction.Operand;
                         var nextName = GetNodeName(target.Offset);
@@ -56,8 +74,7 @@ namespace ILspect.ControlFlow
                         current.OutboundEdges.Add(new Edge(instruction, current.Name, nextNode.Name));
                         instruction = null;
                     }
-                    else if (instruction.OpCode == OpCodes.Brfalse || instruction.OpCode == OpCodes.Brfalse_S ||
-                             instruction.OpCode == OpCodes.Brtrue || instruction.OpCode == OpCodes.Brtrue_S)
+                    else if (instruction.OpCode.FlowControl == FlowControl.Cond_Branch)
                     {
                         CreateBranch(nodes, workQueue, current, instruction);
                         instruction = null;
