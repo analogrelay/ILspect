@@ -27,6 +27,8 @@ namespace ILspect.CommandLine
             app.HelpOption("-h|-?|--help");
             app.VersionOption("-v|--version", Program.Version);
 
+            while (true) { }
+
             ListCommand.Register(app);
             GraphCommand.Register(app);
             DisassembleCommand.Register(app);

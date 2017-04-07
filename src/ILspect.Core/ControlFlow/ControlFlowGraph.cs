@@ -56,7 +56,7 @@ namespace ILspect.ControlFlow
                             nodes[nextNode.Name] = nextNode;
                             workQueue.Enqueue(nextNode);
                         }
-                        current.Edges.Add(new Edge(instruction, current.Name, nextNode.Name));
+                        current.OutboundEdges.Add(new Edge(instruction, current.Name, nextNode.Name));
                         instruction = null;
                     }
                     else if (instruction.OpCode == OpCodes.Brfalse || instruction.OpCode == OpCodes.Brfalse_S ||
@@ -96,7 +96,7 @@ namespace ILspect.ControlFlow
                 nodes[branchNode.Name] = branchNode;
                 workQueue.Enqueue(branchNode);
             }
-            current.Edges.Add(new Edge(instruction, current.Name, branchNode.Name));
+            current.OutboundEdges.Add(new Edge(instruction, current.Name, branchNode.Name));
 
             if (instruction.Next != null)
             {
@@ -108,7 +108,7 @@ namespace ILspect.ControlFlow
                     nodes[nextNode.Name] = nextNode;
                     workQueue.Enqueue(nextNode);
                 }
-                current.Edges.Add(new Edge(null, current.Name, nextNode.Name));
+                current.OutboundEdges.Add(new Edge(null, current.Name, nextNode.Name));
             }
         }
 

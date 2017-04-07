@@ -70,10 +70,10 @@ namespace ILspect.Syntax
                     handler?.Invoke(method, evaluationStack, instruction, target);
                 }
 
-                Debug.Assert(current.Edges.Count < 3, "Control flow graph nodes should never have more than 2 edges");
-                Debug.Assert(current.Edges.Where(e => e.Payload != null).Count() < 2, "Control flow graph nodes should never have more than one payload-bearing edge");
+                Debug.Assert(current.OutboundEdges.Count < 3, "Control flow graph nodes should never have more than 2 edges");
+                Debug.Assert(current.OutboundEdges.Where(e => e.Payload != null).Count() < 2, "Control flow graph nodes should never have more than one payload-bearing edge");
 
-                foreach (var edge in current.Edges)
+                foreach (var edge in current.OutboundEdges)
                 {
                     Expression expr = null;
                     if (edge.Payload != null && edge.Payload.OpCode != OpCodes.Br && edge.Payload.OpCode != OpCodes.Br_S)
@@ -81,7 +81,7 @@ namespace ILspect.Syntax
                         // Get the expression for this path
                         expr = Pop(evaluationStack);
                     }
-                    target.Edges.Add(new SyntaxGraph.Edge(expr, target.Name, edge.Target));
+                    target.OutboundEdges.Add(new SyntaxGraph.Edge(expr, target.Name, edge.Target));
 
                     var next = graph.Nodes[edge.Target];
                     workQueue.Enqueue(next);
