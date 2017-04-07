@@ -83,28 +83,28 @@ namespace ILspect.CommandLine.Commands
                 return Error($"Member type not supported: {member.MemberType}");
             }
 
-            var syntax = SyntaxAnalyzer.AnalyzeSyntax(graph, method);
+            var syntax = SyntaxGraph.Create(graph, method);
 
             Console.WriteLine($"Syntax analysis for {typeName}.{memberName}");
             foreach (var node in syntax.Nodes.Values)
             {
                 Console.WriteLine();
                 Console.WriteLine($" {node.Name} : {{");
-                foreach (var instruction in node.Payload)
+                foreach (var instruction in node.Contents)
                 {
                     Console.WriteLine($"   {instruction}");
                 }
-                if (node.Edges.Count == 1)
+                if (node.OutboundEdges.Count == 1)
                 {
-                    Console.WriteLine($" }} -> {node.Edges.First().Target}");
+                    Console.WriteLine($" }} -> {node.OutboundEdges.First().Target}");
                 }
-                else if (node.Edges.Count == 0)
+                else if (node.OutboundEdges.Count == 0)
                 {
                     Console.WriteLine(" } -> end;");
                 }
                 else
                 {
-                    var targets = string.Join(", ", node.Edges.Select(FormatLink));
+                    var targets = string.Join(", ", node.OutboundEdges.Select(FormatLink));
                     Console.WriteLine($" }} {targets}");
                 }
             }
@@ -114,12 +114,12 @@ namespace ILspect.CommandLine.Commands
 
         private static string FormatLink(SyntaxGraph.Edge edge)
         {
-            if (edge.Payload == null)
+            if (edge.Value == null)
             {
                 return $"else -> {edge.Target}";
             }
 
-            return $"{edge.Payload} -> {edge.Target}";
+            return $"{edge.Value} -> {edge.Target}";
         }
     }
 }

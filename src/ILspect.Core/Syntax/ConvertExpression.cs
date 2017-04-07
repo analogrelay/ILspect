@@ -3,12 +3,12 @@ using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax
 {
-    public class Constant : Expression
+    public class ConvertExpression : Expression
     {
-        public object Value { get; }
+        public Expression Value { get; }
         public MetadataType Type { get; }
 
-        public Constant(int value, MetadataType type, Instruction instruction) : base(instruction)
+        public ConvertExpression(Expression value, MetadataType type, Instruction instruction) : base(instruction)
         {
             Value = value;
             Type = type;
@@ -16,7 +16,7 @@ namespace ILspect.Syntax
 
         public override string ToString()
         {
-            return Value.ToString();
+            return $"({Type}){Value}";
         }
     }
 }

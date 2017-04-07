@@ -2,11 +2,11 @@
 
 namespace ILspect.Syntax
 {
-    public class VariableReference : Expression
+    public class VariableExpression : Expression
     {
         public VariableDefinition Variable { get; }
 
-        public VariableReference(VariableDefinition variable, Instruction instruction) : base(instruction)
+        public VariableExpression(VariableDefinition variable, Instruction instruction) : base(instruction)
         {
             Variable = variable;
         }

@@ -1,0 +1,19 @@
+﻿using Mono.Cecil.Cil;
+
+namespace ILspect.Syntax
+{
+    internal class ArrayLengthExpression : Expression
+    {
+        public Expression Array { get; }
+
+        public ArrayLengthExpression(Expression array, Instruction instruction) : base(instruction)
+        {
+            Array = array;
+        }
+
+        public override string ToString()
+        {
+            return $"{Array}.Length";
+        }
+    }
+}

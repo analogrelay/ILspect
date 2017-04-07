@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
@@ -6,16 +5,10 @@ using Mono.Cecil.Cil;
 
 namespace ILspect.ControlFlow
 {
-    public class ControlFlowGraph
+    public class ControlFlowGraph : Graph<Instruction, Instruction>
     {
-        public Node Root { get; }
-
-        public IDictionary<string, Node> Nodes { get; }
-
-        public ControlFlowGraph(Node root, IDictionary<string, Node> nodes)
+        public ControlFlowGraph(Node root, IDictionary<string, Node> nodes) : base(root, nodes)
         {
-            Root = root;
-            Nodes = nodes;
         }
 
         public static ControlFlowGraph Create(MethodDefinition method)
@@ -32,27 +25,31 @@ namespace ILspect.ControlFlow
             nodes[root.Name] = root;
             if (instruction != null)
             {
-                root.Payload.Add(instruction);
+                root.Contents.Add(instruction);
             }
             workQueue.Enqueue(root);
 
             while (workQueue.Count > 0)
             {
                 var current = workQueue.Dequeue();
-                instruction = current.Payload.LastOrDefault()?.Next;
+                instruction = current.Contents.LastOrDefault()?.Next;
                 while (instruction != null)
                 {
-                    if (instruction.OpCode == OpCodes.Br || instruction.OpCode == OpCodes.Br_S)
+                    // If there is a node for this instruction already, flow to that and stop
+                    if (nodes.TryGetValue(GetNodeName(instruction.Offset), out var node))
+                    {
+                        var nextName = node.Name;
+                        current.OutboundEdges.Add(new Edge(null, current.Name, nextName));
+                        instruction = null;
+                    }
+                    else if (instruction.OpCode == OpCodes.Br || instruction.OpCode == OpCodes.Br_S)
                     {
                         var target = (Instruction)instruction.Operand;
                         var nextName = GetNodeName(target.Offset);
                         if (!nodes.TryGetValue(nextName, out var nextNode))
                         {
                             nextNode = new Node(nextName);
-                            if (instruction.Next != null)
-                            {
-                                nextNode.Payload.Add(instruction.Next);
-                            }
+                            nextNode.Contents.Add(target);
                             nodes[nextNode.Name] = nextNode;
                             workQueue.Enqueue(nextNode);
                         }
@@ -67,7 +64,7 @@ namespace ILspect.ControlFlow
                     }
                     else
                     {
-                        current.Payload.Add(instruction);
+                        current.Contents.Add(instruction);
                         if (instruction.OpCode != OpCodes.Ret)
                         {
                             instruction = instruction.Next;
@@ -80,6 +77,7 @@ namespace ILspect.ControlFlow
                 }
             }
 
+            Weave(nodes);
 
             return new ControlFlowGraph(root, nodes);
         }
@@ -92,7 +90,7 @@ namespace ILspect.ControlFlow
             if (!nodes.TryGetValue(branchName, out var branchNode))
             {
                 branchNode = new Node(branchName);
-                branchNode.Payload.Add(branchTarget);
+                branchNode.Contents.Add(branchTarget);
                 nodes[branchNode.Name] = branchNode;
                 workQueue.Enqueue(branchNode);
             }
@@ -104,7 +102,7 @@ namespace ILspect.ControlFlow
                 if (!nodes.TryGetValue(nextName, out var nextNode))
                 {
                     nextNode = new Node(nextName);
-                    nextNode.Payload.Add(instruction.Next);
+                    nextNode.Contents.Add(instruction.Next);
                     nodes[nextNode.Name] = nextNode;
                     workQueue.Enqueue(nextNode);
                 }
@@ -115,16 +113,6 @@ namespace ILspect.ControlFlow
         private static string GetNodeName(int offset)
         {
             return $"IL_{offset:X4}";
-        }
-
-        public class Node : ILspect.Graph.Node<Instruction, Edge>
-        {
-            public Node(string name) : base(name) { }
-        }
-
-        public class Edge : ILspect.Graph.Edge<Instruction>
-        {
-            public Edge(Instruction payload, string source, string target) : base(payload, source, target) { }
         }
     }
 }

@@ -3,11 +3,11 @@ using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax
 {
-    public class ParameterReference : Expression
+    public class ParameterExpression : Expression
     {
         public ParameterDefinition Parameter { get; }
 
-        public ParameterReference(ParameterDefinition parameter, Instruction instruction) : base(instruction)
+        public ParameterExpression(ParameterDefinition parameter, Instruction instruction) : base(instruction)
         {
             Parameter = parameter;
         }
