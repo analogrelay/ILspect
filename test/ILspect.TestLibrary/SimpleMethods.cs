@@ -8,6 +8,7 @@ namespace ILspect.TestLibrary
         {
             Console.WriteLine("Add: " + (x + y));
             Console.WriteLine("And: " + (x & y));
+            Console.WriteLine("Div: " + (x / y));
 
             return 0;
         }
@@ -123,6 +124,18 @@ namespace ILspect.TestLibrary
             {
                 i++;
             } while (i < 10);
+        }
+
+        public static void TryFinally()
+        {
+            try
+            {
+                Console.WriteLine("Try");
+            }
+            finally
+            {
+                Console.WriteLine("Finally");
+            }
         }
     }
 }

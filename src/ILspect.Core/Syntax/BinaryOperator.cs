@@ -7,6 +7,7 @@ namespace ILspect.Syntax
     {
         Add,
         And,
+        Divide,
         LessThan,
         Equal,
         NotEqual,
@@ -21,6 +22,7 @@ namespace ILspect.Syntax
         {
             { BinaryOperator.Add, "+" },
             { BinaryOperator.And, "&" },
+            { BinaryOperator.Divide, "/" },
             { BinaryOperator.LessThan, "<" },
             { BinaryOperator.Equal, "==" },
             { BinaryOperator.NotEqual, "!=" },

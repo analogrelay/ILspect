@@ -35,14 +35,30 @@ namespace ILspect.ControlFlow
             {
                 if (instr.OpCode.FlowControl == FlowControl.Branch || instr.OpCode.FlowControl == FlowControl.Cond_Branch)
                 {
-                    var target = (Instruction)instr.Operand;
-                    var name = GetNodeName(target.Offset);
-                    if (!nodes.TryGetValue(name, out _))
+                    if (instr.Operand != null)
                     {
-                        var node = new Node(name);
-                        nodes[name] = node;
-                        node.Contents.Add(target);
-                        workQueue.Enqueue(node);
+                        var target = (Instruction)instr.Operand;
+
+                        var name = GetNodeName(target.Offset);
+                        if (!nodes.TryGetValue(name, out _))
+                        {
+                            var node = new Node(name);
+                            nodes[name] = node;
+                            node.Contents.Add(target);
+                            workQueue.Enqueue(node);
+                        }
+                    }
+
+                    if (instr.Next != null)
+                    {
+                        var name = GetNodeName(instr.Next.Offset);
+                        if (!nodes.TryGetValue(name, out _))
+                        {
+                            var node = new Node(name);
+                            nodes[name] = node;
+                            node.Contents.Add(instr.Next);
+                            workQueue.Enqueue(node);
+                        }
                     }
                 }
             }
@@ -64,13 +80,7 @@ namespace ILspect.ControlFlow
                     {
                         var target = (Instruction)instruction.Operand;
                         var nextName = GetNodeName(target.Offset);
-                        if (!nodes.TryGetValue(nextName, out var nextNode))
-                        {
-                            nextNode = new Node(nextName);
-                            nextNode.Contents.Add(target);
-                            nodes[nextNode.Name] = nextNode;
-                            workQueue.Enqueue(nextNode);
-                        }
+                        var nextNode = nodes[nextName];
                         current.OutboundEdges.Add(new Edge(instruction, current.Name, nextNode.Name));
                         instruction = null;
                     }
