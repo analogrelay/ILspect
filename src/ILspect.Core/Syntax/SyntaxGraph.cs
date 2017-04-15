@@ -66,6 +66,8 @@ namespace ILspect.Syntax
             { OpCodes.Ldlen, Ldlen },
             { OpCodes.Clt, BinExpr(BinaryOperator.LessThan) },
             { OpCodes.Add, BinExpr(BinaryOperator.Add) },
+            { OpCodes.Add_Ovf, Checked(BinExpr(BinaryOperator.Add)) },
+            { OpCodes.Add_Ovf_Un, Checked(BinExpr(BinaryOperator.Add)) },
             { OpCodes.Neg, UnExpr(UnaryOperator.Negate) },
             { OpCodes.Callvirt, Call(CallType.Virtual) },
             { OpCodes.Call, Call(CallType.Normal) },
@@ -238,6 +240,16 @@ namespace ILspect.Syntax
                 var value2 = Pop(evaluationStack);
                 var value1 = Pop(evaluationStack);
                 evaluationStack.Push(new BinaryExpression(value1, value2, @operator, instruction));
+            };
+        }
+
+        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> Checked(Action<MethodDefinition, Stack<Expression>, Instruction, Node> subExpr)
+        {
+            return (method, evaluationStack, instruction, node) =>
+            {
+                subExpr(method, evaluationStack, instruction, node);
+                var expr = Pop(evaluationStack);
+                evaluationStack.Push(new CheckedExpression(expr, instruction));
             };
         }
 
