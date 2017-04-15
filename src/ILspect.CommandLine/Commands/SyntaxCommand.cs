@@ -85,14 +85,28 @@ namespace ILspect.CommandLine.Commands
 
             var syntax = SyntaxGraph.Create(graph, method);
 
-            Console.WriteLine($"Syntax analysis for {typeName}.{memberName}");
+            var arguments = string.Join(", ", method.Parameters.Select(p => $"{p.ParameterType.FullName} {p.Name}"));
+
+            Console.WriteLine($"Syntax analysis for {typeName}.{memberName}({arguments})");
+
+            if (method.Body.Variables.Any())
+            {
+                Console.WriteLine();
+                Console.WriteLine("Locals: ");
+
+                foreach (var local in method.Body.Variables)
+                {
+                    Console.WriteLine($"    {local.VariableType.FullName} _{local.Index}");
+                }
+            }
+
             foreach (var node in syntax.Nodes.Values)
             {
                 Console.WriteLine();
                 Console.WriteLine($" {node.Name} : {{");
                 foreach (var instruction in node.Contents)
                 {
-                    Console.WriteLine($"   {instruction}");
+                    Console.WriteLine($"    {instruction}");
                 }
                 if (node.OutboundEdges.Count == 1)
                 {

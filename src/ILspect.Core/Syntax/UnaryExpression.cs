@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Mono.Cecil.Cil;
+﻿using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax
 {
     public class UnaryExpression : Expression
     {
-        private static readonly Dictionary<UnaryOperator, string> _operators = new Dictionary<UnaryOperator, string>()
-        {
-            {UnaryOperator.Negate, "-" }
-        };
-
         public Expression Value { get; }
         public UnaryOperator Operator {get;}
 
@@ -22,11 +15,7 @@ namespace ILspect.Syntax
 
         public override string ToString()
         {
-            if(!_operators.TryGetValue(Operator, out var operatorStr))
-            {
-                throw new InvalidOperationException($"Unknown operator: {Operator}");
-            }
-            return $"{operatorStr}{Value}";
+            return $"{Operator.GetSymbol()}{Value}";
         }
     }
 }

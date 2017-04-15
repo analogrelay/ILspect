@@ -16,6 +16,13 @@ namespace ILspect.Syntax
 
         private static readonly Dictionary<OpCode, Action<MethodDefinition, Stack<Expression>, Instruction, Node>> _opCodeHandlers = new Dictionary<OpCode, Action<MethodDefinition, Stack<Expression>, Instruction, Node>>()
         {
+            { OpCodes.Add, BinExpr(BinaryOperator.Add) },
+            { OpCodes.Add_Ovf, Checked(BinExpr(BinaryOperator.Add)) },
+            { OpCodes.Add_Ovf_Un, Checked(BinExpr(BinaryOperator.Add)) },
+            { OpCodes.And, BinExpr(BinaryOperator.And) },
+            { OpCodes.Box, Box },
+            { OpCodes.Ceq, BinExpr(BinaryOperator.Equal) },
+
             { OpCodes.Nop, null }, // Nop does nothing!
             { OpCodes.Ldarg_0, LdArg(0) },
             { OpCodes.Ldarg_1, LdArg(1) },
@@ -25,6 +32,8 @@ namespace ILspect.Syntax
             { OpCodes.Stloc_1, StLoc(1) },
             { OpCodes.Stloc_2, StLoc(2) },
             { OpCodes.Stloc_3, StLoc(3) },
+            { OpCodes.Ldloca, Chain(UnExpr(UnaryOperator.AddressOf), LdLoc()) },
+            { OpCodes.Ldloca_S, Chain(UnExpr(UnaryOperator.AddressOf), LdLoc()) },
             { OpCodes.Ldloc_0, LdLoc(0) },
             { OpCodes.Ldloc_1, LdLoc(1) },
             { OpCodes.Ldloc_2, LdLoc(2) },
@@ -65,9 +74,6 @@ namespace ILspect.Syntax
             { OpCodes.Conv_U8, Conv(MetadataType.UInt64) },
             { OpCodes.Ldlen, Ldlen },
             { OpCodes.Clt, BinExpr(BinaryOperator.LessThan) },
-            { OpCodes.Add, BinExpr(BinaryOperator.Add) },
-            { OpCodes.Add_Ovf, Checked(BinExpr(BinaryOperator.Add)) },
-            { OpCodes.Add_Ovf_Un, Checked(BinExpr(BinaryOperator.Add)) },
             { OpCodes.Neg, UnExpr(UnaryOperator.Negate) },
             { OpCodes.Callvirt, Call(CallType.Virtual) },
             { OpCodes.Call, Call(CallType.Normal) },
@@ -189,9 +195,9 @@ namespace ILspect.Syntax
                 }
 
                 // Pop the object reference
-                var target = targetMethod.Resolve().IsStatic ?
-                        null :
-                        Pop(evaluationStack);
+                var target = targetMethod.HasThis ?
+                        Pop(evaluationStack) :
+                        null;
 
                 // Create the call expression
                 var call = new CallExpression(targetMethod, callType, target, arguments, instruction);
@@ -209,6 +215,13 @@ namespace ILspect.Syntax
                 }
             };
         }
+
+        private static void Box(MethodDefinition method, Stack<Expression> evaluationStack, Instruction instruction, Node node)
+        {
+            var value = Pop(evaluationStack);
+            evaluationStack.Push(new BoxingExpression(value, instruction));
+        }
+
         private static void Return(MethodDefinition method, Stack<Expression> evaluationStack, Instruction instruction, Node node)
         {
             var value = PopOrDefault(evaluationStack);
@@ -240,6 +253,15 @@ namespace ILspect.Syntax
                 var value2 = Pop(evaluationStack);
                 var value1 = Pop(evaluationStack);
                 evaluationStack.Push(new BinaryExpression(value1, value2, @operator, instruction));
+            };
+        }
+
+        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> Chain(Action<MethodDefinition, Stack<Expression>, Instruction, Node> outer, Action<MethodDefinition, Stack<Expression>, Instruction, Node> inner)
+        {
+            return (method, evaluationStack, instruction, node) =>
+            {
+                inner(method, evaluationStack, instruction, node);
+                outer(method, evaluationStack, instruction, node);
             };
         }
 
@@ -292,7 +314,7 @@ namespace ILspect.Syntax
             };
         }
 
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> LdLoc(int index)
+        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> LdLocA(int index)
         {
             return (method, evaluationStack, instruction, node) =>
             {
@@ -300,6 +322,28 @@ namespace ILspect.Syntax
                 if (local == null)
                 {
                     throw new FormatException($"Method does not have local at index: {index}");
+                }
+                evaluationStack.Push(new VariableExpression(local, instruction));
+            };
+        }
+
+        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> LdLoc(int? index = null)
+        {
+            return (method, evaluationStack, instruction, node) =>
+            {
+                VariableDefinition local;
+                if (index == null)
+                {
+                    local = ((VariableReference)instruction.Operand).Resolve();
+                }
+                else
+                {
+                    local = method.Body.Variables.FirstOrDefault(v => v.Index == index);
+
+                    if (local == null)
+                    {
+                        throw new FormatException($"Method does not have local at index: {index}");
+                    }
                 }
                 evaluationStack.Push(new VariableExpression(local, instruction));
             };

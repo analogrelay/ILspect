@@ -6,6 +6,7 @@ namespace ILspect.Syntax
     public enum BinaryOperator
     {
         Add,
+        And,
         LessThan,
         Equal,
         NotEqual,
@@ -19,6 +20,7 @@ namespace ILspect.Syntax
         private static readonly Dictionary<BinaryOperator, string> _symbols = new Dictionary<BinaryOperator, string>()
         {
             { BinaryOperator.Add, "+" },
+            { BinaryOperator.And, "&" },
             { BinaryOperator.LessThan, "<" },
             { BinaryOperator.Equal, "==" },
             { BinaryOperator.NotEqual, "!=" },

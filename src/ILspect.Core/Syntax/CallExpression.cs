@@ -23,7 +23,7 @@ namespace ILspect.Syntax
         public override string ToString()
         {
             var args = string.Join(", ", Arguments.Select(a => a.ToString()));
-            var call = $"{Method.Name}({args}) // Call Type: {Type}";
+            var call = $"{Method.Name}({args})";
 
             if (Target == null)
             {

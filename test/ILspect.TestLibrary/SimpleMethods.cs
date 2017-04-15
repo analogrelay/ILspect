@@ -1,7 +1,17 @@
-﻿namespace ILspect.TestLibrary
+﻿using System;
+
+namespace ILspect.TestLibrary
 {
     public static class SimpleMethods
     {
+        public static int BinExprs(int x, int y)
+        {
+            Console.WriteLine("Add: " + (x + y));
+            Console.WriteLine("And: " + (x & y));
+
+            return 0;
+        }
+
         public static int Add(int x, int y)
         {
             return x + y;
@@ -25,6 +35,11 @@
             {
                 return x;
             }
+        }
+
+        public static void Compare(int x, int y)
+        {
+            Console.WriteLine("Eq: " + (x == y));
         }
 
         public static int Call(string item)
@@ -54,6 +69,18 @@
             {
                 length += items[i].Length;
             }
+        }
+
+#if NET46
+        public static void ArgList(__arglist)
+        {
+            var args = new ArgIterator(__arglist);
+        }
+#endif
+
+        public static void ParamArray(params string[] args)
+        {
+            Console.WriteLine(args);
         }
 
         public static void WhileLoop()
