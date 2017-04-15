@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Mono.Cecil.Cil;
+﻿using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax
 {
     internal class BinaryExpression : Expression
     {
-        private static readonly Dictionary<BinaryOperator, string> _operators = new Dictionary<BinaryOperator, string>()
-        {
-            { BinaryOperator.Add, "+" },
-            { BinaryOperator.LessThan, "<" }
-        };
-
         public Expression Value1 { get; }
         public Expression Value2 { get; }
         public BinaryOperator Operator { get; }
@@ -25,11 +17,7 @@ namespace ILspect.Syntax
 
         public override string ToString()
         {
-            if (!_operators.TryGetValue(Operator, out var operatorStr))
-            {
-                throw new InvalidOperationException($"Unknown operator: {Operator}");
-            }
-            return $"{Value1} {operatorStr} {Value2}";
+            return $"{Value1} {Operator.GetSymbol()} {Value2}";
         }
     }
 }

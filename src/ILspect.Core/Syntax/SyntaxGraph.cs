@@ -74,25 +74,18 @@ namespace ILspect.Syntax
 
         public static SyntaxGraph Create(ControlFlowGraph graph, MethodDefinition method)
         {
-            // Set up the nodes of the syntax graph (which will be the same as the input graph, just a different type)
-            var nodes = graph.Nodes
-                .ToDictionary(n => n.Key, n => new SyntaxGraph.Node(n.Key));
-
             var evaluationStack = new Stack<Expression>();
-            var workQueue = new Queue<ControlFlowGraph.Node>();
-            workQueue.Enqueue(graph.Root);
 
-            while (workQueue.Count > 0)
+            string RenderStack() => string.Join(", ", evaluationStack.Select(s => s.ToString()));
+
+            var newNodes = new Dictionary<string, Node>();
+
+            foreach (var node in graph.Nodes.Values)
             {
-                var current = workQueue.Dequeue();
-                var target = nodes[current.Name];
+                var target = new Node(node.Name);
+                newNodes.Add(target.Name, target);
 
-                if (target.Contents.Count > 0)
-                {
-                    continue;
-                }
-
-                foreach (var instruction in current.Contents)
+                foreach (var instruction in node.Contents)
                 {
                     if (!_opCodeHandlers.TryGetValue(instruction.OpCode, out var handler))
                     {
@@ -101,32 +94,82 @@ namespace ILspect.Syntax
                     handler?.Invoke(method, evaluationStack, instruction, target);
                 }
 
-                Debug.Assert(current.OutboundEdges.Count < 3, "Control flow graph nodes should never have more than 2 edges");
-                Debug.Assert(current.OutboundEdges.Where(e => e.Value != null).Count() < 2, "Control flow graph nodes should never have more than one payload-bearing edge");
+                Debug.Assert(node.OutboundEdges.Count < 3, "Control flow graph nodes should never have more than 2 edges");
+                Debug.Assert(node.OutboundEdges.Where(e => e.Value != null).Count() < 2, "Control flow graph nodes should never have more than one payload-bearing edge");
 
-                foreach (var edge in current.OutboundEdges)
+                foreach (var edge in node.OutboundEdges)
                 {
-                    Expression expr = null;
-                    if (edge.Value != null && edge.Value.OpCode != OpCodes.Br && edge.Value.OpCode != OpCodes.Br_S)
-                    {
-                        // Get the expression for this path
-                        expr = Pop(evaluationStack);
-                    }
+                    var expr = GetExpressionForBranch(evaluationStack, edge);
                     target.OutboundEdges.Add(new SyntaxGraph.Edge(expr, target.Name, edge.Target));
-
-                    var next = graph.Nodes[edge.Target];
-                    workQueue.Enqueue(next);
                 }
 
                 if (evaluationStack.Count > 0)
                 {
-                    throw new NotSupportedException("Can't handle evaluation stack being non-empty at the end of a control flow block yet!");
+                    throw new NotSupportedException($"Can't handle evaluation stack being non-empty at the end of a control flow block yet! Stack: {RenderStack()}");
                 }
             }
 
-            Weave(nodes);
+            Weave(newNodes);
 
-            return new SyntaxGraph(nodes[graph.Root.Name], nodes);
+            return new SyntaxGraph(newNodes[graph.Root.Name], newNodes);
+        }
+
+        private static Expression GetExpressionForBranch(Stack<Expression> evaluationStack, Graph<Instruction, Instruction>.Edge edge)
+        {
+            if (edge.Value != null && edge.Value.OpCode != OpCodes.Br && edge.Value.OpCode != OpCodes.Br_S)
+            {
+                if (edge.Value.OpCode == OpCodes.Brfalse || edge.Value.OpCode == OpCodes.Brfalse_S ||
+                    edge.Value.OpCode == OpCodes.Brtrue || edge.Value.OpCode == OpCodes.Brtrue_S)
+                {
+                    return Pop(evaluationStack);
+                }
+                else if (edge.Value.OpCode == OpCodes.Beq || edge.Value.OpCode == OpCodes.Beq_S)
+                {
+                    var value2 = Pop(evaluationStack);
+                    var value1 = Pop(evaluationStack);
+                    return new BinaryExpression(value1, value2, BinaryOperator.Equal, edge.Value);
+                }
+                else if (edge.Value.OpCode == OpCodes.Bne_Un || edge.Value.OpCode == OpCodes.Bne_Un_S)
+                {
+                    var value2 = Pop(evaluationStack);
+                    var value1 = Pop(evaluationStack);
+                    return new BinaryExpression(value1, value2, BinaryOperator.NotEqual, edge.Value);
+                }
+                else if (edge.Value.OpCode == OpCodes.Bge || edge.Value.OpCode == OpCodes.Bge_S ||
+                        edge.Value.OpCode == OpCodes.Bge_Un || edge.Value.OpCode == OpCodes.Bge_Un_S)
+                {
+                    var value2 = Pop(evaluationStack);
+                    var value1 = Pop(evaluationStack);
+                    return new BinaryExpression(value1, value2, BinaryOperator.GreaterThanOrEqual, edge.Value);
+                }
+                else if (edge.Value.OpCode == OpCodes.Bgt || edge.Value.OpCode == OpCodes.Bgt_S ||
+                        edge.Value.OpCode == OpCodes.Bgt_Un || edge.Value.OpCode == OpCodes.Bgt_Un_S)
+                {
+                    var value2 = Pop(evaluationStack);
+                    var value1 = Pop(evaluationStack);
+                    return new BinaryExpression(value1, value2, BinaryOperator.GreaterThan, edge.Value);
+                }
+                else if (edge.Value.OpCode == OpCodes.Ble || edge.Value.OpCode == OpCodes.Ble_S ||
+                        edge.Value.OpCode == OpCodes.Ble_Un || edge.Value.OpCode == OpCodes.Ble_Un_S)
+                {
+                    var value2 = Pop(evaluationStack);
+                    var value1 = Pop(evaluationStack);
+                    return new BinaryExpression(value1, value2, BinaryOperator.LessThanOrEqual, edge.Value);
+                }
+                else if (edge.Value.OpCode == OpCodes.Blt || edge.Value.OpCode == OpCodes.Blt_S ||
+                        edge.Value.OpCode == OpCodes.Blt_Un || edge.Value.OpCode == OpCodes.Blt_Un_S)
+                {
+                    var value2 = Pop(evaluationStack);
+                    var value1 = Pop(evaluationStack);
+                    return new BinaryExpression(value1, value2, BinaryOperator.LessThan, edge.Value);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Unrecognized Branch instruction: {edge.Value}");
+                }
+            }
+
+            return null;
         }
 
         private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> Call(CallType callType)
@@ -145,8 +188,8 @@ namespace ILspect.Syntax
 
                 // Pop the object reference
                 var target = targetMethod.Resolve().IsStatic ?
-                    null :
-                    Pop(evaluationStack);
+                        null :
+                        Pop(evaluationStack);
 
                 // Create the call expression
                 var call = new CallExpression(targetMethod, callType, target, arguments, instruction);
