@@ -102,23 +102,23 @@ namespace ILspect.CommandLine.Commands
                 foreach (var node in graph.Nodes.Values)
                 {
                     Console.WriteLine();
-                    Console.WriteLine($" {node.Name} : {{");
+                    Console.WriteLine($"  {node.Name} : {{");
                     foreach (var instruction in node.Contents)
                     {
-                        Console.WriteLine($"   {instruction}");
+                        Console.WriteLine($"    {instruction}");
                     }
                     if (node.OutboundEdges.Count == 1)
                     {
-                        Console.WriteLine($" }} -> {node.OutboundEdges.First().Target}");
+                        Console.WriteLine($"  }} -> {node.OutboundEdges.First().Target}");
                     }
                     else if (node.OutboundEdges.Count == 0)
                     {
-                        Console.WriteLine(" } -> end;");
+                        Console.WriteLine("  } -> end;");
                     }
                     else
                     {
                         var targets = string.Join(", ", node.OutboundEdges.Select(FormatLink));
-                        Console.WriteLine($" }} {targets}");
+                        Console.WriteLine($"  }} {targets}");
                     }
                 }
             }
