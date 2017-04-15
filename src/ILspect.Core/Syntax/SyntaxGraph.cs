@@ -22,6 +22,8 @@ namespace ILspect.Syntax
             { OpCodes.And, BinExpr(BinaryOperator.And) },
             { OpCodes.Box, Box },
             { OpCodes.Ceq, BinExpr(BinaryOperator.Equal) },
+            { OpCodes.Cgt, BinExpr(BinaryOperator.GreaterThan) },
+            { OpCodes.Cgt_Un, BinExpr(BinaryOperator.GreaterThan) },
 
             { OpCodes.Nop, null }, // Nop does nothing!
             { OpCodes.Ldarg_0, LdArg(0) },
@@ -219,7 +221,7 @@ namespace ILspect.Syntax
         private static void Box(MethodDefinition method, Stack<Expression> evaluationStack, Instruction instruction, Node node)
         {
             var value = Pop(evaluationStack);
-            evaluationStack.Push(new BoxingExpression(value, instruction));
+            evaluationStack.Push(new BoxingExpression(value, (TypeReference)instruction.Operand, instruction));
         }
 
         private static void Return(MethodDefinition method, Stack<Expression> evaluationStack, Instruction instruction, Node node)

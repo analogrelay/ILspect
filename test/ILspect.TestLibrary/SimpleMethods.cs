@@ -40,6 +40,30 @@ namespace ILspect.TestLibrary
         public static void Compare(int x, int y)
         {
             Console.WriteLine("Eq: " + (x == y));
+            Console.WriteLine("Ne: " + (x != y));
+            Console.WriteLine("Gt: " + (x > y));
+            Console.WriteLine("Lt: " + (x < y));
+            Console.WriteLine("Ge: " + (x >= y));
+            Console.WriteLine("Le: " + (x <= y));
+        }
+
+        public static void Convert(int x, long y)
+        {
+            Console.WriteLine("int8" + (sbyte)x);
+            Console.WriteLine("int16" + (short)x);
+            Console.WriteLine("int32" + (int)y);
+            Console.WriteLine("int64" + (long)x);
+            Console.WriteLine("float32" + (float)x);
+            Console.WriteLine("float64" + (double)x);
+            Console.WriteLine("uint8" + (byte)x);
+            Console.WriteLine("uint16" + (ushort)x);
+            Console.WriteLine("uint32" + (uint)y);
+            Console.WriteLine("uint64" + (ulong)x);
+
+            // C# doesn't emit the conv.i or conv.u opcodes for these,
+            // rather it uses op_Explicit on (U)IntPtr.
+            // Console.WriteLine("native int" + (IntPtr)x);
+            // Console.WriteLine("native unsigned int" + (UIntPtr)x);
         }
 
         public static int Call(string item)

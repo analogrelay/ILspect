@@ -15,7 +15,7 @@ namespace ILspect.Syntax
 
         public override string ToString()
         {
-            return $"{Operator.GetSymbol()}{Value}";
+            return $"{Operator.GetSymbol()}({Value})";
         }
     }
 }
