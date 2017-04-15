@@ -29,6 +29,8 @@ namespace ILspect.ControlFlow
             }
             workQueue.Enqueue(root);
 
+            Got to get TryCatchFilterFinally to work.
+
             // Preload all branch targets into the graph
             // This is probably not the idea way to do this, but it should work
             foreach (var instr in method.Body.Instructions)
