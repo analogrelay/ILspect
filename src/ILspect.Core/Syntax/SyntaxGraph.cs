@@ -10,7 +10,7 @@ namespace ILspect.Syntax
 {
     public class SyntaxGraph : Graph<Statement, Expression>
     {
-        public SyntaxGraph(Node root, IDictionary<string, Node> nodes) : base(root, nodes)
+        public SyntaxGraph(Node root, IDictionary<int, Node> nodes) : base(root, nodes)
         {
         }
 
@@ -105,44 +105,46 @@ namespace ILspect.Syntax
 
         public static SyntaxGraph Create(ControlFlowGraph graph, MethodDefinition method)
         {
-            var evaluationStack = new Stack<Expression>();
+            throw new NotImplementedException();
+            //var evaluationStack = new Stack<Expression>();
 
-            string RenderStack() => string.Join(", ", evaluationStack.Select(s => s.ToString()));
+            //string RenderStack() => string.Join(", ", evaluationStack.Select(s => s.ToString()));
 
-            var newNodes = new Dictionary<string, Node>();
+            //var newNodes = new SortedList<int, Node>();
 
-            foreach (var node in graph.Nodes.Values)
-            {
-                var target = new Node(node.Name);
-                newNodes.Add(target.Name, target);
+            //foreach (var node in graph.Nodes.Values)
+            //{
+            //    var target = new Node(node.Offset);
+            //    newNodes.Add(target.Offset, target);
 
-                foreach (var instruction in node.Contents)
-                {
-                    if (!_opCodeHandlers.TryGetValue(instruction.OpCode, out var handler))
-                    {
-                        throw new NotSupportedException($"Unsupported opcode: {instruction.OpCode}");
-                    }
-                    handler?.Invoke(method, evaluationStack, instruction, target);
-                }
+            //    foreach (var instruction in node.Contents)
+            //    {
+            //        if (!_opCodeHandlers.TryGetValue(instruction.OpCode, out var handler))
+            //        {
+            //            throw new NotSupportedException($"Unsupported opcode: {instruction.OpCode}");
+            //        }
+            //        handler?.Invoke(method, evaluationStack, instruction, target);
+            //    }
 
-                Debug.Assert(node.OutboundEdges.Count < 3, "Control flow graph nodes should never have more than 2 edges");
-                Debug.Assert(node.OutboundEdges.Where(e => e.Value != null).Count() < 2, "Control flow graph nodes should never have more than one payload-bearing edge");
+            //    Debug.Assert(node.OutboundEdges.Count < 3, "Control flow graph nodes should never have more than 2 edges");
+            //    Debug.Assert(node.OutboundEdges.Where(e => e.Value != null).Count() < 2, "Control flow graph nodes should never have more than one payload-bearing edge");
 
-                foreach (var edge in node.OutboundEdges)
-                {
-                    var expr = GetExpressionForBranch(evaluationStack, edge);
-                    target.OutboundEdges.Add(new SyntaxGraph.Edge(expr, target.Name, edge.Target));
-                }
+            //    //foreach (var edge in node.OutboundEdges)
+            //    //{
+            //    //    var expr = GetExpressionForBranch(evaluationStack, edge);
+            //    //    target.AddEdge(expr, ed)
+            //    //    target.OutboundEdges.Add(new Edge(expr, target.Name, edge.Target));
+            //    //}
 
-                if (evaluationStack.Count > 0)
-                {
-                    throw new NotSupportedException($"Can't handle evaluation stack being non-empty at the end of a control flow block yet! Stack: {RenderStack()}");
-                }
-            }
+            //    //if (evaluationStack.Count > 0)
+            //    //{
+            //    //    throw new NotSupportedException($"Can't handle evaluation stack being non-empty at the end of a control flow block yet! Stack: {RenderStack()}");
+            //    //}
+            //}
 
-            Weave(newNodes);
+            //Weave(newNodes);
 
-            return new SyntaxGraph(newNodes[graph.Root.Name], newNodes);
+            //return new SyntaxGraph(newNodes[graph.Root.Name], newNodes);
         }
 
         private static Expression GetExpressionForBranch(Stack<Expression> evaluationStack, Graph<Instruction, Instruction>.Edge edge)

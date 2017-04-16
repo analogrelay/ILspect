@@ -103,7 +103,7 @@ namespace ILspect.CommandLine.Commands
             foreach (var node in syntax.Nodes.Values)
             {
                 Console.WriteLine();
-                Console.WriteLine($"  {node.Name} : {{");
+                Console.WriteLine($"  {node.DisplayName} : {{");
                 foreach (var instruction in node.Contents)
                 {
                     Console.WriteLine($"    {instruction}");

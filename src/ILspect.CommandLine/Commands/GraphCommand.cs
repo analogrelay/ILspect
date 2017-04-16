@@ -102,14 +102,14 @@ namespace ILspect.CommandLine.Commands
                 foreach (var node in graph.Nodes.Values)
                 {
                     Console.WriteLine();
-                    Console.WriteLine($"  {node.Name} : {{");
+                    Console.WriteLine($"  {node.DisplayName} ({string.Join(", ", node.InboundEdges.Select(i => i.Source.DisplayName))}) : {{");
                     foreach (var instruction in node.Contents)
                     {
                         Console.WriteLine($"    {instruction}");
                     }
                     if (node.OutboundEdges.Count == 1)
                     {
-                        Console.WriteLine($"  }} -> {node.OutboundEdges.First().Target}");
+                        Console.WriteLine($"  }} -> {node.OutboundEdges.First().Target.DisplayName}");
                     }
                     else if (node.OutboundEdges.Count == 0)
                     {
@@ -130,11 +130,11 @@ namespace ILspect.CommandLine.Commands
         {
             if (edge.Value == null)
             {
-                return $"else -> {edge.Target}";
+                return $"else -> {edge.Target.DisplayName}";
             }
             else
             {
-                return $"{edge.Value.OpCode} -> {edge.Target}";
+                return $"{edge.Value} -> {edge.Target.DisplayName}";
             }
         }
 
@@ -152,14 +152,14 @@ namespace ILspect.CommandLine.Commands
                 foreach (var node in graph.Nodes.Values)
                 {
                     var content = node.Contents.Count > 0 ?
-                        node.Name + " {\\l" + string.Join("\\l", node.Contents.Select(FormatInstruction)) + "\\l}\\l" :
-                        node.Name;
+                        node.DisplayName + " {\\l" + string.Join("\\l", node.Contents.Select(FormatInstruction)) + "\\l}\\l" :
+                        node.DisplayName;
 
-                    await writer.WriteLineAsync($"  {node.Name}[label=\"{content}\"]");
+                    await writer.WriteLineAsync($"  {node.DisplayName}[label=\"{content}\"]");
 
                     if (node.OutboundEdges.Count == 0)
                     {
-                        await writer.WriteLineAsync($"  {node.Name} -> end;");
+                        await writer.WriteLineAsync($"  {node.DisplayName} -> end;");
                     }
                     else
                     {
@@ -167,12 +167,11 @@ namespace ILspect.CommandLine.Commands
                         {
                             if (link.Value != null)
                             {
-                                var label = link.Value.OpCode.ToString();
-                                await writer.WriteLineAsync($"  {node.Name} -> {link.Target}[label=\"{label}\"];");
+                                await writer.WriteLineAsync($"  {node.DisplayName} -> {link.Target.DisplayName}[label=\"{link.Value}\"];");
                             }
                             else
                             {
-                                await writer.WriteLineAsync($"  {node.Name} -> {link.Target}[label=\"else\"];");
+                                await writer.WriteLineAsync($"  {node.DisplayName} -> {link.Target.DisplayName}[label=\"else\"];");
                             }
                         }
                     }

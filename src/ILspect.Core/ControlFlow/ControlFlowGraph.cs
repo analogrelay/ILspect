@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
@@ -5,143 +6,162 @@ using Mono.Cecil.Cil;
 
 namespace ILspect.ControlFlow
 {
-    public class ControlFlowGraph : Graph<Instruction, Instruction>
+    public class ControlFlowGraph : Graph<Instruction, ControlFlowCondition>
     {
-        public ControlFlowGraph(Node root, IDictionary<string, Node> nodes) : base(root, nodes)
+        public ControlFlowGraph(Node root, IDictionary<int, Node> nodes) : base(root, nodes)
         {
         }
 
         public static ControlFlowGraph Create(MethodDefinition method)
         {
-            var body = method.Body;
-
-            var nodes = new Dictionary<string, Node>();
-
             var workQueue = new Queue<Node>();
+            var nodes = new SortedList<int, Node>();
 
-            // Create the root node and put it in the queue
-            var instruction = method.Body.Instructions.FirstOrDefault();
-            var root = new Node(GetNodeName(0));
-            nodes[root.Name] = root;
-            if (instruction != null)
+            if (!method.HasBody)
             {
-                root.Contents.Add(instruction);
+                return new ControlFlowGraph(null, nodes);
             }
-            workQueue.Enqueue(root);
 
-            Got to get TryCatchFilterFinally to work.
-
-            // Preload all branch targets into the graph
-            // This is probably not the idea way to do this, but it should work
-            foreach (var instr in method.Body.Instructions)
+            Node GetOrAddNode(Instruction instr)
             {
-                if (instr.OpCode.FlowControl == FlowControl.Branch || instr.OpCode.FlowControl == FlowControl.Cond_Branch)
+                if (nodes.TryGetValue(instr.Offset, out var node))
                 {
-                    if (instr.Operand != null)
-                    {
-                        var target = (Instruction)instr.Operand;
-
-                        var name = GetNodeName(target.Offset);
-                        if (!nodes.TryGetValue(name, out _))
-                        {
-                            var node = new Node(name);
-                            nodes[name] = node;
-                            node.Contents.Add(target);
-                            workQueue.Enqueue(node);
-                        }
-                    }
-
-                    if (instr.Next != null)
-                    {
-                        var name = GetNodeName(instr.Next.Offset);
-                        if (!nodes.TryGetValue(name, out _))
-                        {
-                            var node = new Node(name);
-                            nodes[name] = node;
-                            node.Contents.Add(instr.Next);
-                            workQueue.Enqueue(node);
-                        }
-                    }
+                    return node;
                 }
+
+                node = new Node(instr.Offset);
+                node.Contents.Add(instr);
+                nodes.Add(instr.Offset, node);
+                return node;
             }
 
-            while (workQueue.Count > 0)
+            // Create the start node
+            var root = GetOrAddNode(method.Body.Instructions.First());
+
+            foreach (var instruction in method.Body.Instructions)
             {
-                var current = workQueue.Dequeue();
-                instruction = current.Contents.LastOrDefault()?.Next;
-                while (instruction != null)
+                var node = GetOrAddNode(instruction);
+
+                switch (instruction.OpCode.FlowControl)
                 {
-                    // If there is a node for this instruction already, flow to that and stop
-                    if (nodes.TryGetValue(GetNodeName(instruction.Offset), out var node))
-                    {
-                        var nextName = node.Name;
-                        current.OutboundEdges.Add(new Edge(null, current.Name, nextName));
-                        instruction = null;
-                    }
-                    else if (instruction.OpCode.FlowControl == FlowControl.Branch)
-                    {
-                        var target = (Instruction)instruction.Operand;
-                        var nextName = GetNodeName(target.Offset);
-                        var nextNode = nodes[nextName];
-                        current.OutboundEdges.Add(new Edge(instruction, current.Name, nextNode.Name));
-                        instruction = null;
-                    }
-                    else if (instruction.OpCode.FlowControl == FlowControl.Cond_Branch)
-                    {
-                        CreateBranch(nodes, workQueue, current, instruction);
-                        instruction = null;
-                    }
-                    else
-                    {
-                        current.Contents.Add(instruction);
-                        if (instruction.OpCode != OpCodes.Ret)
+                    case FlowControl.Branch:
+                        node.Contents.Clear(); // Branches are moved to edges
+                        node.AddEdge(null, GetOrAddNode((Instruction)instruction.Operand));
+                        break;
+                    case FlowControl.Cond_Branch:
+                        node.Contents.Clear(); // Branches are moved to edges
+                        node.AddEdge(null, GetOrAddNode(instruction.Next));
+                        node.AddEdge(new BranchCondition(instruction), GetOrAddNode((Instruction)instruction.Operand));
+                        break;
+                    case FlowControl.Next:
+                    case FlowControl.Call:
+                        node.AddEdge(null, GetOrAddNode(instruction.Next));
+                        break;
+                    case FlowControl.Return:
+                        if (instruction.OpCode == OpCodes.Endfilter)
                         {
-                            instruction = instruction.Next;
+                            // Endfilter is actually not a return
+                            node.AddEdge(null, GetOrAddNode(instruction.Next));
                         }
                         else
                         {
-                            instruction = null;
+                            node.Contents.Clear(); // Returns are moved to edges
                         }
-                    }
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Unsupported flow control type: {instruction.OpCode} -> {instruction.OpCode.FlowControl}");
                 }
             }
 
-            Weave(nodes);
+            // Wire up exception handlers
+            foreach (var handler in method.Body.ExceptionHandlers)
+            {
+                // Figure out the condition for this block
+                var condition = CreateCondition(handler);
+                var handlerNode = GetOrAddNode(handler.FilterStart == null ? handler.HandlerStart : handler.FilterStart);
+
+                // Each node within the try block jumps to the handler block if there's an exception
+                var inst = handler.TryStart;
+                while (inst != handler.TryEnd)
+                {
+                    var node = GetOrAddNode(inst);
+                    node.AddEdge(condition, handlerNode);
+                    inst = inst.Next;
+                }
+            }
+
+            // Merge nodes
+            nodes = CollapseNodes(nodes);
 
             return new ControlFlowGraph(root, nodes);
         }
 
-        private static void CreateBranch(Dictionary<string, Node> nodes, Queue<Node> workQueue, Node current, Instruction instruction)
+        private static SortedList<int, Node> CollapseNodes(SortedList<int, Node> nodes)
         {
-            var branchTarget = (Instruction)instruction.Operand;
-
-            var branchName = GetNodeName(branchTarget.Offset);
-            if (!nodes.TryGetValue(branchName, out var branchNode))
+            // This thing is probably terribly slow
+            var output = new SortedList<int, Node>();
+            var node = nodes.Values.FirstOrDefault();
+            while (node != null)
             {
-                branchNode = new Node(branchName);
-                branchNode.Contents.Add(branchTarget);
-                nodes[branchNode.Name] = branchNode;
-                workQueue.Enqueue(branchNode);
-            }
-            current.OutboundEdges.Add(new Edge(instruction, current.Name, branchNode.Name));
+                // Try to merge this node
+                var merged = false;
 
-            if (instruction.Next != null)
-            {
-                var nextName = GetNodeName(instruction.Next.Offset);
-                if (!nodes.TryGetValue(nextName, out var nextNode))
+                // Remove links to empty nodes, just copy their outbound edges up
+                var removableEdges = node.OutboundEdges.Where(e => e.Target.Contents.Count == 0).ToList();
+                foreach (var removableEdge in removableEdges)
                 {
-                    nextNode = new Node(nextName);
-                    nextNode.Contents.Add(instruction.Next);
-                    nodes[nextNode.Name] = nextNode;
-                    workQueue.Enqueue(nextNode);
+                    node.Inline(removableEdge);
                 }
-                current.OutboundEdges.Add(new Edge(null, current.Name, nextNode.Name));
+
+                var unconditionalEdge = node.OutboundEdges.SingleOrDefault(e => e.Value == null);
+                if (unconditionalEdge != null)
+                {
+                    var target = unconditionalEdge.Target;
+                    if (target.InboundEdges.Count == 1 && target.InboundEdges[0].Source == node)
+                    {
+                        // Check the other edges, if any
+                        var sourceOutbounds = node.OutboundEdges.Where(e => e.Value != null);
+                        if (sourceOutbounds.All(s => target.OutboundEdges.Any(t => Equals(t.Target, s.Target) && Equals(s.Value, t.Value))))
+                        {
+                            // Remove the other node and merge it in
+                            target.Detach();
+                            nodes.Remove(target.Offset);
+                            node.MergeIn(target);
+                            merged = true;
+                        }
+                    }
+                }
+
+                if (!merged)
+                {
+                    // Finished with this node, move to the next one
+                    output.Add(node.Offset, node);
+                    nodes.Remove(node.Offset);
+
+                    node = nodes.Values.FirstOrDefault();
+                }
             }
+
+            var unreachableNodes = output.Values.Where(n => n.Offset != 0 && n.InboundEdges.Count == 0).ToList();
+            foreach(var unreachableNode in unreachableNodes)
+            {
+                unreachableNode.Detach();
+                output.Remove(unreachableNode.Offset);
+            }
+
+            return output;
         }
 
-        private static string GetNodeName(int offset)
+        private static ControlFlowCondition CreateCondition(ExceptionHandler handler)
         {
-            return $"IL_{offset:X4}";
+            switch (handler.HandlerType)
+            {
+                case ExceptionHandlerType.Catch: return new CatchCondition(handler.CatchType);
+                case ExceptionHandlerType.Filter: return new FilterCondtion();
+                case ExceptionHandlerType.Finally: return new FinallyCondition();
+                case ExceptionHandlerType.Fault: return new FaultCondition();
+                default: throw new InvalidOperationException($"Unknown exception handler type: {handler.HandlerType}");
+            }
         }
     }
 }
