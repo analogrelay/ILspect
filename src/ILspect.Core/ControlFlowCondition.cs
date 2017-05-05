@@ -2,43 +2,50 @@
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace ILspect.ControlFlow
+namespace ILspect
 {
     // SO READY for C# record types :)
-
-    public abstract class ControlFlowCondition
+    public abstract class Condition
     {
     }
 
-    public class FilterCondtion : ControlFlowCondition
+    public class FilterCondtion : Condition
     {
         public override string ToString() => "filter";
     }
 
-    public class FaultCondition : ControlFlowCondition
+    public class FaultCondition : Condition
     {
         public override string ToString() => "fault";
     }
 
-    public class FinallyCondition : ControlFlowCondition
+    public class FinallyCondition : Condition
     {
         public override string ToString() => "finally";
     }
 
 
-    public class BranchCondition : ControlFlowCondition
+    public class BranchCondition<TBranch> : Condition
     {
-        public Instruction Branch { get; }
+        public TBranch Branch { get; }
 
-        public BranchCondition(Instruction branch)
+        public BranchCondition(TBranch branch)
         {
             Branch = branch;
         }
 
-        public override string ToString() => Branch.OpCode.ToString();
+        public override string ToString()
+        {
+            // Not ideal...
+            if (((object)Branch) is Instruction i)
+            {
+                return i.OpCode.ToString();
+            }
+            return Branch.ToString();
+        }
     }
 
-    public class CatchCondition : ControlFlowCondition
+    public class CatchCondition : Condition
     {
         public TypeReference ExceptionType { get; }
 

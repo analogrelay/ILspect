@@ -8,13 +8,13 @@ using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax
 {
-    public class SyntaxGraph : Graph<Statement, Expression>
+    public class SyntaxGraph : Graph<Statement, Condition>
     {
         public SyntaxGraph(Node root, IDictionary<int, Node> nodes) : base(root, nodes)
         {
         }
 
-        private static readonly Dictionary<OpCode, Action<MethodDefinition, Stack<Expression>, Instruction, Node>> _opCodeHandlers = new Dictionary<OpCode, Action<MethodDefinition, Stack<Expression>, Instruction, Node>>()
+        private static readonly Dictionary<OpCode, Action<DecompiledMethod, Stack<Expression>, Instruction, Node>> _opCodeHandlers = new Dictionary<OpCode, Action<DecompiledMethod, Stack<Expression>, Instruction, Node>>()
         {
             { OpCodes.Add, BinExpr(BinaryOperator.Add) },
             { OpCodes.Add_Ovf, Checked(BinExpr(BinaryOperator.Add)) },
@@ -57,8 +57,10 @@ namespace ILspect.Syntax
             { OpCodes.Conv_Ovf_U8_Un, Conv(MetadataType.UInt64) },
             { OpCodes.Div, BinExpr(BinaryOperator.Divide) },
             { OpCodes.Div_Un, BinExpr(BinaryOperator.Divide) },
+            { OpCodes.Dup, Dup },
 
             { OpCodes.Nop, null }, // Nop does nothing!
+            { OpCodes.Isinst, Isinst },
             { OpCodes.Ldarg_0, LdArg(0) },
             { OpCodes.Ldarg_1, LdArg(1) },
             { OpCodes.Ldarg_2, LdArg(2) },
@@ -103,111 +105,144 @@ namespace ILspect.Syntax
             { OpCodes.Ret, Return }
         };
 
-        public static SyntaxGraph Create(ControlFlowGraph graph, MethodDefinition method)
+        public static SyntaxGraph Create(ControlFlowGraph graph, DecompiledMethod method)
         {
-            throw new NotImplementedException();
-            //var evaluationStack = new Stack<Expression>();
+            // Note to myself that I can't ignore because it'll be a compiler error ;)
+            Need to have SyntaxGraph nodes accept inputs.
+            Popping when the stack is empty will create an input on the current node
+            Each item on the stack when a control flow node is hit will be passed as inputs
+            to the next node.
 
-            //string RenderStack() => string.Join(", ", evaluationStack.Select(s => s.ToString()));
+            var newNodes = new SortedList<int, Node>();
+            var workQueue = new Queue<(ControlFlowGraph.Node node, Stack<Expression> stack)>();
 
-            //var newNodes = new SortedList<int, Node>();
+            foreach (var node in graph.Nodes.Values)
+            {
+                var target = new Node(node.Offset);
+                target.Type = node.Type;
+                newNodes.Add(target.Offset, target);
+            }
 
-            //foreach (var node in graph.Nodes.Values)
-            //{
-            //    var target = new Node(node.Offset);
-            //    newNodes.Add(target.Offset, target);
+            // Queue the root item
+            workQueue.Enqueue((node: graph.Root, stack: new Stack<Expression>()));
 
-            //    foreach (var instruction in node.Contents)
-            //    {
-            //        if (!_opCodeHandlers.TryGetValue(instruction.OpCode, out var handler))
-            //        {
-            //            throw new NotSupportedException($"Unsupported opcode: {instruction.OpCode}");
-            //        }
-            //        handler?.Invoke(method, evaluationStack, instruction, target);
-            //    }
+            while (workQueue.Count > 0)
+            {
+                var (node, stack) = workQueue.Dequeue();
+                var target = newNodes[node.Offset];
+                if (target.Contents.Count > 0)
+                {
+                    continue;
+                }
 
-            //    Debug.Assert(node.OutboundEdges.Count < 3, "Control flow graph nodes should never have more than 2 edges");
-            //    Debug.Assert(node.OutboundEdges.Where(e => e.Value != null).Count() < 2, "Control flow graph nodes should never have more than one payload-bearing edge");
+                if (target.Type == NodeType.Filter)
+                {
+                    stack.Push(ImplicitValueExpression.Exception);
+                }
 
-            //    //foreach (var edge in node.OutboundEdges)
-            //    //{
-            //    //    var expr = GetExpressionForBranch(evaluationStack, edge);
-            //    //    target.AddEdge(expr, ed)
-            //    //    target.OutboundEdges.Add(new Edge(expr, target.Name, edge.Target));
-            //    //}
+                foreach (var instruction in node.Contents)
+                {
+                    if (!_opCodeHandlers.TryGetValue(instruction.OpCode, out var handler))
+                    {
+                        throw new NotSupportedException($"Unsupported opcode: {instruction.OpCode}");
+                    }
+                    handler?.Invoke(method, stack, instruction, target);
+                }
 
-            //    //if (evaluationStack.Count > 0)
-            //    //{
-            //    //    throw new NotSupportedException($"Can't handle evaluation stack being non-empty at the end of a control flow block yet! Stack: {RenderStack()}");
-            //    //}
-            //}
+                var nextStack = new List<Expression>();
+                if (stack.Count > 0)
+                {
+                    // Store every entry in the stack in a temporary
+                    foreach(var value in stack.Reverse())
+                    {
+                        var temp = method.NextTemporary();
+                        target.Contents.Add(new StoreTemporaryStatement(temp, value, instruction: null));
+                        nextStack.Add(new TemporaryExpression(temp, instruction: null));
+                    }
+                }
 
-            //Weave(newNodes);
+                foreach (var edge in node.OutboundEdges)
+                {
+                    var expr = GetConditionForEdge(stack, edge);
+                    target.AddEdge(expr, newNodes[edge.Target.Offset]);
 
-            //return new SyntaxGraph(newNodes[graph.Root.Name], newNodes);
+                    workQueue.Enqueue((node: edge.Target, stack: new Stack<Expression>(nextStack)));
+                }
+            }
+
+            return new SyntaxGraph(newNodes[graph.Root.Offset], newNodes);
         }
 
-        private static Expression GetExpressionForBranch(Stack<Expression> evaluationStack, Graph<Instruction, Instruction>.Edge edge)
+        private static Condition GetConditionForEdge(Stack<Expression> stack, ControlFlowGraph.Edge edge)
         {
-            if (edge.Value != null && edge.Value.OpCode != OpCodes.Br && edge.Value.OpCode != OpCodes.Br_S)
+            if (edge.Value is BranchCondition<Instruction> b)
             {
-                if (edge.Value.OpCode == OpCodes.Brfalse || edge.Value.OpCode == OpCodes.Brfalse_S ||
-                    edge.Value.OpCode == OpCodes.Brtrue || edge.Value.OpCode == OpCodes.Brtrue_S)
+                return new BranchCondition<Expression>(GetExpressionForBranch(stack, b));
+            }
+            return edge.Value;
+        }
+
+        private static Expression GetExpressionForBranch(Stack<Expression> stack, BranchCondition<Instruction> condition)
+        {
+            if (condition.Branch != null && condition.Branch.OpCode != OpCodes.Br && condition.Branch.OpCode != OpCodes.Br_S)
+            {
+                if (condition.Branch.OpCode == OpCodes.Brfalse || condition.Branch.OpCode == OpCodes.Brfalse_S ||
+                    condition.Branch.OpCode == OpCodes.Brtrue || condition.Branch.OpCode == OpCodes.Brtrue_S)
                 {
-                    return Pop(evaluationStack);
+                    return Pop(stack);
                 }
-                else if (edge.Value.OpCode == OpCodes.Beq || edge.Value.OpCode == OpCodes.Beq_S)
+                else if (condition.Branch.OpCode == OpCodes.Beq || condition.Branch.OpCode == OpCodes.Beq_S)
                 {
-                    var value2 = Pop(evaluationStack);
-                    var value1 = Pop(evaluationStack);
-                    return new BinaryExpression(value1, value2, BinaryOperator.Equal, edge.Value);
+                    var value2 = Pop(stack);
+                    var value1 = Pop(stack);
+                    return new BinaryExpression(value1, value2, BinaryOperator.Equal, condition.Branch);
                 }
-                else if (edge.Value.OpCode == OpCodes.Bne_Un || edge.Value.OpCode == OpCodes.Bne_Un_S)
+                else if (condition.Branch.OpCode == OpCodes.Bne_Un || condition.Branch.OpCode == OpCodes.Bne_Un_S)
                 {
-                    var value2 = Pop(evaluationStack);
-                    var value1 = Pop(evaluationStack);
-                    return new BinaryExpression(value1, value2, BinaryOperator.NotEqual, edge.Value);
+                    var value2 = Pop(stack);
+                    var value1 = Pop(stack);
+                    return new BinaryExpression(value1, value2, BinaryOperator.NotEqual, condition.Branch);
                 }
-                else if (edge.Value.OpCode == OpCodes.Bge || edge.Value.OpCode == OpCodes.Bge_S ||
-                        edge.Value.OpCode == OpCodes.Bge_Un || edge.Value.OpCode == OpCodes.Bge_Un_S)
+                else if (condition.Branch.OpCode == OpCodes.Bge || condition.Branch.OpCode == OpCodes.Bge_S ||
+                        condition.Branch.OpCode == OpCodes.Bge_Un || condition.Branch.OpCode == OpCodes.Bge_Un_S)
                 {
-                    var value2 = Pop(evaluationStack);
-                    var value1 = Pop(evaluationStack);
-                    return new BinaryExpression(value1, value2, BinaryOperator.GreaterThanOrEqual, edge.Value);
+                    var value2 = Pop(stack);
+                    var value1 = Pop(stack);
+                    return new BinaryExpression(value1, value2, BinaryOperator.GreaterThanOrEqual, condition.Branch);
                 }
-                else if (edge.Value.OpCode == OpCodes.Bgt || edge.Value.OpCode == OpCodes.Bgt_S ||
-                        edge.Value.OpCode == OpCodes.Bgt_Un || edge.Value.OpCode == OpCodes.Bgt_Un_S)
+                else if (condition.Branch.OpCode == OpCodes.Bgt || condition.Branch.OpCode == OpCodes.Bgt_S ||
+                        condition.Branch.OpCode == OpCodes.Bgt_Un || condition.Branch.OpCode == OpCodes.Bgt_Un_S)
                 {
-                    var value2 = Pop(evaluationStack);
-                    var value1 = Pop(evaluationStack);
-                    return new BinaryExpression(value1, value2, BinaryOperator.GreaterThan, edge.Value);
+                    var value2 = Pop(stack);
+                    var value1 = Pop(stack);
+                    return new BinaryExpression(value1, value2, BinaryOperator.GreaterThan, condition.Branch);
                 }
-                else if (edge.Value.OpCode == OpCodes.Ble || edge.Value.OpCode == OpCodes.Ble_S ||
-                        edge.Value.OpCode == OpCodes.Ble_Un || edge.Value.OpCode == OpCodes.Ble_Un_S)
+                else if (condition.Branch.OpCode == OpCodes.Ble || condition.Branch.OpCode == OpCodes.Ble_S ||
+                        condition.Branch.OpCode == OpCodes.Ble_Un || condition.Branch.OpCode == OpCodes.Ble_Un_S)
                 {
-                    var value2 = Pop(evaluationStack);
-                    var value1 = Pop(evaluationStack);
-                    return new BinaryExpression(value1, value2, BinaryOperator.LessThanOrEqual, edge.Value);
+                    var value2 = Pop(stack);
+                    var value1 = Pop(stack);
+                    return new BinaryExpression(value1, value2, BinaryOperator.LessThanOrEqual, condition.Branch);
                 }
-                else if (edge.Value.OpCode == OpCodes.Blt || edge.Value.OpCode == OpCodes.Blt_S ||
-                        edge.Value.OpCode == OpCodes.Blt_Un || edge.Value.OpCode == OpCodes.Blt_Un_S)
+                else if (condition.Branch.OpCode == OpCodes.Blt || condition.Branch.OpCode == OpCodes.Blt_S ||
+                        condition.Branch.OpCode == OpCodes.Blt_Un || condition.Branch.OpCode == OpCodes.Blt_Un_S)
                 {
-                    var value2 = Pop(evaluationStack);
-                    var value1 = Pop(evaluationStack);
-                    return new BinaryExpression(value1, value2, BinaryOperator.LessThan, edge.Value);
+                    var value2 = Pop(stack);
+                    var value1 = Pop(stack);
+                    return new BinaryExpression(value1, value2, BinaryOperator.LessThan, condition.Branch);
                 }
                 else
                 {
-                    throw new InvalidOperationException($"Unrecognized Branch instruction: {edge.Value}");
+                    throw new InvalidOperationException($"Unrecognized Branch instruction: {condition.Branch}");
                 }
             }
 
             return null;
         }
 
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> Call(CallType callType)
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> Call(CallType callType)
         {
-            return (MethodDefinition method, Stack<Expression> evaluationStack, Instruction instruction, Node node) =>
+            return (DecompiledMethod method, Stack<Expression> stack, Instruction instruction, Node node) =>
             {
                 var targetMethod = (MethodReference)instruction.Operand;
 
@@ -215,13 +250,13 @@ namespace ILspect.Syntax
                 var arguments = new List<Expression>(targetMethod.Parameters.Count);
                 for (var i = 0; i < targetMethod.Parameters.Count; i++)
                 {
-                    var expr = Pop(evaluationStack);
+                    var expr = Pop(stack);
                     arguments.Insert(0, expr);
                 }
 
                 // Pop the object reference
                 var target = targetMethod.HasThis ?
-                        Pop(evaluationStack) :
+                        Pop(stack) :
                         null;
 
                 // Create the call expression
@@ -236,125 +271,141 @@ namespace ILspect.Syntax
                 else
                 {
                     // It's an expression
-                    evaluationStack.Push(call);
+                    stack.Push(call);
                 }
             };
         }
 
-        private static void Box(MethodDefinition method, Stack<Expression> evaluationStack, Instruction instruction, Node node)
+        private static void Dup(DecompiledMethod method, Stack<Expression> stack, Instruction instruction, Node node)
         {
-            var value = Pop(evaluationStack);
-            evaluationStack.Push(new BoxingExpression(value, (TypeReference)instruction.Operand, instruction));
+            // Store the current value in a temporary, then load it into the stack twice
+            var value = Pop(stack);
+            var temp = method.NextTemporary();
+            node.Contents.Add(new StoreTemporaryStatement(temp, value, instruction));
+            stack.Push(new TemporaryExpression(temp, instruction));
+            stack.Push(new TemporaryExpression(temp, instruction));
         }
 
-        private static void Return(MethodDefinition method, Stack<Expression> evaluationStack, Instruction instruction, Node node)
+        private static void Box(DecompiledMethod method, Stack<Expression> stack, Instruction instruction, Node node)
         {
-            var value = PopOrDefault(evaluationStack);
+            var value = Pop(stack);
+            stack.Push(new BoxingExpression(value, (TypeReference)instruction.Operand, instruction));
+        }
+
+        private static void Return(DecompiledMethod method, Stack<Expression> stack, Instruction instruction, Node node)
+        {
+            var value = PopOrDefault(stack);
             node.Contents.Add(new ReturnStatement(value, instruction));
         }
 
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> Conv(MetadataType type)
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> Conv(MetadataType type)
         {
-            return (method, evaluationStack, instruction, node) =>
+            return (method, stack, instruction, node) =>
             {
-                var value = Pop(evaluationStack);
-                evaluationStack.Push(new ConvertExpression(value, type, instruction));
+                var value = Pop(stack);
+                stack.Push(new ConvertExpression(value, type, instruction));
             };
         }
 
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> UnExpr(UnaryOperator @operator)
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> UnExpr(UnaryOperator @operator)
         {
-            return (method, evaluationStack, instruction, node) =>
+            return (method, stack, instruction, node) =>
             {
-                var value = Pop(evaluationStack);
-                evaluationStack.Push(new UnaryExpression(value, @operator, instruction));
+                var value = Pop(stack);
+                stack.Push(new UnaryExpression(value, @operator, instruction));
             };
         }
 
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> BinExpr(BinaryOperator @operator)
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> BinExpr(BinaryOperator @operator)
         {
-            return (method, evaluationStack, instruction, node) =>
+            return (method, stack, instruction, node) =>
             {
-                var value2 = Pop(evaluationStack);
-                var value1 = Pop(evaluationStack);
-                evaluationStack.Push(new BinaryExpression(value1, value2, @operator, instruction));
+                var value2 = Pop(stack);
+                var value1 = Pop(stack);
+                stack.Push(new BinaryExpression(value1, value2, @operator, instruction));
             };
         }
 
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> Chain(Action<MethodDefinition, Stack<Expression>, Instruction, Node> outer, Action<MethodDefinition, Stack<Expression>, Instruction, Node> inner)
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> Chain(Action<DecompiledMethod, Stack<Expression>, Instruction, Node> outer, Action<DecompiledMethod, Stack<Expression>, Instruction, Node> inner)
         {
-            return (method, evaluationStack, instruction, node) =>
+            return (method, stack, instruction, node) =>
             {
-                inner(method, evaluationStack, instruction, node);
-                outer(method, evaluationStack, instruction, node);
+                inner(method, stack, instruction, node);
+                outer(method, stack, instruction, node);
             };
         }
 
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> Checked(Action<MethodDefinition, Stack<Expression>, Instruction, Node> subExpr)
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> Checked(Action<DecompiledMethod, Stack<Expression>, Instruction, Node> subExpr)
         {
-            return (method, evaluationStack, instruction, node) =>
+            return (method, stack, instruction, node) =>
             {
-                subExpr(method, evaluationStack, instruction, node);
-                var expr = Pop(evaluationStack);
-                evaluationStack.Push(new CheckedExpression(expr, instruction));
+                subExpr(method, stack, instruction, node);
+                var expr = Pop(stack);
+                stack.Push(new CheckedExpression(expr, instruction));
             };
         }
 
-        private static void Ldlen(MethodDefinition method, Stack<Expression> evaluationStack, Instruction instruction, Node node)
+        private static void Isinst(DecompiledMethod method, Stack<Expression> stack, Instruction instruction, Node node)
         {
-            var array = Pop(evaluationStack);
-            evaluationStack.Push(new ArrayLengthExpression(array, instruction));
+            var obj = Pop(stack);
+            stack.Push(new IsTypeExpression(obj, (TypeReference)instruction.Operand, instruction));
         }
 
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> Ldelem(MetadataType type)
+        private static void Ldlen(DecompiledMethod method, Stack<Expression> stack, Instruction instruction, Node node)
         {
-            return (method, evaluationStack, instruction, node) =>
+            var array = Pop(stack);
+            stack.Push(new ArrayLengthExpression(array, instruction));
+        }
+
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> Ldelem(MetadataType type)
+        {
+            return (method, stack, instruction, node) =>
             {
-                var index = Pop(evaluationStack);
-                var array = Pop(evaluationStack);
-                evaluationStack.Push(new ArrayIndexExpression(array, index, type, instruction));
+                var index = Pop(stack);
+                var array = Pop(stack);
+                stack.Push(new ArrayIndexExpression(array, index, type, instruction));
             };
         }
 
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> Ld(MetadataType type) => Ld<object>(type, constant: null, isConstant: false);
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> Ld<T>(MetadataType type, T constant) => Ld<T>(type, constant, isConstant: true);
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> Ld<T>(MetadataType type, T constant, bool isConstant)
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> Ld(MetadataType type) => Ld<object>(type, constant: null, isConstant: false);
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> Ld<T>(MetadataType type, T constant) => Ld<T>(type, constant, isConstant: true);
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> Ld<T>(MetadataType type, T constant, bool isConstant)
         {
-            return (method, evaluationStack, instruction, node) =>
+            return (method, stack, instruction, node) =>
             {
-                evaluationStack.Push(new ConstantExpression(isConstant ? constant : instruction.Operand, type, instruction));
+                stack.Push(new ConstantExpression(isConstant ? constant : instruction.Operand, type, instruction));
             };
         }
 
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> LdArg(int index)
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> LdArg(int index)
         {
-            return (method, evaluationStack, instruction, node) =>
+            return (method, stack, instruction, node) =>
             {
-                var parameter = method.Parameters.FirstOrDefault(p => p.Index == index);
+                var parameter = method.Definition.Parameters.FirstOrDefault(p => p.Index == index);
                 if (parameter == null)
                 {
                     throw new FormatException($"Method does not have argument at index: {index}");
                 }
-                evaluationStack.Push(new ParameterExpression(parameter, instruction));
+                stack.Push(new ParameterExpression(parameter, instruction));
             };
         }
 
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> LdLocA(int index)
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> LdLocA(int index)
         {
-            return (method, evaluationStack, instruction, node) =>
+            return (method, stack, instruction, node) =>
             {
-                var local = method.Body.Variables.FirstOrDefault(v => v.Index == index);
+                var local = method.Definition.Body.Variables.FirstOrDefault(v => v.Index == index);
                 if (local == null)
                 {
                     throw new FormatException($"Method does not have local at index: {index}");
                 }
-                evaluationStack.Push(new VariableExpression(local, instruction));
+                stack.Push(new VariableExpression(local, instruction));
             };
         }
 
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> LdLoc(int? index = null)
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> LdLoc(int? index = null)
         {
-            return (method, evaluationStack, instruction, node) =>
+            return (method, stack, instruction, node) =>
             {
                 VariableDefinition local;
                 if (index == null)
@@ -363,24 +414,24 @@ namespace ILspect.Syntax
                 }
                 else
                 {
-                    local = method.Body.Variables.FirstOrDefault(v => v.Index == index);
+                    local = method.Definition.Body.Variables.FirstOrDefault(v => v.Index == index);
 
                     if (local == null)
                     {
                         throw new FormatException($"Method does not have local at index: {index}");
                     }
                 }
-                evaluationStack.Push(new VariableExpression(local, instruction));
+                stack.Push(new VariableExpression(local, instruction));
             };
         }
 
-        private static Action<MethodDefinition, Stack<Expression>, Instruction, Node> StLoc(int index)
+        private static Action<DecompiledMethod, Stack<Expression>, Instruction, Node> StLoc(int index)
         {
-            return (method, evaluationStack, instruction, node) =>
+            return (method, stack, instruction, node) =>
             {
-                var value = Pop(evaluationStack);
+                var value = Pop(stack);
 
-                var local = method.Body.Variables.FirstOrDefault(v => v.Index == index);
+                var local = method.Definition.Body.Variables.FirstOrDefault(v => v.Index == index);
                 if (local == null)
                 {
                     throw new FormatException($"Method does not have local at index: {index}");

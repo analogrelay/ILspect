@@ -6,7 +6,7 @@ using Mono.Cecil.Cil;
 
 namespace ILspect.ControlFlow
 {
-    public class ControlFlowGraph : Graph<Instruction, ControlFlowCondition>
+    public class ControlFlowGraph : Graph<Instruction, Condition>
     {
         public ControlFlowGraph(Node root, IDictionary<int, Node> nodes) : base(root, nodes)
         {
@@ -51,7 +51,7 @@ namespace ILspect.ControlFlow
                     case FlowControl.Cond_Branch:
                         node.Contents.Clear(); // Branches are moved to edges
                         node.AddEdge(null, GetOrAddNode(instruction.Next));
-                        node.AddEdge(new BranchCondition(instruction), GetOrAddNode((Instruction)instruction.Operand));
+                        node.AddEdge(new BranchCondition<Instruction>(instruction), GetOrAddNode((Instruction)instruction.Operand));
                         break;
                     case FlowControl.Next:
                     case FlowControl.Call:
@@ -79,6 +79,11 @@ namespace ILspect.ControlFlow
                 // Figure out the condition for this block
                 var condition = CreateCondition(handler);
                 var handlerNode = GetOrAddNode(handler.FilterStart == null ? handler.HandlerStart : handler.FilterStart);
+
+                if (handler.FilterStart != null)
+                {
+                    handlerNode.Type = NodeType.Filter;
+                }
 
                 // Each node within the try block jumps to the handler block if there's an exception
                 var inst = handler.TryStart;
@@ -143,7 +148,7 @@ namespace ILspect.ControlFlow
             }
 
             var unreachableNodes = output.Values.Where(n => n.Offset != 0 && n.InboundEdges.Count == 0).ToList();
-            foreach(var unreachableNode in unreachableNodes)
+            foreach (var unreachableNode in unreachableNodes)
             {
                 unreachableNode.Detach();
                 output.Remove(unreachableNode.Offset);
@@ -152,7 +157,7 @@ namespace ILspect.ControlFlow
             return output;
         }
 
-        private static ControlFlowCondition CreateCondition(ExceptionHandler handler)
+        private static Condition CreateCondition(ExceptionHandler handler)
         {
             switch (handler.HandlerType)
             {

@@ -1,0 +1,26 @@
+digraph ControlFlow {
+  graph[fontname="Courier"];
+  node[fontname="Courier",shape="box"];
+  edge[fontname="Courier"];
+  IL_0000[label="IL_0000 {\l  ldstr \"Try\"\l  call System.Void System.Console::WriteLine(System.String)\l}\l"]
+  IL_0000 -> IL_000C[label="filter"];
+  IL_0000 -> IL_0037[label="finally"];
+  IL_0000 -> IL_0042[label="else"];
+  IL_000C[label="IL_000C {\l  isinst System.InvalidOperationException\l  dup\l}\l"]
+  IL_000C -> IL_0037[label="finally"];
+  IL_000C -> IL_0014[label="else"];
+  IL_000C -> IL_0018[label="brtrue.s"];
+  IL_0014[label="IL_0014 {\l  pop\l  ldc.i4.0\l}\l"]
+  IL_0014 -> IL_0037[label="finally"];
+  IL_0014 -> IL_0028[label="else"];
+  IL_0018[label="IL_0018 {\l  callvirt System.String System.Exception::get_Message()\l  callvirt System.Int32 System.String::get_Length()\l  ldc.i4.0\l  cgt\l  ldc.i4.0\l  cgt.un\l}\l"]
+  IL_0018 -> IL_0028[label="else"];
+  IL_0018 -> IL_0037[label="finally"];
+  IL_0028[label="IL_0028 {\l  endfilter\l  pop\l  ldstr \"Catch\"\l  call System.Void System.Console::WriteLine(System.String)\l}\l"]
+  IL_0028 -> IL_0037[label="finally"];
+  IL_0028 -> IL_0042[label="else"];
+  IL_0037[label="IL_0037 {\l  ldstr \"Finally\"\l  call System.Void System.Console::WriteLine(System.String)\l}\l"]
+  IL_0037 -> end;
+  IL_0042[label="IL_0042"]
+  IL_0042 -> end;
+}

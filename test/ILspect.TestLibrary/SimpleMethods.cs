@@ -66,34 +66,9 @@ namespace ILspect.TestLibrary
             // Console.WriteLine("native int" + (IntPtr)x);
             // Console.WriteLine("native unsigned int" + (UIntPtr)x);
         }
-
-        public static int Call(string item)
-        {
-            return item.Length;
-        }
-
-        public static string CallWithArgs(string item)
-        {
-            return item.Substring(1, 1024);
-        }
-
-        public static string CallStatic(string item)
-        {
-            return string.Format("Foo {0}", item);
-        }
-
         public static int ArrayElement(int[] items)
         {
             return items[42];
-        }
-
-        public static void ForLoop(string[] items)
-        {
-            var length = 0;
-            for (int i = 0; i < items.Length; i++)
-            {
-                length += items[i].Length;
-            }
         }
 
 #if NET46
@@ -102,88 +77,5 @@ namespace ILspect.TestLibrary
             var args = new ArgIterator(__arglist);
         }
 #endif
-
-        public static void ParamArray(params string[] args)
-        {
-            Console.WriteLine(args);
-        }
-
-        public static void WhileLoop()
-        {
-            var i = 0;
-            while (i < 10)
-            {
-                i++;
-            }
-        }
-
-        public static void DoWhileLoop()
-        {
-            var i = 0;
-            do
-            {
-                i++;
-            } while (i < 10);
-        }
-
-        public static void TryFinally()
-        {
-            try
-            {
-                Console.WriteLine("Try");
-            }
-            finally
-            {
-                Console.WriteLine("Finally");
-            }
-        }
-
-        public static void TryCatchFinally()
-        {
-            try
-            {
-                Console.WriteLine("Try");
-            }
-            catch
-            {
-                Console.WriteLine("Catch");
-            }
-            finally
-            {
-                Console.WriteLine("Finally");
-            }
-        }
-
-        public static void TryCatchTypeFinally()
-        {
-            try
-            {
-                Console.WriteLine("Try");
-            }
-            catch (InvalidOperationException)
-            {
-                Console.WriteLine("Catch");
-            }
-            finally
-            {
-                Console.WriteLine("Finally");
-            }
-        }
-
-        public static void TryCatchFilterFinally()
-        {
-            try
-            {
-                Console.WriteLine("Try");
-            }
-            catch (InvalidOperationException iex) when (iex.Message.Length > 0)
-            {
-                Console.WriteLine("Catch");
-            }
-            finally
-            {
-                Console.WriteLine("Finally");
-            }
-        }
     }
 }

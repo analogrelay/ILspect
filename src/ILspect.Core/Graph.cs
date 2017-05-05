@@ -6,6 +6,12 @@ using Mono.Cecil.Cil;
 
 namespace ILspect
 {
+    public enum NodeType
+    {
+        Normal,
+        Filter
+    }
+
     public abstract class Graph<TNode, TEdge>
     {
         public Node Root { get; }
@@ -42,6 +48,7 @@ namespace ILspect
             private List<Edge> _inboundEdges = new List<Edge>();
 
             public int Offset { get; }
+            public NodeType Type { get; set; } = NodeType.Normal;
             public IList<TNode> Contents { get; } = new List<TNode>();
             public IReadOnlyList<Edge> InboundEdges => _inboundEdges.AsReadOnly();
             public IReadOnlyList<Edge> OutboundEdges => _outboundEdges.AsReadOnly();

@@ -155,7 +155,7 @@ namespace ILspect.CommandLine.Commands
                         node.DisplayName + " {\\l" + string.Join("\\l", node.Contents.Select(FormatInstruction)) + "\\l}\\l" :
                         node.DisplayName;
 
-                    await writer.WriteLineAsync($"  {node.DisplayName}[label=\"{content}\"]");
+                    await writer.WriteLineAsync($"  {node.DisplayName}[label=\"{content.Replace("\"", "\\\"")}\"]");
 
                     if (node.OutboundEdges.Count == 0)
                     {
@@ -167,7 +167,7 @@ namespace ILspect.CommandLine.Commands
                         {
                             if (link.Value != null)
                             {
-                                await writer.WriteLineAsync($"  {node.DisplayName} -> {link.Target.DisplayName}[label=\"{link.Value}\"];");
+                                await writer.WriteLineAsync($"  {node.DisplayName} -> {link.Target.DisplayName}[label=\"{link.Value.ToString().Replace("\"", "\\\"")}\"];");
                             }
                             else
                             {

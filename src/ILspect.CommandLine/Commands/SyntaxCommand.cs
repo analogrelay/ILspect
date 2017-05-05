@@ -83,7 +83,8 @@ namespace ILspect.CommandLine.Commands
                 return Error($"Member type not supported: {member.MemberType}");
             }
 
-            var syntax = SyntaxGraph.Create(graph, method);
+            var decompiledMethod = new DecompiledMethod(method);
+            var syntax = SyntaxGraph.Create(graph, decompiledMethod);
 
             var arguments = string.Join(", ", method.Parameters.Select(p => $"{p.ParameterType.FullName} {p.Name}"));
 
@@ -130,10 +131,10 @@ namespace ILspect.CommandLine.Commands
         {
             if (edge.Value == null)
             {
-                return $"else -> {edge.Target}";
+                return $"else -> {edge.Target.DisplayName}";
             }
 
-            return $"{edge.Value} -> {edge.Target}";
+            return $"{edge.Value} -> {edge.Target.DisplayName}";
         }
     }
 }
