@@ -76,6 +76,28 @@ namespace ILspect.TestLibrary
             return items[42];
         }
 
+        public static void Constants()
+        {
+            Console.WriteLine("i4:" + 42);
+            Console.WriteLine("i8:" + 42L);
+            Console.WriteLine("r4:" + 3.14f);
+            Console.WriteLine("r8:" + 3.14);
+        }
+
+        public static void Args(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j)
+        {
+            Console.WriteLine("a: " + a);
+            Console.WriteLine("b: " + b);
+            Console.WriteLine("c: " + c);
+            Console.WriteLine("d: " + d);
+            Console.WriteLine("e: " + e);
+            Console.WriteLine("f: " + f);
+            Console.WriteLine("g: " + g);
+            Console.WriteLine("h: " + h);
+            Console.WriteLine("i: " + i);
+            Console.WriteLine("j: " + j);
+        }
+
 #if NET46
         public static void ArgList(__arglist)
         {

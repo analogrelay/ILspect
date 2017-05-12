@@ -14,8 +14,6 @@ namespace ILspect.Syntax
         public IReadOnlyList<VariableDefinition> Locals { get; }
         public IReadOnlyList<Temporary> Temporaries => _temporaries.AsReadOnly();
 
-        public VariableReference GetParameter { get; internal set; }
-
         public MethodVariables(IEnumerable<ParameterDefinition> parameters, IEnumerable<VariableDefinition> locals)
         {
             Parameters = parameters.ToList().AsReadOnly();
@@ -24,7 +22,7 @@ namespace ILspect.Syntax
 
         public MethodVariables(MethodDefinition method) : this(method.Parameters, method.Body.Variables) { }
 
-        public ParameterReference ReferenceParameter(int index)
+        public ParameterReference GetParameter(int index)
         {
             if(index > Parameters.Count || index < 0)
             {

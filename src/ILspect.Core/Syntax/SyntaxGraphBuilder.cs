@@ -89,23 +89,21 @@ namespace ILspect.Syntax
             { OpCodes.Div, BinExpr(BinaryOperator.Divide) },
             { OpCodes.Div_Un, BinExpr(BinaryOperator.Divide) },
             { OpCodes.Dup, Dup },
-
-            { OpCodes.Nop, null }, // Nop does nothing!
-            { OpCodes.Isinst, Isinst },
+            // endfilter
+            // endfinally
+            // initblk
+            // jmp
             { OpCodes.Ldarg_0, LdArg(0) },
             { OpCodes.Ldarg_1, LdArg(1) },
             { OpCodes.Ldarg_2, LdArg(2) },
             { OpCodes.Ldarg_3, LdArg(3) },
-            { OpCodes.Stloc_0, StLoc(0) },
-            { OpCodes.Stloc_1, StLoc(1) },
-            { OpCodes.Stloc_2, StLoc(2) },
-            { OpCodes.Stloc_3, StLoc(3) },
-            { OpCodes.Ldloca, Chain(UnExpr(UnaryOperator.AddressOf), LdLoc()) },
-            { OpCodes.Ldloca_S, Chain(UnExpr(UnaryOperator.AddressOf), LdLoc()) },
-            { OpCodes.Ldloc_0, LdLoc(0) },
-            { OpCodes.Ldloc_1, LdLoc(1) },
-            { OpCodes.Ldloc_2, LdLoc(2) },
-            { OpCodes.Ldloc_3, LdLoc(3) },
+            { OpCodes.Ldarg_S, LdArg(null) },
+            // ldarg
+            // ldarga
+            { OpCodes.Ldc_I4, Ld(MetadataType.Int32) },
+            { OpCodes.Ldc_I8, Ld(MetadataType.Int64) },
+            { OpCodes.Ldc_R4, Ld(MetadataType.Single) },
+            { OpCodes.Ldc_R8, Ld(MetadataType.Double) },
             { OpCodes.Ldc_I4_0, Ld(MetadataType.Int32, 0) },
             { OpCodes.Ldc_I4_1, Ld(MetadataType.Int32, 1) },
             { OpCodes.Ldc_I4_2, Ld(MetadataType.Int32, 2) },
@@ -116,7 +114,19 @@ namespace ILspect.Syntax
             { OpCodes.Ldc_I4_7, Ld(MetadataType.Int32, 7) },
             { OpCodes.Ldc_I4_8, Ld(MetadataType.Int32, 8) },
             { OpCodes.Ldc_I4_S, Ld(MetadataType.Int32) },
-            { OpCodes.Ldc_I4, Ld(MetadataType.Int32) },
+
+            { OpCodes.Nop, null }, // Nop does nothing!
+            { OpCodes.Isinst, Isinst },
+            { OpCodes.Stloc_0, StLoc(0) },
+            { OpCodes.Stloc_1, StLoc(1) },
+            { OpCodes.Stloc_2, StLoc(2) },
+            { OpCodes.Stloc_3, StLoc(3) },
+            { OpCodes.Ldloca, Chain(UnExpr(UnaryOperator.AddressOf), LdLoc()) },
+            { OpCodes.Ldloca_S, Chain(UnExpr(UnaryOperator.AddressOf), LdLoc()) },
+            { OpCodes.Ldloc_0, LdLoc(0) },
+            { OpCodes.Ldloc_1, LdLoc(1) },
+            { OpCodes.Ldloc_2, LdLoc(2) },
+            { OpCodes.Ldloc_3, LdLoc(3) },
             { OpCodes.Ldstr, Ld(MetadataType.String) },
             { OpCodes.Ldelem_I, Ldelem(MetadataType.IntPtr) },
             { OpCodes.Ldelem_I1, Ldelem(MetadataType.SByte) },
@@ -336,11 +346,20 @@ namespace ILspect.Syntax
             };
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> LdArg(int index)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> LdArg(int? index)
         {
             return (variables, stack, instruction, node) =>
             {
-                stack.Push(new ParameterExpression(variables.ReferenceParameter(index), instruction));
+                ParameterReference parameter;
+                if (index == null)
+                {
+                    parameter = ((ParameterReference)instruction.Operand);
+                }
+                else
+                {
+                    parameter = variables.GetParameter(index.Value);
+                }
+                stack.Push(new ParameterExpression(parameter, instruction));
             };
         }
 
