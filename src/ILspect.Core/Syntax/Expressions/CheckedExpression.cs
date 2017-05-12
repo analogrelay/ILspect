@@ -1,6 +1,6 @@
-using Mono.Cecil.Cil;
+﻿using Mono.Cecil.Cil;
 
-namespace ILspect.Syntax
+namespace ILspect.Syntax.Expressions
 {
     public class CheckedExpression : Expression
     {

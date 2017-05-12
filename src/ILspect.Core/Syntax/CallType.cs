@@ -4,6 +4,7 @@
     {
         Normal,
         Virtual,
-        Interface
+        Interface,
+        Constructor
     }
 }

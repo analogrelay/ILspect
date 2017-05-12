@@ -1,6 +1,7 @@
+﻿using ILspect.Syntax.Expressions;
 using Mono.Cecil.Cil;
 
-namespace ILspect.Syntax
+namespace ILspect.Syntax.Statements
 {
     public class DiscardStatement : Statement
     {

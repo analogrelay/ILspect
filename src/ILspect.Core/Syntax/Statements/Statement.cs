@@ -1,12 +1,12 @@
 ﻿using Mono.Cecil.Cil;
 
-namespace ILspect.Syntax
+namespace ILspect.Syntax.Statements
 {
-    public abstract class SyntaxNode
+    public abstract class Statement
     {
         public Instruction Instruction { get; }
 
-        protected SyntaxNode(Instruction instruction)
+        public Statement(Instruction instruction)
         {
             Instruction = instruction;
         }

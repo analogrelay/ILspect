@@ -1,14 +1,14 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace ILspect.Syntax
+namespace ILspect.Syntax.Expressions
 {
-    public class IsTypeExpression : Expression
+    public class BoxingExpression : Expression
     {
         public Expression Value { get; }
         public TypeReference Type { get; }
 
-        public IsTypeExpression(Expression value, TypeReference type, Instruction instruction) : base(instruction)
+        public BoxingExpression(Expression value, TypeReference type, Instruction instruction) : base(instruction)
         {
             Value = value;
             Type = type;
@@ -16,7 +16,7 @@ namespace ILspect.Syntax
 
         public override string ToString()
         {
-            return $"{Value} is {Type}";
+            return $"__box({Value},{Type.FullName})";
         }
     }
 }

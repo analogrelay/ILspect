@@ -3,7 +3,7 @@ using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace ILspect.Syntax
+namespace ILspect.Syntax.Expressions
 {
     public class CallExpression : Expression
     {
@@ -23,15 +23,18 @@ namespace ILspect.Syntax
         public override string ToString()
         {
             var args = string.Join(", ", Arguments.Select(a => a.ToString()));
-            var call = $"{Method.Name}({args})";
 
-            if (Target == null)
+            if(Type == CallType.Constructor)
             {
-                return $"{Method.DeclaringType.FullName}::{call}";
+                return $"new {Method.DeclaringType.FullName}({args})";
+            }
+            else if (Target == null)
+            {
+                return $"{Method.DeclaringType.FullName}::{Method.Name}({args})";
             }
             else
             {
-                return $"{Target}.{call}";
+                return $"{Target}.{Method.Name}({args})";
             }
         }
     }

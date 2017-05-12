@@ -38,6 +38,11 @@ namespace ILspect.TestLibrary
             }
         }
 
+        public static void ParamArray(params string[] args)
+        {
+            Console.WriteLine(args);
+        }
+
         public static void Compare(int x, int y)
         {
             Console.WriteLine("Eq: " + (x == y));

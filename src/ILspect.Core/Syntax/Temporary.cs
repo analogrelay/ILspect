@@ -1,12 +1,10 @@
-using Mono.Cecil.Cil;
-
-namespace ILspect.Syntax
+﻿namespace ILspect.Syntax
 {
-    public class TemporaryExpression : Expression
+    public class Temporary
     {
         public int Index { get; }
 
-        public TemporaryExpression(int index, Instruction instruction) : base(instruction)
+        public Temporary(int index)
         {
             Index = index;
         }

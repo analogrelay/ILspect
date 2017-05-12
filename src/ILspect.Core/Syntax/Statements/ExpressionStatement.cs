@@ -1,6 +1,7 @@
-﻿using Mono.Cecil.Cil;
+﻿using ILspect.Syntax.Expressions;
+using Mono.Cecil.Cil;
 
-namespace ILspect.Syntax
+namespace ILspect.Syntax.Statements
 {
     public class ExpressionStatement : Statement
     {

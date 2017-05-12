@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace ILspect.Syntax
+namespace ILspect.Syntax.Expressions
 {
     public class ImplicitValueExpression : Expression, IEquatable<ImplicitValueExpression>
     {

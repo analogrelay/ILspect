@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -76,15 +77,14 @@ namespace ILspect.CommandLine.Commands
             if (member.MemberType == MemberType.Method)
             {
                 method = (MethodDefinition)member.Definition;
-                graph = ControlFlowGraph.Create(method);
+                graph = ControlFlowGraphBuilder.Build(method.Body);
             }
             else
             {
                 return Error($"Member type not supported: {member.MemberType}");
             }
 
-            var decompiledMethod = new DecompiledMethod(method);
-            var syntax = SyntaxGraph.Create(graph, decompiledMethod);
+            var syntax = SyntaxGraphBuilder.Create(graph, method);
 
             var arguments = string.Join(", ", method.Parameters.Select(p => $"{p.ParameterType.FullName} {p.Name}"));
 
@@ -93,48 +93,46 @@ namespace ILspect.CommandLine.Commands
             if (method.Body.Variables.Any())
             {
                 Console.WriteLine();
-                Console.WriteLine("Locals: ");
 
                 foreach (var local in method.Body.Variables)
                 {
-                    Console.WriteLine($"    {local.VariableType.FullName} _{local.Index}");
+                    Console.WriteLine($"  .local {local.VariableType.FullName} _{local.Index}");
                 }
             }
 
-            foreach (var node in syntax.Nodes.Values)
+            foreach (var node in syntax.Nodes)
             {
                 Console.WriteLine();
                 Console.WriteLine($"  {node.DisplayName} : {{");
-                foreach (var instruction in node.Contents)
+                foreach (var statement in node.Statements)
                 {
-                    Console.WriteLine($"    {instruction}");
+                    Console.WriteLine($"    {statement}");
                 }
-                if (node.OutboundEdges.Count == 1)
-                {
-                    Console.WriteLine($"  }} -> {node.OutboundEdges.First().Target}");
-                }
-                else if (node.OutboundEdges.Count == 0)
-                {
-                    Console.WriteLine("  } -> end;");
-                }
-                else
-                {
-                    var targets = string.Join(", ", node.OutboundEdges.Select(FormatLink));
-                    Console.WriteLine($"  }} {targets}");
-                }
+                Console.WriteLine($"  }}{FormatLinks(node)}");
             }
+
+            Console.WriteLine();
 
             return 0;
         }
 
-        private static string FormatLink(SyntaxGraph.Edge edge)
+        private static string FormatLinks(SyntaxTreeNode node)
         {
-            if (edge.Value == null)
+            if (node.OutboundLinks.Count == 0)
             {
-                return $"else -> {edge.Target.DisplayName}";
+                return string.Empty;
+            }
+            return " " + string.Join("; ", node.OutboundLinks.Select(FormatLink));
+        }
+
+        private static string FormatLink(SyntaxTreeLink link)
+        {
+            if (link.Expression == null)
+            {
+                return $"else -> {link.Target.DisplayName}";
             }
 
-            return $"{edge.Value} -> {edge.Target.DisplayName}";
+            return $"({link.Expression}) -> {link.Target.DisplayName}";
         }
     }
 }

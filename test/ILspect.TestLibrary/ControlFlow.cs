@@ -1,10 +1,48 @@
-
+﻿
 using System;
 
 namespace ILspect.TestLibrary
 {
     public static class ControlFlow
     {
+        public static void If(string[] items)
+        {
+            if(items.Length > 0)
+            {
+                Console.WriteLine("Has Items!");
+            }
+            else
+            {
+                Console.WriteLine("Does not have items!");
+            }
+        }
+
+        public static void NestedIf(string[] items)
+        {
+            if(items.Length > 0)
+            {
+                if (items.Rank > 0)
+                {
+                    Console.WriteLine("Items > 0 && Rank > 0");
+                }
+                else
+                {
+                    Console.WriteLine("Items > 0 && Rank <= 0");
+                }
+            }
+            else
+            {
+                if (items.Rank > 0)
+                {
+                    Console.WriteLine("Items <= 0 && Rank > 0");
+                }
+                else
+                {
+                    Console.WriteLine("Items <= 0 && Rank <= 0");
+                }
+            }
+        }
+
         public static void ForLoop(string[] items)
         {
             var length = 0;
@@ -12,11 +50,6 @@ namespace ILspect.TestLibrary
             {
                 length += items[i].Length;
             }
-        }
-
-        public static void ParamArray(params string[] args)
-        {
-            Console.WriteLine(args);
         }
 
         public static void WhileLoop()

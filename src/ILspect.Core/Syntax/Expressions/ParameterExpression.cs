@@ -1,13 +1,13 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace ILspect.Syntax
+namespace ILspect.Syntax.Expressions
 {
     public class ParameterExpression : Expression
     {
-        public ParameterDefinition Parameter { get; }
+        public ParameterReference Parameter { get; }
 
-        public ParameterExpression(ParameterDefinition parameter, Instruction instruction) : base(instruction)
+        public ParameterExpression(ParameterReference parameter, Instruction instruction) : base(instruction)
         {
             Parameter = parameter;
         }

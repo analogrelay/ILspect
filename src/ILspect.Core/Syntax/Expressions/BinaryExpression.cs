@@ -1,6 +1,6 @@
 ﻿using Mono.Cecil.Cil;
 
-namespace ILspect.Syntax
+namespace ILspect.Syntax.Expressions
 {
     internal class BinaryExpression : Expression
     {

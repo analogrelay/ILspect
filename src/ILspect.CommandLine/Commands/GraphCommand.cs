@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,7 +17,7 @@ namespace ILspect.CommandLine.Commands
         private static readonly string Name = "graph";
         private static readonly Dictionary<string, Func<ControlFlowGraph, string, Task>> Formats = new Dictionary<string, Func<ControlFlowGraph, string, Task>>()
         {
-            { "dot", DotGraphFormatter }
+            //{ "dot", DotGraphFormatter }
         };
 
         internal static void Register(CommandLineApplication app)
@@ -80,7 +80,7 @@ namespace ILspect.CommandLine.Commands
             ControlFlowGraph graph = null;
             if (member.MemberType == MemberType.Method)
             {
-                graph = ControlFlowGraph.Create((MethodDefinition)member.Definition);
+                graph = ControlFlowGraphBuilder.Build(((MethodDefinition)member.Definition).Body);
             }
             else
             {
@@ -99,86 +99,121 @@ namespace ILspect.CommandLine.Commands
             else
             {
                 Console.WriteLine($"Control flow graph for {typeName}.{memberName}");
-                foreach (var node in graph.Nodes.Values)
+
+                foreach (var node in graph.Nodes)
                 {
                     Console.WriteLine();
-                    Console.WriteLine($"  {node.DisplayName} ({string.Join(", ", node.InboundEdges.Select(i => i.Source.DisplayName))}) : {{");
-                    foreach (var instruction in node.Contents)
+                    Console.WriteLine($"  {node.DisplayName} : {{");
+                    foreach (var instruction in node.Instructions)
                     {
                         Console.WriteLine($"    {instruction}");
                     }
-                    if (node.OutboundEdges.Count == 1)
+                    Console.WriteLine($"  }}{FormatLinks(node)}");
+                }
+
+                // Write Exception handlers
+                foreach (var handler in graph.ExceptionHandlers)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("  .try {");
+                    Console.WriteLine($"    IL_{handler.TryStart.Offset:X4} -> IL_{handler.TryEnd.Offset:X4}");
+                    Console.WriteLine("  }");
+                    Console.WriteLine($"  {FormatHandlerType(handler)} {{");
+                    if(handler.HandlerType == ExceptionHandlerType.Filter)
                     {
-                        Console.WriteLine($"  }} -> {node.OutboundEdges.First().Target.DisplayName}");
+                        Console.WriteLine($"    IL_{handler.FilterStart.Offset:X4} -> IL_{handler.HandlerStart.Offset:X4}");
+                        Console.WriteLine("  }");
+                        Console.WriteLine("  .catch {");
                     }
-                    else if (node.OutboundEdges.Count == 0)
-                    {
-                        Console.WriteLine("  } -> end;");
-                    }
-                    else
-                    {
-                        var targets = string.Join(", ", node.OutboundEdges.Select(FormatLink));
-                        Console.WriteLine($"  }} {targets}");
-                    }
+                    Console.WriteLine($"    IL_{handler.HandlerStart.Offset:X4} -> IL_{handler.HandlerEnd.Offset:X4}");
+                    Console.WriteLine("  }");
                 }
             }
+
+            Console.WriteLine();
 
             return 0;
         }
 
-        private static string FormatLink(ControlFlowGraph.Edge edge)
+        private static string FormatHandlerType(ExceptionHandler handler)
         {
-            if (edge.Value == null)
+            switch (handler.HandlerType)
             {
-                return $"else -> {edge.Target.DisplayName}";
+                case ExceptionHandlerType.Catch:
+                    return $".catch({handler.CatchType})";
+                case ExceptionHandlerType.Filter:
+                    return $".filter";
+                case ExceptionHandlerType.Finally:
+                    return $".finally";
+                case ExceptionHandlerType.Fault:
+                    return $".fault";
+                default:
+                    throw new InvalidOperationException($"Unknown handler type {handler.HandlerType}");
+            }
+        }
+
+        private static string FormatLinks(ControlFlowNode node)
+        {
+            if (node.OutboundLinks.Count == 0)
+            {
+                return string.Empty;
+            }
+            return " " + string.Join("; ", node.OutboundLinks.Select(FormatLink));
+        }
+
+        private static string FormatLink(ControlFlowLink link)
+        {
+            if(link.Condition == Condition.Conditional)
+            {
+                return $"if -> {link.Target.DisplayName}";
             }
             else
             {
-                return $"{edge.Value} -> {edge.Target.DisplayName}";
+                return $"else -> {link.Target.DisplayName}";
             }
         }
 
-        private static async Task DotGraphFormatter(ControlFlowGraph graph, string outFile)
-        {
-            using (var stream = new FileStream(outFile, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
-            using (var writer = new StreamWriter(stream))
-            {
-                await writer.WriteLineAsync("digraph ControlFlow {");
+        //private static async Task DotGraphFormatter(ControlFlowGraph graph, string outFile)
+        //{
+        //    using (var stream = new FileStream(outFile, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
+        //    using (var writer = new StreamWriter(stream))
+        //    {
+        //        await writer.WriteLineAsync("digraph ControlFlow {");
 
-                await writer.WriteLineAsync("  graph[fontname=\"Courier\"];");
-                await writer.WriteLineAsync("  node[fontname=\"Courier\",shape=\"box\"];");
-                await writer.WriteLineAsync("  edge[fontname=\"Courier\"];");
+        //        await writer.WriteLineAsync("  graph[fontname=\"Courier\"];");
+        //        await writer.WriteLineAsync("  node[fontname=\"Courier\",shape=\"box\"];");
+        //        await writer.WriteLineAsync("  edge[fontname=\"Courier\"];");
 
-                foreach (var node in graph.Nodes.Values)
-                {
-                    var content = node.Contents.Count > 0 ?
-                        node.DisplayName + " {\\l" + string.Join("\\l", node.Contents.Select(FormatInstruction)) + "\\l}\\l" :
-                        node.DisplayName;
+        //        foreach (var node in graph.Nodes.Values)
+        //        {
+        //            var content = node.Contents.Count > 0 ?
+        //                node.DisplayName + " {\\l" + string.Join("\\l", node.Contents.Select(FormatInstruction)) + "\\l}\\l" :
+        //                node.DisplayName;
 
-                    await writer.WriteLineAsync($"  {node.DisplayName}[label=\"{content.Replace("\"", "\\\"")}\"]");
+        //            await writer.WriteLineAsync($"  {node.DisplayName}[label=\"{content.Replace("\"", "\\\"")}\"]");
 
-                    if (node.OutboundEdges.Count == 0)
-                    {
-                        await writer.WriteLineAsync($"  {node.DisplayName} -> end;");
-                    }
-                    else
-                    {
-                        foreach (var link in node.OutboundEdges)
-                        {
-                            if (link.Value != null)
-                            {
-                                await writer.WriteLineAsync($"  {node.DisplayName} -> {link.Target.DisplayName}[label=\"{link.Value.ToString().Replace("\"", "\\\"")}\"];");
-                            }
-                            else
-                            {
-                                await writer.WriteLineAsync($"  {node.DisplayName} -> {link.Target.DisplayName}[label=\"else\"];");
-                            }
-                        }
-                    }
-                }
-                await writer.WriteLineAsync("}");
-            }
-        }
+        //            if (node.OutboundEdges.Count == 0)
+        //            {
+        //                await writer.WriteLineAsync($"  {node.DisplayName} -> end;");
+        //            }
+        //            else
+        //            {
+        //                foreach (var link in node.OutboundEdges)
+        //                {
+        //                    if (link.Value != null)
+        //                    {
+        //                        await writer.WriteLineAsync($"  {node.DisplayName} -> {link.Target.DisplayName}[label=\"{link.Value.ToString().Replace("\"", "\\\"")}\"];");
+        //                    }
+        //                    else
+        //                    {
+        //                        await writer.WriteLineAsync($"  {node.DisplayName} -> {link.Target.DisplayName}[label=\"else\"];");
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        await writer.WriteLineAsync("}");
+        //    }
+        //}
 
         private static string FormatInstruction(Instruction arg)
         {

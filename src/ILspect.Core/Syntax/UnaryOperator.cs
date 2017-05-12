@@ -6,6 +6,7 @@ namespace ILspect.Syntax
     public enum UnaryOperator
     {
         Negate,
+        Not,
         AddressOf
     }
 
@@ -14,6 +15,7 @@ namespace ILspect.Syntax
         private static readonly Dictionary<UnaryOperator, string> _symbols = new Dictionary<UnaryOperator, string>()
         {
             { UnaryOperator.Negate, "-" },
+            { UnaryOperator.Not, "!" },
             { UnaryOperator.AddressOf, "&" },
         };
 
