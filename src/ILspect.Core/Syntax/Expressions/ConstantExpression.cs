@@ -1,4 +1,4 @@
-﻿using Mono.Cecil;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax.Expressions
@@ -20,6 +20,8 @@ namespace ILspect.Syntax.Expressions
             {
                 case string s:
                     return "\"" + s + "\"";
+                case null:
+                    return "null";
                 default:
                     return Value.ToString();
             }

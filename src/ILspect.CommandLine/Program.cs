@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 using ILspect.CommandLine.Commands;
@@ -47,9 +47,12 @@ namespace ILspect.CommandLine
             catch (Exception ex)
             {
                 CommandHelpers.Error(ex.Message);
+
 #if DEBUG
-                throw;
+                CommandHelpers.Error(ex.ToString());
 #endif
+
+                return -1;
             }
         }
     }

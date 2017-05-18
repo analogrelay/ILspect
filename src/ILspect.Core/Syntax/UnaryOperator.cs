@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace ILspect.Syntax
@@ -7,6 +7,7 @@ namespace ILspect.Syntax
     {
         Negate,
         Not,
+        BitNot,
         AddressOf
     }
 
@@ -16,6 +17,7 @@ namespace ILspect.Syntax
         {
             { UnaryOperator.Negate, "-" },
             { UnaryOperator.Not, "!" },
+            { UnaryOperator.BitNot, "~" },
             { UnaryOperator.AddressOf, "&" },
         };
 

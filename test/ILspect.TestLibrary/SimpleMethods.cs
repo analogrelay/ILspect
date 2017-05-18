@@ -1,16 +1,22 @@
-﻿using System;
+using System;
 
 namespace ILspect.TestLibrary
 {
     public static class SimpleMethods
     {
-        public static int BinExprs(int x, int y)
+        public static void BinExprs(int x, int y)
         {
             Console.WriteLine("Add: " + (x + y));
             Console.WriteLine("And: " + (x & y));
             Console.WriteLine("Div: " + (x / y));
+            Console.WriteLine("Mul: " + (x * y));
+        }
 
-            return 0;
+        public static void UnExprs(int x, bool y)
+        {
+            Console.WriteLine("Neg: " + -x);
+            Console.WriteLine("Not: " + !y);
+            Console.WriteLine("BitNot: " + ~x);
         }
 
         public static int Add(int x, int y)
@@ -41,6 +47,11 @@ namespace ILspect.TestLibrary
         public static void ParamArray(params string[] args)
         {
             Console.WriteLine(args);
+        }
+
+        public static void Null()
+        {
+            new Version(null);
         }
 
         public static void Compare(int x, int y)

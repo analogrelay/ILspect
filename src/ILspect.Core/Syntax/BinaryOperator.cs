@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace ILspect.Syntax
@@ -13,7 +13,8 @@ namespace ILspect.Syntax
         NotEqual,
         GreaterThanOrEqual,
         GreaterThan,
-        LessThanOrEqual
+        LessThanOrEqual,
+        Multiply
     }
 
     public static class BinaryOperatorExtensions
@@ -29,6 +30,7 @@ namespace ILspect.Syntax
             { BinaryOperator.GreaterThanOrEqual, ">=" },
             { BinaryOperator.GreaterThan, ">" },
             { BinaryOperator.LessThanOrEqual, "<=" },
+            { BinaryOperator.Multiply, "*" },
         };
 
         public static string GetSymbol(this BinaryOperator self)

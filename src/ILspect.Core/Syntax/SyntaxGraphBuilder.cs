@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ILspect.ControlFlow;
@@ -55,37 +55,37 @@ namespace ILspect.Syntax
             { OpCodes.Ceq, BinExpr(BinaryOperator.Equal) },
             { OpCodes.Cgt, BinExpr(BinaryOperator.GreaterThan) },
             { OpCodes.Cgt_Un, BinExpr(BinaryOperator.GreaterThan) },
-            { OpCodes.Conv_I, Conv(MetadataType.IntPtr) },
-            { OpCodes.Conv_I1, Conv(MetadataType.SByte) },
-            { OpCodes.Conv_I2, Conv(MetadataType.Int16) },
-            { OpCodes.Conv_I4, Conv(MetadataType.Int32) },
-            { OpCodes.Conv_I8, Conv(MetadataType.Int64) },
-            { OpCodes.Conv_R4, Conv(MetadataType.Single) },
-            { OpCodes.Conv_R8, Conv(MetadataType.Double) },
-            { OpCodes.Conv_U, Conv(MetadataType.UIntPtr) },
-            { OpCodes.Conv_U1, Conv(MetadataType.Byte) },
-            { OpCodes.Conv_U2, Conv(MetadataType.UInt16) },
-            { OpCodes.Conv_U4, Conv(MetadataType.UInt32) },
-            { OpCodes.Conv_U8, Conv(MetadataType.UInt64) },
-            { OpCodes.Conv_Ovf_I, Conv(MetadataType.IntPtr) },
-            { OpCodes.Conv_Ovf_I1, Conv(MetadataType.SByte) },
-            { OpCodes.Conv_Ovf_I2, Conv(MetadataType.Int16) },
-            { OpCodes.Conv_Ovf_I4, Conv(MetadataType.Int32) },
-            { OpCodes.Conv_Ovf_I8, Conv(MetadataType.Int64) },
-            { OpCodes.Conv_Ovf_I1_Un, Conv(MetadataType.SByte) },
-            { OpCodes.Conv_Ovf_I2_Un, Conv(MetadataType.Int16) },
-            { OpCodes.Conv_Ovf_I4_Un, Conv(MetadataType.Int32) },
-            { OpCodes.Conv_Ovf_I8_Un, Conv(MetadataType.Int64) },
-            { OpCodes.Conv_Ovf_U, Conv(MetadataType.UIntPtr) },
-            { OpCodes.Conv_Ovf_U1, Conv(MetadataType.Byte) },
-            { OpCodes.Conv_Ovf_U2, Conv(MetadataType.UInt16) },
-            { OpCodes.Conv_Ovf_U4, Conv(MetadataType.UInt32) },
-            { OpCodes.Conv_Ovf_U8, Conv(MetadataType.UInt64) },
-            { OpCodes.Conv_Ovf_U_Un, Conv(MetadataType.UIntPtr) },
-            { OpCodes.Conv_Ovf_U1_Un, Conv(MetadataType.Byte) },
-            { OpCodes.Conv_Ovf_U2_Un, Conv(MetadataType.UInt16) },
-            { OpCodes.Conv_Ovf_U4_Un, Conv(MetadataType.UInt32) },
-            { OpCodes.Conv_Ovf_U8_Un, Conv(MetadataType.UInt64) },
+            { OpCodes.Conv_I, Conv(MetadataType.IntPtr, withOverflowDetection: false) },
+            { OpCodes.Conv_I1, Conv(MetadataType.SByte, withOverflowDetection: false) },
+            { OpCodes.Conv_I2, Conv(MetadataType.Int16, withOverflowDetection: false) },
+            { OpCodes.Conv_I4, Conv(MetadataType.Int32, withOverflowDetection: false) },
+            { OpCodes.Conv_I8, Conv(MetadataType.Int64, withOverflowDetection: false) },
+            { OpCodes.Conv_R4, Conv(MetadataType.Single, withOverflowDetection: false) },
+            { OpCodes.Conv_R8, Conv(MetadataType.Double, withOverflowDetection: false) },
+            { OpCodes.Conv_U, Conv(MetadataType.UIntPtr, withOverflowDetection: false) },
+            { OpCodes.Conv_U1, Conv(MetadataType.Byte, withOverflowDetection: false) },
+            { OpCodes.Conv_U2, Conv(MetadataType.UInt16, withOverflowDetection: false) },
+            { OpCodes.Conv_U4, Conv(MetadataType.UInt32, withOverflowDetection: false) },
+            { OpCodes.Conv_U8, Conv(MetadataType.UInt64, withOverflowDetection: false) },
+            { OpCodes.Conv_Ovf_I, Conv(MetadataType.IntPtr, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_I1, Conv(MetadataType.SByte, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_I2, Conv(MetadataType.Int16, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_I4, Conv(MetadataType.Int32, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_I8, Conv(MetadataType.Int64, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_I1_Un, Conv(MetadataType.SByte, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_I2_Un, Conv(MetadataType.Int16, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_I4_Un, Conv(MetadataType.Int32, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_I8_Un, Conv(MetadataType.Int64, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_U, Conv(MetadataType.UIntPtr, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_U1, Conv(MetadataType.Byte, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_U2, Conv(MetadataType.UInt16, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_U4, Conv(MetadataType.UInt32, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_U8, Conv(MetadataType.UInt64, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_U_Un, Conv(MetadataType.UIntPtr, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_U1_Un, Conv(MetadataType.Byte, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_U2_Un, Conv(MetadataType.UInt16, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_U4_Un, Conv(MetadataType.UInt32, withOverflowDetection: true) },
+            { OpCodes.Conv_Ovf_U8_Un, Conv(MetadataType.UInt64, withOverflowDetection: true) },
             { OpCodes.Div, BinExpr(BinaryOperator.Divide) },
             { OpCodes.Div_Un, BinExpr(BinaryOperator.Divide) },
             { OpCodes.Dup, Dup },
@@ -114,19 +114,40 @@ namespace ILspect.Syntax
             { OpCodes.Ldc_I4_7, Ld(MetadataType.Int32, 7) },
             { OpCodes.Ldc_I4_8, Ld(MetadataType.Int32, 8) },
             { OpCodes.Ldc_I4_S, Ld(MetadataType.Int32) },
-
+            // ldftn
+            { OpCodes.Ldind_I, Ldind(MetadataType.IntPtr) },
+            { OpCodes.Ldind_I1, Ldind(MetadataType.SByte) },
+            { OpCodes.Ldind_I2, Ldind(MetadataType.Int16) },
+            { OpCodes.Ldind_I4, Ldind(MetadataType.Int32) },
+            { OpCodes.Ldind_I8, Ldind(MetadataType.Int64) },
+            { OpCodes.Ldind_U1, Ldind(MetadataType.Byte) },
+            { OpCodes.Ldind_U2, Ldind(MetadataType.UInt16) },
+            { OpCodes.Ldind_U4, Ldind(MetadataType.UInt32) },
+            { OpCodes.Ldind_R4, Ldind(MetadataType.Single) },
+            { OpCodes.Ldind_R8, Ldind(MetadataType.Double) },
+            { OpCodes.Ldind_Ref, Ldind(MetadataType.Object) },
+            { OpCodes.Ldloc, LdLoc() },
+            { OpCodes.Ldloc_S, LdLoc() },
+            { OpCodes.Ldloc_0, LdLoc(0) },
+            { OpCodes.Ldloc_1, LdLoc(1) },
+            { OpCodes.Ldloc_2, LdLoc(2) },
+            { OpCodes.Ldloc_3, LdLoc(3) },
+            { OpCodes.Ldloca, Chain(UnExpr(UnaryOperator.AddressOf), LdLoc()) },
+            { OpCodes.Ldloca_S, Chain(UnExpr(UnaryOperator.AddressOf), LdLoc()) },
+            { OpCodes.Ldnull, Ldnull },
+            // leave
+            { OpCodes.Localloc, Localloc },
+            { OpCodes.Mul, BinExpr(BinaryOperator.Multiply, withOverflowDetection: false) },
+            { OpCodes.Mul_Ovf, BinExpr(BinaryOperator.Multiply, withOverflowDetection: true) },
+            { OpCodes.Mul_Ovf_Un, BinExpr(BinaryOperator.Multiply, withOverflowDetection: true) },
             { OpCodes.Nop, null }, // Nop does nothing!
+            { OpCodes.Not, UnExpr(UnaryOperator.BitNot) },
+
             { OpCodes.Isinst, Isinst },
             { OpCodes.Stloc_0, StLoc(0) },
             { OpCodes.Stloc_1, StLoc(1) },
             { OpCodes.Stloc_2, StLoc(2) },
             { OpCodes.Stloc_3, StLoc(3) },
-            { OpCodes.Ldloca, Chain(UnExpr(UnaryOperator.AddressOf), LdLoc()) },
-            { OpCodes.Ldloca_S, Chain(UnExpr(UnaryOperator.AddressOf), LdLoc()) },
-            { OpCodes.Ldloc_0, LdLoc(0) },
-            { OpCodes.Ldloc_1, LdLoc(1) },
-            { OpCodes.Ldloc_2, LdLoc(2) },
-            { OpCodes.Ldloc_3, LdLoc(3) },
             { OpCodes.Ldstr, Ld(MetadataType.String) },
             { OpCodes.Ldelem_I, Ldelem(MetadataType.IntPtr) },
             { OpCodes.Ldelem_I1, Ldelem(MetadataType.SByte) },
@@ -177,7 +198,7 @@ namespace ILspect.Syntax
                 }
 
                 // Copy the edges
-                if(controlFlowNode.OutboundLinks.Any())
+                if (controlFlowNode.OutboundLinks.Any())
                 {
                     var unconditional = controlFlowNode.OutboundLinks.Single(l => l.Condition == Condition.Unconditional);
                     var conditional = controlFlowNode.OutboundLinks.SingleOrDefault(l => l.Condition == Condition.Conditional);
@@ -190,7 +211,7 @@ namespace ILspect.Syntax
                     }
                 }
 
-                if(stack.Count > 0)
+                if (stack.Count > 0)
                 {
                     throw new NotImplementedException("Not yet implemented: forwarding stacks");
                 }
@@ -209,9 +230,20 @@ namespace ILspect.Syntax
             stack.Push(new ArglistExpression(instruction));
         }
 
+        private static void Localloc(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        {
+            var size = Pop(stack);
+            stack.Push(new LocallocExpression(size, instruction));
+        }
+
+        private static void Ldnull(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        {
+            stack.Push(new ConstantExpression(null, MetadataType.Object, instruction));
+        }
+
         private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> Call(CallType callType)
         {
-            return (MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node) =>
+            return (variables, stack, instruction, node) =>
             {
                 var targetMethod = (MethodReference)instruction.Operand;
 
@@ -267,12 +299,12 @@ namespace ILspect.Syntax
             node.AddStatement(new ReturnStatement(value, instruction));
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> Conv(MetadataType type)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> Conv(MetadataType type, bool withOverflowDetection)
         {
             return (variables, stack, instruction, node) =>
             {
                 var value = Pop(stack);
-                stack.Push(new ConvertExpression(value, type, instruction));
+                stack.Push(new ConvertExpression(value, type, withOverflowDetection, instruction));
             };
         }
 
@@ -285,13 +317,13 @@ namespace ILspect.Syntax
             };
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> BinExpr(BinaryOperator @operator)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> BinExpr(BinaryOperator @operator, bool withOverflowDetection = false)
         {
             return (variables, stack, instruction, node) =>
             {
                 var value2 = Pop(stack);
                 var value1 = Pop(stack);
-                stack.Push(new BinaryExpression(value1, value2, @operator, instruction));
+                stack.Push(new BinaryExpression(value1, value2, @operator, withOverflowDetection, instruction));
             };
         }
 
@@ -336,6 +368,15 @@ namespace ILspect.Syntax
             };
         }
 
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> Ldind(MetadataType type)
+        {
+            return (variables, stack, instruction, node) =>
+            {
+                var addr = Pop(stack);
+                stack.Push(new LoadIndirectExpression(addr, type, instruction));
+            };
+        }
+
         private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> Ld(MetadataType type) => Ld<object>(type, constant: null, isConstant: false);
         private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> Ld<T>(MetadataType type, T constant) => Ld<T>(type, constant, isConstant: true);
         private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> Ld<T>(MetadataType type, T constant, bool isConstant)
@@ -360,14 +401,6 @@ namespace ILspect.Syntax
                     parameter = variables.GetParameter(index.Value);
                 }
                 stack.Push(new ParameterExpression(parameter, instruction));
-            };
-        }
-
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> LdLocA(int index)
-        {
-            return (variables, stack, instruction, node) =>
-            {
-                stack.Push(new LocalExpression(variables.GetLocal(index), instruction));
             };
         }
 
