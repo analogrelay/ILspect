@@ -1,1 +1,1 @@
-﻿& dotnet "$PSScriptRoot\src\ILspect.CommandLine\bin\Debug\netcoreapp1.1\ILspect.CommandLine.dll" @args
+﻿& dotnet "$PSScriptRoot\src\ILspect.CommandLine\bin\Debug\netcoreapp2.0\ILspect.CommandLine.dll" @args

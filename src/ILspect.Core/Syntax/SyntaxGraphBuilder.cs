@@ -142,6 +142,7 @@ namespace ILspect.Syntax
             { OpCodes.Mul_Ovf_Un, BinExpr(BinaryOperator.Multiply, withOverflowDetection: true) },
             { OpCodes.Nop, null }, // Nop does nothing!
             { OpCodes.Not, UnExpr(UnaryOperator.BitNot) },
+            { OpCodes.Or, BinExpr(BinaryOperator.BitOr) },
 
             { OpCodes.Isinst, Isinst },
             { OpCodes.Stloc_0, StLoc(0) },
