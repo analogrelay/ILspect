@@ -200,6 +200,17 @@ namespace ILspect.Syntax
             { OpCodes.Sub_Ovf_Un, BinExpr(BinaryOperator.Subtract, withOverflowDetection: true, unsigned: true) },
             //switch
             { OpCodes.Xor, BinExpr(BinaryOperator.BitXor) },
+
+            // TODO:
+            // ldvirtftn
+            // mkrefany
+            // newarr
+            // refanytype
+            // refanyval
+            // rethrow
+            // sizeof
+            // stelem
+            // and more...
         };
 
         public static SyntaxGraph Create(ControlFlowGraph controlFlowGraph, MethodDefinition method) =>
