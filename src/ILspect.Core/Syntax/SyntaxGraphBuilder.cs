@@ -169,6 +169,8 @@ namespace ILspect.Syntax
             { OpCodes.Sub, BinExpr(BinaryOperator.Subtract) },
             { OpCodes.Sub_Ovf, BinExpr(BinaryOperator.Subtract, withOverflowDetection: true) },
             { OpCodes.Sub_Ovf_Un, BinExpr(BinaryOperator.Subtract, withOverflowDetection: true, unsigned: true) },
+            //switch
+            { OpCodes.Xor, BinExpr(BinaryOperator.BitXor) },
 
             { OpCodes.Isinst, Isinst },
             { OpCodes.Ldstr, Ld(MetadataType.String) },

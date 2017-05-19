@@ -15,6 +15,7 @@ namespace ILspect.TestLibrary
             Console.WriteLine("Shl: " + (x << 4));
             Console.WriteLine("Shr: " + (x >> 4));
             Console.WriteLine("Sub: " + (x - 4));
+            Console.WriteLine("BitXor: " + (x ^ 4));
         }
 
         public static void UnsignedBinExprs(uint x, uint y)
@@ -27,6 +28,7 @@ namespace ILspect.TestLibrary
             Console.WriteLine("Rem: " + (x % y));
             Console.WriteLine("Shr: " + (x >> 4));
             Console.WriteLine("Sub: " + (x - 4));
+            Console.WriteLine("BitXor: " + (x ^ 4));
         }
 
         public static void UnExprs(int x, bool y)

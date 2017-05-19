@@ -20,6 +20,7 @@ namespace ILspect.Syntax
         ShiftLeft,
         ShiftRight,
         Subtract,
+        BitXor,
     }
 
     public static class BinaryOperatorExtensions
@@ -41,6 +42,7 @@ namespace ILspect.Syntax
             { BinaryOperator.ShiftLeft, "<<" },
             { BinaryOperator.ShiftRight, ">>" },
             { BinaryOperator.Subtract, "-" },
+            { BinaryOperator.BitXor, "^" },
         };
 
         public static string GetSymbol(this BinaryOperator self)
