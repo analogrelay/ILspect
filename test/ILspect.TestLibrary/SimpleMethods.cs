@@ -11,6 +11,22 @@ namespace ILspect.TestLibrary
             Console.WriteLine("Div: " + (x / y));
             Console.WriteLine("Mul: " + (x * y));
             Console.WriteLine("BitOr: " + (x | y));
+            Console.WriteLine("Rem: " + (x % y));
+            Console.WriteLine("Shl: " + (x << 4));
+            Console.WriteLine("Shr: " + (x >> 4));
+            Console.WriteLine("Sub: " + (x - 4));
+        }
+
+        public static void UnsignedBinExprs(uint x, uint y)
+        {
+            Console.WriteLine("Add: " + (x + y));
+            Console.WriteLine("And: " + (x & y));
+            Console.WriteLine("Div: " + (x / y));
+            Console.WriteLine("Mul: " + (x * y));
+            Console.WriteLine("BitOr: " + (x | y));
+            Console.WriteLine("Rem: " + (x % y));
+            Console.WriteLine("Shr: " + (x >> 4));
+            Console.WriteLine("Sub: " + (x - 4));
         }
 
         public static void UnExprs(int x, bool y)
@@ -18,6 +34,22 @@ namespace ILspect.TestLibrary
             Console.WriteLine("Neg: " + -x);
             Console.WriteLine("Not: " + !y);
             Console.WriteLine("BitNot: " + ~x);
+        }
+
+        public static void StoreArg(int foo)
+        {
+            foo = foo + 42;
+            Console.WriteLine("foo: " + foo);
+        }
+
+        public static void RefParam(ref int foo)
+        {
+            foo = foo + 42;
+        }
+
+        public static void OutParam(out int foo)
+        {
+            foo = 42;
         }
 
         public static int Add(int x, int y)

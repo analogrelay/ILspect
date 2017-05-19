@@ -16,6 +16,10 @@ namespace ILspect.Syntax
         LessThanOrEqual,
         Multiply,
         BitOr,
+        Remainder,
+        ShiftLeft,
+        ShiftRight,
+        Subtract,
     }
 
     public static class BinaryOperatorExtensions
@@ -33,6 +37,10 @@ namespace ILspect.Syntax
             { BinaryOperator.LessThanOrEqual, "<=" },
             { BinaryOperator.Multiply, "*" },
             { BinaryOperator.BitOr, "|" },
+            { BinaryOperator.Remainder, "%" },
+            { BinaryOperator.ShiftLeft, "<<" },
+            { BinaryOperator.ShiftRight, ">>" },
+            { BinaryOperator.Subtract, "-" },
         };
 
         public static string GetSymbol(this BinaryOperator self)
