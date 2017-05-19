@@ -7,7 +7,7 @@ namespace ILspect.TestLibrary
         public static void LoadIndirect(int* value)
         {
             Console.WriteLine(*value);
-        } 
+        }
 
         public static void LoadLocalAddress()
         {

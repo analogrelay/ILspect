@@ -117,10 +117,6 @@ namespace ILspect.TestLibrary
             // Console.WriteLine("native int" + (IntPtr)x);
             // Console.WriteLine("native unsigned int" + (UIntPtr)x);
         }
-        public static int ArrayElement(int[] items)
-        {
-            return items[42];
-        }
 
         public static void Constants()
         {
@@ -128,6 +124,7 @@ namespace ILspect.TestLibrary
             Console.WriteLine("i8:" + 42L);
             Console.WriteLine("r4:" + 3.14f);
             Console.WriteLine("r8:" + 3.14);
+            Console.WriteLine("string");
         }
 
         public static void Args(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j)

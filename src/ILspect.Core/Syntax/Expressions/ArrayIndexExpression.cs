@@ -8,12 +8,14 @@ namespace ILspect.Syntax.Expressions
         public Expression Array { get; }
         public Expression Index { get; }
         public MetadataType Type { get; }
+        public TypeReference ObjectType { get; }
 
-        public ArrayIndexExpression(Expression array, Expression index, MetadataType type, Instruction instruction) : base(instruction)
+        public ArrayIndexExpression(Expression array, Expression index, MetadataType type, TypeReference objectType, Instruction instruction) : base(instruction)
         {
             Array = array;
             Index = index;
             Type = type;
+            ObjectType = objectType;
         }
 
         public override string ToString()
