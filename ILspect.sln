@@ -4,13 +4,13 @@ VisualStudioVersion = 15.0.26510.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{529A7AD9-F0D7-43D9-8370-3CE657500969}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ILspect.Core", "src\ILspect.Core\ILspect.Core.csproj", "{034ABAA9-1FAC-4576-85C4-D70286E293CF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILspect.Core", "src\ILspect.Core\ILspect.Core.csproj", "{034ABAA9-1FAC-4576-85C4-D70286E293CF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ILspect.CommandLine", "src\ILspect.CommandLine\ILspect.CommandLine.csproj", "{7345A352-F7D5-430D-8101-4E8BAF1476D0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILspect.CommandLine", "src\ILspect.CommandLine\ILspect.CommandLine.csproj", "{7345A352-F7D5-430D-8101-4E8BAF1476D0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E7B7CA0F-D14C-46CB-A20A-53BCD4CE1A0D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ILspect.TestLibrary", "test\ILspect.TestLibrary\ILspect.TestLibrary.csproj", "{4990A3B7-6B04-4590-B762-A972B8BC13A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILspect.TestLibrary", "test\ILspect.TestLibrary\ILspect.TestLibrary.csproj", "{4990A3B7-6B04-4590-B762-A972B8BC13A4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1BB6FFA1-7132-4A81-85FD-996A1EB43BCB}"
 	ProjectSection(SolutionItems) = preProject

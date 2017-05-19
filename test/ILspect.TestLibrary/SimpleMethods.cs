@@ -10,6 +10,7 @@ namespace ILspect.TestLibrary
             Console.WriteLine("And: " + (x & y));
             Console.WriteLine("Div: " + (x / y));
             Console.WriteLine("Mul: " + (x * y));
+            Console.WriteLine("BitOr: " + (x | y));
         }
 
         public static void UnExprs(int x, bool y)
