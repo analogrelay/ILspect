@@ -7,6 +7,9 @@ namespace ILspect.Syntax.Expressions
     {
         public MemberReference Token { get; }
 
+        public TokenExpression(MemberReference token)
+            : this(token, instruction: null) { }
+
         public TokenExpression(MemberReference token, Instruction instruction) : base(instruction)
         {
             Token = token;

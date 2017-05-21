@@ -9,6 +9,9 @@ namespace ILspect.Syntax.Statements
         public ParameterReference Parameter { get; }
         public Expression Value { get; }
 
+        public StoreParameterStatement(ParameterReference parameter, Expression value)
+            : this(parameter, value, instruction: null) { }
+
         public StoreParameterStatement(ParameterReference parameter, Expression value, Instruction instruction) : base(instruction)
         {
             Parameter = parameter;

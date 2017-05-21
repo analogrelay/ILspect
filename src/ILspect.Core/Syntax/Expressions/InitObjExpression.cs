@@ -7,6 +7,9 @@ namespace ILspect.Syntax.Expressions
     {
         public TypeReference Type { get; }
 
+        public InitObjExpression(TypeReference type)
+            : this(type, instruction: null) { }
+
         public InitObjExpression(TypeReference type, Instruction instruction) : base(instruction)
         {
             Type = type;

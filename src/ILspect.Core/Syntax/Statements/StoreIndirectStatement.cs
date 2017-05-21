@@ -10,6 +10,9 @@ namespace ILspect.Syntax.Statements
         public Expression Value { get; }
         public MetadataType Type { get; }
 
+        public StoreIndirectStatement(Expression address, Expression value, MetadataType type)
+            : this(address, value, type, instruction: null) { }
+
         public StoreIndirectStatement(Expression address, Expression value, MetadataType type, Instruction instruction) : base(instruction)
         {
             Address = address;

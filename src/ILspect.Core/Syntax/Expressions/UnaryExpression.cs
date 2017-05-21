@@ -5,7 +5,10 @@ namespace ILspect.Syntax.Expressions
     public class UnaryExpression : Expression
     {
         public Expression Value { get; }
-        public UnaryOperator Operator {get;}
+        public UnaryOperator Operator { get; }
+
+        public UnaryExpression(Expression value, UnaryOperator @operator)
+            : this(value, @operator, instruction: null) { }
 
         public UnaryExpression(Expression value, UnaryOperator @operator, Instruction instruction) : base(instruction)
         {

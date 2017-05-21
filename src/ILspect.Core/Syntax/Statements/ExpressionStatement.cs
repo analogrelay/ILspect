@@ -7,6 +7,9 @@ namespace ILspect.Syntax.Statements
     {
         public Expression Expression { get; }
 
+        public ExpressionStatement(Expression expression)
+            : this(expression, instruction: null) { }
+
         public ExpressionStatement(Expression expression, Instruction instruction) : base(instruction)
         {
             Expression = expression;

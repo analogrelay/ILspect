@@ -11,7 +11,7 @@ namespace ILspect.Syntax
 {
     public static class SyntaxGraphBuilder
     {
-        private static readonly Dictionary<OpCode, Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode>> _opCodeHandlers = new Dictionary<OpCode, Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode>>()
+        private static readonly Dictionary<OpCode, Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode>> _opCodeHandlers = new Dictionary<OpCode, Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode>>()
         {
             { OpCodes.Add, BinExpr(BinaryOperator.Add) },
             { OpCodes.Add_Ovf, BinExpr(BinaryOperator.Add, withOverflowDetection: true) },
@@ -218,12 +218,12 @@ namespace ILspect.Syntax
 
         public static SyntaxGraph Create(ControlFlowGraph controlFlowGraph, MethodVariables variables)
         {
-            var syntaxNodes = new SortedDictionary<int, SyntaxTreeNode>();
+            var syntaxNodes = new SortedDictionary<int, SyntaxGraphNode>();
 
             // Populate the nodes list
             foreach (var controlFlowNode in controlFlowGraph.Nodes)
             {
-                syntaxNodes.Add(controlFlowNode.Offset, new SyntaxTreeNode(controlFlowNode.Offset));
+                syntaxNodes.Add(controlFlowNode.Offset, new SyntaxGraphNode(controlFlowNode.Offset));
             }
 
             // Now fill them
@@ -264,46 +264,46 @@ namespace ILspect.Syntax
             return new SyntaxGraph(syntaxNodes, variables);
         }
 
-        private static void Pop(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void Pop(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             node.AddStatement(new DiscardStatement(Pop(stack), instruction));
         }
 
-        private static void ArgList(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void ArgList(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             stack.Push(new ArglistExpression(instruction));
         }
 
-        private static void LocAlloc(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void LocAlloc(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             var size = Pop(stack);
             stack.Push(new LocallocExpression(size, instruction));
         }
 
-        private static void LdNull(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void LdNull(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             stack.Push(new ConstantExpression(null, MetadataType.Object, instruction));
         }
 
-        private static void LdObj(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void LdObj(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             var addr = Pop(stack);
             stack.Push(new DereferenceExpression(addr, (TypeReference)instruction.Operand, instruction));
         }
 
-        private static void LdToken(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void LdToken(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             stack.Push(new TokenExpression((MemberReference)instruction.Operand, instruction));
         }
 
-        private static void InitObj(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void InitObj(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             var addr = Pop(stack);
             var value = new InitObjExpression((TypeReference)instruction.Operand, instruction);
             node.AddStatement(new StoreIndirectStatement(addr, value, MetadataType.Object, instruction));
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> Call(CallType callType)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> Call(CallType callType)
         {
             return (variables, stack, instruction, node) =>
             {
@@ -339,7 +339,7 @@ namespace ILspect.Syntax
             };
         }
 
-        private static void Dup(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void Dup(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             // Store the current value in a temporary, then load it into the stack twice
             var value = Pop(stack);
@@ -349,31 +349,31 @@ namespace ILspect.Syntax
             stack.Push(new TemporaryExpression(temp, instruction));
         }
 
-        private static void Box(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void Box(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             var value = Pop(stack);
             stack.Push(new BoxingExpression(value, (TypeReference)instruction.Operand, instruction));
         }
 
-        private static void CastClass(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void CastClass(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             var value = Pop(stack);
             stack.Push(new CastExpression(value, (TypeReference)instruction.Operand, instruction));
         }
 
-        private static void Return(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void Return(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             var value = PopOrDefault(stack);
             node.AddStatement(new ReturnStatement(value, instruction));
         }
 
-        private static void StArg(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void StArg(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             var value = Pop(stack);
             node.AddStatement(new StoreParameterStatement((ParameterReference)instruction.Operand, value, instruction));
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> Conv(MetadataType type, bool withOverflowDetection, bool unsigned)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> Conv(MetadataType type, bool withOverflowDetection, bool unsigned)
         {
             return (variables, stack, instruction, node) =>
             {
@@ -382,7 +382,7 @@ namespace ILspect.Syntax
             };
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> UnExpr(UnaryOperator @operator)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> UnExpr(UnaryOperator @operator)
         {
             return (variables, stack, instruction, node) =>
             {
@@ -391,7 +391,7 @@ namespace ILspect.Syntax
             };
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> BinExpr(BinaryOperator @operator, bool withOverflowDetection = false, bool unsigned = false)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> BinExpr(BinaryOperator @operator, bool withOverflowDetection = false, bool unsigned = false)
         {
             return (variables, stack, instruction, node) =>
             {
@@ -401,7 +401,7 @@ namespace ILspect.Syntax
             };
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> Chain(Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> outer, Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> inner)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> Chain(Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> outer, Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> inner)
         {
             return (variables, stack, instruction, node) =>
             {
@@ -410,19 +410,19 @@ namespace ILspect.Syntax
             };
         }
 
-        private static void IsInst(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void IsInst(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             var obj = Pop(stack);
             stack.Push(new IsTypeExpression(obj, (TypeReference)instruction.Operand, instruction));
         }
 
-        private static void LdLen(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxTreeNode node)
+        private static void LdLen(MethodVariables variables, Stack<Expression> stack, Instruction instruction, SyntaxGraphNode node)
         {
             var array = Pop(stack);
             stack.Push(new ArrayLengthExpression(array, instruction));
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> LdFld(bool isStatic)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> LdFld(bool isStatic)
         {
             return (variables, stack, instruction, node) =>
             {
@@ -431,7 +431,7 @@ namespace ILspect.Syntax
             };
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> LdElem(MetadataType type = MetadataType.Object)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> LdElem(MetadataType type = MetadataType.Object)
         {
             return (variables, stack, instruction, node) =>
             {
@@ -446,7 +446,7 @@ namespace ILspect.Syntax
             };
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> StInd(MetadataType type)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> StInd(MetadataType type)
         {
             return (variables, stack, instruction, node) =>
             {
@@ -456,7 +456,7 @@ namespace ILspect.Syntax
             };
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> LdInd(MetadataType type)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> LdInd(MetadataType type)
         {
             return (variables, stack, instruction, node) =>
             {
@@ -465,9 +465,9 @@ namespace ILspect.Syntax
             };
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> Ld(MetadataType type) => Ld<object>(type, constant: null, isConstant: false);
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> Ld<T>(MetadataType type, T constant) => Ld<T>(type, constant, isConstant: true);
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> Ld<T>(MetadataType type, T constant, bool isConstant)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> Ld(MetadataType type) => Ld<object>(type, constant: null, isConstant: false);
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> Ld<T>(MetadataType type, T constant) => Ld<T>(type, constant, isConstant: true);
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> Ld<T>(MetadataType type, T constant, bool isConstant)
         {
             return (variables, stack, instruction, node) =>
             {
@@ -475,7 +475,7 @@ namespace ILspect.Syntax
             };
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> LdArg(int? index = null)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> LdArg(int? index = null)
         {
             return (variables, stack, instruction, node) =>
             {
@@ -492,7 +492,7 @@ namespace ILspect.Syntax
             };
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> LdLoc(int? index = null)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> LdLoc(int? index = null)
         {
             return (variables, stack, instruction, node) =>
             {
@@ -509,7 +509,7 @@ namespace ILspect.Syntax
             };
         }
 
-        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxTreeNode> StLoc(int? index = null)
+        private static Action<MethodVariables, Stack<Expression>, Instruction, SyntaxGraphNode> StLoc(int? index = null)
         {
             return (variables, stack, instruction, node) =>
             {

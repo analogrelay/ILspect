@@ -8,6 +8,9 @@ namespace ILspect.Syntax.Expressions
         public object Value { get; }
         public MetadataType Type { get; }
 
+        public ConstantExpression(object value, MetadataType type)
+            : this(value, type, instruction: null) { }
+
         public ConstantExpression(object value, MetadataType type, Instruction instruction) : base(instruction)
         {
             Value = value;

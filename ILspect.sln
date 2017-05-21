@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		ilspect.ps1 = ilspect.ps1
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILspect.Core.Tests", "test\ILspect.Core.Tests\ILspect.Core.Tests.csproj", "{EF98E74C-900F-4DAF-BC1D-E376FF8134DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,18 @@ Global
 		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Release|x64.Build.0 = Release|Any CPU
 		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Release|x86.ActiveCfg = Release|Any CPU
 		{4990A3B7-6B04-4590-B762-A972B8BC13A4}.Release|x86.Build.0 = Release|Any CPU
+		{EF98E74C-900F-4DAF-BC1D-E376FF8134DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF98E74C-900F-4DAF-BC1D-E376FF8134DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF98E74C-900F-4DAF-BC1D-E376FF8134DB}.Debug|x64.ActiveCfg = Debug|x64
+		{EF98E74C-900F-4DAF-BC1D-E376FF8134DB}.Debug|x64.Build.0 = Debug|x64
+		{EF98E74C-900F-4DAF-BC1D-E376FF8134DB}.Debug|x86.ActiveCfg = Debug|x86
+		{EF98E74C-900F-4DAF-BC1D-E376FF8134DB}.Debug|x86.Build.0 = Debug|x86
+		{EF98E74C-900F-4DAF-BC1D-E376FF8134DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF98E74C-900F-4DAF-BC1D-E376FF8134DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF98E74C-900F-4DAF-BC1D-E376FF8134DB}.Release|x64.ActiveCfg = Release|x64
+		{EF98E74C-900F-4DAF-BC1D-E376FF8134DB}.Release|x64.Build.0 = Release|x64
+		{EF98E74C-900F-4DAF-BC1D-E376FF8134DB}.Release|x86.ActiveCfg = Release|x86
+		{EF98E74C-900F-4DAF-BC1D-E376FF8134DB}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,5 +85,6 @@ Global
 		{034ABAA9-1FAC-4576-85C4-D70286E293CF} = {529A7AD9-F0D7-43D9-8370-3CE657500969}
 		{7345A352-F7D5-430D-8101-4E8BAF1476D0} = {529A7AD9-F0D7-43D9-8370-3CE657500969}
 		{4990A3B7-6B04-4590-B762-A972B8BC13A4} = {E7B7CA0F-D14C-46CB-A20A-53BCD4CE1A0D}
+		{EF98E74C-900F-4DAF-BC1D-E376FF8134DB} = {E7B7CA0F-D14C-46CB-A20A-53BCD4CE1A0D}
 	EndGlobalSection
 EndGlobal

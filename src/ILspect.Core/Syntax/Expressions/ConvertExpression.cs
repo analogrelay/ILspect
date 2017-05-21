@@ -10,6 +10,9 @@ namespace ILspect.Syntax.Expressions
         public bool WithOverflowDetection { get; }
         public bool Unsigned { get; }
 
+        public ConvertExpression(Expression value, MetadataType type, bool withOverflowDetection, bool unsigned)
+            : this(value, type, withOverflowDetection, unsigned, instruction: null) { }
+
         public ConvertExpression(Expression value, MetadataType type, bool withOverflowDetection, bool unsigned, Instruction instruction) : base(instruction)
         {
             Value = value;

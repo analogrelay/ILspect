@@ -103,12 +103,7 @@ namespace ILspect.CommandLine.Commands
                 foreach (var node in graph.Nodes)
                 {
                     Console.WriteLine();
-                    Console.WriteLine($"  {node.DisplayName} : {{");
-                    foreach (var instruction in node.Instructions)
-                    {
-                        Console.WriteLine($"    {instruction}");
-                    }
-                    Console.WriteLine($"  }}{FormatLinks(node)}");
+                    Console.WriteLine(node.ToString());
                 }
 
                 // Write Exception handlers
@@ -119,7 +114,7 @@ namespace ILspect.CommandLine.Commands
                     Console.WriteLine($"    IL_{handler.TryStart.Offset:X4} -> IL_{handler.TryEnd.Offset:X4}");
                     Console.WriteLine("  }");
                     Console.WriteLine($"  {FormatHandlerType(handler)} {{");
-                    if(handler.HandlerType == ExceptionHandlerType.Filter)
+                    if (handler.HandlerType == ExceptionHandlerType.Filter)
                     {
                         Console.WriteLine($"    IL_{handler.FilterStart.Offset:X4} -> IL_{handler.HandlerStart.Offset:X4}");
                         Console.WriteLine("  }");
@@ -149,27 +144,6 @@ namespace ILspect.CommandLine.Commands
                     return $".fault";
                 default:
                     throw new InvalidOperationException($"Unknown handler type {handler.HandlerType}");
-            }
-        }
-
-        private static string FormatLinks(ControlFlowNode node)
-        {
-            if (node.OutboundLinks.Count == 0)
-            {
-                return string.Empty;
-            }
-            return " " + string.Join("; ", node.OutboundLinks.Select(FormatLink));
-        }
-
-        private static string FormatLink(ControlFlowLink link)
-        {
-            if(link.Condition == Condition.Conditional)
-            {
-                return $"if -> {link.Target.DisplayName}";
-            }
-            else
-            {
-                return $"else -> {link.Target.DisplayName}";
             }
         }
 

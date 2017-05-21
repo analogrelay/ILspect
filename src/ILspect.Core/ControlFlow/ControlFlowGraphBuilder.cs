@@ -8,7 +8,13 @@ namespace ILspect.ControlFlow
 {
     public class ControlFlowGraphBuilder
     {
-        public static ControlFlowGraph Build(MethodBody method)
+        public static ControlFlowGraph Build(MethodBody method) =>
+            Build(method.Instructions, method.ExceptionHandlers);
+
+        public static ControlFlowGraph Build(IEnumerable<Instruction> il, IEnumerable<ExceptionHandler> exceptionHandlers) =>
+            Build(il.ToList(), exceptionHandlers.ToList());
+
+        public static ControlFlowGraph Build(IList<Instruction> il, IList<ExceptionHandler> exceptionHandlers)
         {
             var spans = new SortedDictionary<int, InstructionSpan>();
 
@@ -50,7 +56,7 @@ namespace ILspect.ControlFlow
 
             void ScanBranches()
             {
-                foreach (var instruction in method.Instructions)
+                foreach (var instruction in il)
                 {
                     if (instruction.OpCode.FlowControl == FlowControl.Branch || instruction.OpCode.FlowControl == FlowControl.Cond_Branch)
                     {
@@ -63,7 +69,7 @@ namespace ILspect.ControlFlow
 
             void ScanExceptionHandlers()
             {
-                foreach (var handler in method.ExceptionHandlers)
+                foreach (var handler in exceptionHandlers)
                 {
                     MarkStartPoint(handler.TryStart);
                     MarkStartPoint(handler.HandlerStart);
@@ -75,7 +81,7 @@ namespace ILspect.ControlFlow
             }
 
             // The start instruction is, obviously, the start of a block
-            MarkStartPoint(method.Instructions[0]);
+            MarkStartPoint(il[0]);
 
             // Scan branch instructions for block starts
             ScanBranches();
@@ -97,7 +103,7 @@ namespace ILspect.ControlFlow
                 (n.Value.OutboundLinks.Count == 2 && n.Value.OutboundLinks[0].Condition == Condition.Conditional && n.Value.OutboundLinks[1].Condition == Condition.Unconditional)),
                 "Expected links to be ordered with Conditional arm first");
 
-            return new ControlFlowGraph(nodes, method.ExceptionHandlers.ToList());
+            return new ControlFlowGraph(nodes, exceptionHandlers);
         }
 
         private static SortedDictionary<int, ControlFlowNode> BuildGraphNodes(SortedDictionary<int, InstructionSpan> spans)
@@ -162,49 +168,5 @@ namespace ILspect.ControlFlow
                     break;
             }
         }
-
-        //private static Condition GetCondition(OpCode opCode)
-        //{
-        //    if (opCode == OpCodes.Brfalse || opCode == OpCodes.Brfalse_S)
-        //    {
-        //        return Condition.False;
-        //    }
-        //    else if (opCode == OpCodes.Brtrue || opCode == OpCodes.Brtrue_S)
-        //    {
-        //        return Condition.True;
-        //    }
-        //    else if (opCode == OpCodes.Beq || opCode == OpCodes.Beq_S)
-        //    {
-        //        return Condition.Equal;
-        //    }
-        //    else if (opCode == OpCodes.Bne_Un || opCode == OpCodes.Bne_Un_S)
-        //    {
-        //        return Condition.NotEqual;
-        //    }
-        //    else if (opCode == OpCodes.Bge || opCode == OpCodes.Bge_S ||
-        //            opCode == OpCodes.Bge_Un || opCode == OpCodes.Bge_Un_S)
-        //    {
-        //        return Condition.GreaterThanOrEqual;
-        //    }
-        //    else if (opCode == OpCodes.Bgt || opCode == OpCodes.Bgt_S ||
-        //            opCode == OpCodes.Bgt_Un || opCode == OpCodes.Bgt_Un_S)
-        //    {
-        //        return Condition.GreaterThan;
-        //    }
-        //    else if (opCode == OpCodes.Ble || opCode == OpCodes.Ble_S ||
-        //            opCode == OpCodes.Ble_Un || opCode == OpCodes.Ble_Un_S)
-        //    {
-        //        return Condition.LessThanOrEqual;
-        //    }
-        //    else if (opCode == OpCodes.Blt || opCode == OpCodes.Blt_S ||
-        //            opCode == OpCodes.Blt_Un || opCode == OpCodes.Blt_Un_S)
-        //    {
-        //        return Condition.LessThan;
-        //    }
-        //    else
-        //    {
-        //        throw new InvalidOperationException($"Unrecognized Branch instruction: {opCode}");
-        //    }
-        //}
     }
 }

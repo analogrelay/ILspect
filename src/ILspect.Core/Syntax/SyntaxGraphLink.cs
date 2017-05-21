@@ -2,12 +2,12 @@
 
 namespace ILspect.Syntax
 {
-    public class SyntaxTreeLink
+    public class SyntaxGraphLink
     {
         public Expression Expression { get; }
-        public SyntaxTreeNode Target { get; }
+        public SyntaxGraphNode Target { get; }
 
-        public SyntaxTreeLink(Expression expression, SyntaxTreeNode target)
+        public SyntaxGraphLink(Expression expression, SyntaxGraphNode target)
         {
             Expression = expression;
             Target = target;

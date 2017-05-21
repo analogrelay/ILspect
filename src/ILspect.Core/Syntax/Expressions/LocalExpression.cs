@@ -6,6 +6,9 @@ namespace ILspect.Syntax.Expressions
     {
         public VariableReference Variable { get; }
 
+        public LocalExpression(VariableReference variable)
+            : this(variable, instruction: null) { }
+
         public LocalExpression(VariableReference variable, Instruction instruction) : base(instruction)
         {
             Variable = variable;

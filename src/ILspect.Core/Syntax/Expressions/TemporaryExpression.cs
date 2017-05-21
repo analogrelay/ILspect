@@ -6,6 +6,9 @@ namespace ILspect.Syntax.Expressions
     {
         public Temporary Temporary { get; }
 
+        public TemporaryExpression(Temporary temporary)
+            : this(temporary, instruction: null) { }
+
         public TemporaryExpression(Temporary temporary, Instruction instruction) : base(instruction)
         {
             Temporary = temporary;

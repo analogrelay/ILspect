@@ -11,6 +11,9 @@ namespace ILspect.Syntax.Expressions
         public Expression Instance { get; }
         public FieldReference Field { get; }
 
+        public FieldExpression(Expression instance, FieldReference field)
+            : this(instance, field, instruction: null) { }
+
         public FieldExpression(Expression instance, FieldReference field, Instruction instruction) : base(instruction)
         {
             Instance = instance;

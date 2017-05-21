@@ -9,8 +9,14 @@ namespace ILspect.Syntax.Expressions
         public MetadataType Type { get; }
         public TypeReference ObjectType { get; }
 
+        public DereferenceExpression(Expression address, MetadataType type)
+            : this(address, type, objectType: null, instruction: null) { }
+
         public DereferenceExpression(Expression address, MetadataType type, Instruction instruction)
             : this(address, type, objectType: null, instruction: instruction) { }
+
+        public DereferenceExpression(Expression address, TypeReference objectType)
+            : this(address, type: MetadataType.Object, objectType: objectType, instruction: null) { }
 
         public DereferenceExpression(Expression address, TypeReference objectType, Instruction instruction)
             : this(address, type: MetadataType.Object, objectType: objectType, instruction: instruction) { }

@@ -2,13 +2,16 @@ using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax.Expressions
 {
-    internal class BinaryExpression : Expression
+    public class BinaryExpression : Expression
     {
         public Expression Value1 { get; }
         public Expression Value2 { get; }
         public BinaryOperator Operator { get; }
         public bool WithOverflowDetection { get; }
         public bool Unsigned { get; }
+
+        public BinaryExpression(Expression value1, Expression value2, BinaryOperator @operator, bool withOverflowDetection, bool unsigned)
+            : this(value1, value2, @operator, withOverflowDetection, unsigned, instruction: null) { }
 
         public BinaryExpression(Expression value1, Expression value2, BinaryOperator @operator, bool withOverflowDetection, bool unsigned, Instruction instruction) : base(instruction)
         {

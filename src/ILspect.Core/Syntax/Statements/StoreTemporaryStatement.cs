@@ -8,6 +8,9 @@ namespace ILspect.Syntax.Statements
         public Temporary Temporary { get; }
         public Expression Value { get; }
 
+        public StoreTemporaryStatement(Temporary temporary, Expression value)
+            : this(temporary, value, instruction: null) { }
+
         public StoreTemporaryStatement(Temporary temporary, Expression value, Instruction instruction) : base(instruction)
         {
             Temporary = temporary;

@@ -4,12 +4,12 @@ namespace ILspect.Syntax
 {
     public class SyntaxGraph
     {
-        private readonly SortedDictionary<int, SyntaxTreeNode> _nodes;
+        private readonly SortedDictionary<int, SyntaxGraphNode> _nodes;
         private readonly MethodVariables _variables;
 
-        public IReadOnlyCollection<SyntaxTreeNode> Nodes => _nodes.Values;
+        public IReadOnlyCollection<SyntaxGraphNode> Nodes => _nodes.Values;
 
-        public SyntaxGraph(SortedDictionary<int, SyntaxTreeNode> nodes, MethodVariables variables)
+        public SyntaxGraph(SortedDictionary<int, SyntaxGraphNode> nodes, MethodVariables variables)
         {
             _nodes = nodes;
             _variables = variables;

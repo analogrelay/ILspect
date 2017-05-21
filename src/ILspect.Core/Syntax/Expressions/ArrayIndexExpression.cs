@@ -10,6 +10,9 @@ namespace ILspect.Syntax.Expressions
         public MetadataType Type { get; }
         public TypeReference ObjectType { get; }
 
+        public ArrayIndexExpression(Expression array, Expression index, MetadataType type, TypeReference objectType)
+            : this(array, index, type, objectType, instruction: null) { }
+
         public ArrayIndexExpression(Expression array, Expression index, MetadataType type, TypeReference objectType, Instruction instruction) : base(instruction)
         {
             Array = array;

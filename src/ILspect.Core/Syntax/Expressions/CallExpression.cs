@@ -12,6 +12,9 @@ namespace ILspect.Syntax.Expressions
         public IList<Expression> Arguments { get; }
         public CallType Type { get; }
 
+        public CallExpression(MethodReference method, CallType type, Expression target, IList<Expression> arguments)
+            : this(method, type, target, arguments, instruction: null) { }
+
         public CallExpression(MethodReference method, CallType type, Expression target, IList<Expression> arguments, Instruction instruction) : base(instruction)
         {
             Type = type;
@@ -24,7 +27,7 @@ namespace ILspect.Syntax.Expressions
         {
             var args = string.Join(", ", Arguments.Select(a => a.ToString()));
 
-            if(Type == CallType.Constructor)
+            if (Type == CallType.Constructor)
             {
                 return $"new {Method.DeclaringType.FullName}({args})";
             }

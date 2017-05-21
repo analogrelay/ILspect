@@ -6,6 +6,9 @@ namespace ILspect.Syntax.Expressions
     {
         public Expression Size { get; }
 
+        public LocallocExpression(Expression size)
+            : this(size, instruction: null) { }
+
         public LocallocExpression(Expression size, Instruction instruction) : base(instruction)
         {
             Size = size;

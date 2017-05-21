@@ -8,6 +8,9 @@ namespace ILspect.Syntax.Expressions
         public Expression Value { get; }
         public TypeReference Type { get; }
 
+        public IsTypeExpression(Expression value, TypeReference type)
+            : this(value, type, instruction: null) { }
+
         public IsTypeExpression(Expression value, TypeReference type, Instruction instruction) : base(instruction)
         {
             Value = value;

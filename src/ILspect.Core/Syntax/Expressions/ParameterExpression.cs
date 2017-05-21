@@ -7,6 +7,9 @@ namespace ILspect.Syntax.Expressions
     {
         public ParameterReference Parameter { get; }
 
+        public ParameterExpression(ParameterReference parameter)
+            : this(parameter, instruction: null) { }
+
         public ParameterExpression(ParameterReference parameter, Instruction instruction) : base(instruction)
         {
             Parameter = parameter;

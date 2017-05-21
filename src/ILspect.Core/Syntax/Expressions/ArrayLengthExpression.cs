@@ -6,6 +6,9 @@ namespace ILspect.Syntax.Expressions
     {
         public Expression Array { get; }
 
+        public ArrayLengthExpression(Expression array)
+            : this(array, instruction: null) { }
+
         public ArrayLengthExpression(Expression array, Instruction instruction) : base(instruction)
         {
             Array = array;

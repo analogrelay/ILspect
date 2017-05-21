@@ -7,6 +7,9 @@ namespace ILspect.Syntax.Expressions
 {
     public class ArglistExpression : Expression
     {
+        public ArglistExpression()
+            : this(instruction: null) { }
+
         public ArglistExpression(Instruction instruction) : base(instruction)
         {
         }

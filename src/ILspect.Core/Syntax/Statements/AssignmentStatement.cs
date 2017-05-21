@@ -8,6 +8,9 @@ namespace ILspect.Syntax.Statements
         public VariableReference Variable { get; }
         public Expression Value { get; }
 
+        public AssignmentStatement(VariableReference variable, Expression value)
+            : this(variable, value, instruction: null) { }
+
         public AssignmentStatement(VariableReference variable, Expression value, Instruction instruction) : base(instruction)
         {
             Variable = variable;
