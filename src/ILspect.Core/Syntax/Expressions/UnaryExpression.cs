@@ -1,8 +1,9 @@
-﻿using Mono.Cecil.Cil;
+﻿using System;
+using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax.Expressions
 {
-    public class UnaryExpression : Expression
+    public class UnaryExpression : Expression, IEquatable<UnaryExpression>
     {
         public Expression Value { get; }
         public UnaryOperator Operator { get; }
@@ -19,6 +20,24 @@ namespace ILspect.Syntax.Expressions
         public override string ToString()
         {
             return $"{Operator.GetSymbol()}({Value})";
+        }
+
+        public override bool Equals(object obj) => obj is UnaryExpression e && Equals(e);
+
+        public override int GetHashCode()
+        {
+            var combiner = HashCodeCombiner.Start();
+            combiner.Add(base.GetHashCode());
+            combiner.Add(Value);
+            combiner.Add(Operator);
+            return combiner.CombinedHash;
+        }
+
+        public bool Equals(UnaryExpression other)
+        {
+            return base.Equals(other) &&
+                Equals(Value, other.Value) &&
+                Operator == other.Operator;
         }
     }
 }

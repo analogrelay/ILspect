@@ -31,17 +31,15 @@ namespace ILspect.Core.Tests.Instructions
         [Fact]
         public void Syntax()
         {
-            var graph = SyntaxGraph.Create(
-                new SyntaxGraphNode(0,
-                    new DiscardStatement(
-                        new BinaryExpression(
-                            new ConstantExpression(0, MetadataType.Int32, instruction: null),
-                            new ConstantExpression(1, MetadataType.Int32, instruction: null),
-                            BinaryOperator.Add,
-                            withOverflowDetection: false,
-                            unsigned: false
-                        ))));
-            InstructionTester.RunExpressionTest(Instruction, graph);
+            var expr = new BinaryExpression(
+                new ConstantExpression(4, MetadataType.Int32, instruction: Instructions[0]),
+                new ConstantExpression(2, MetadataType.Int32, instruction: Instructions[1]),
+                BinaryOperator.Add,
+                withOverflowDetection: false,
+                unsigned: false,
+                instruction: Instructions[2]
+            );
+            InstructionTester.RunExpressionTest(Instructions, expr);
         }
     }
 }

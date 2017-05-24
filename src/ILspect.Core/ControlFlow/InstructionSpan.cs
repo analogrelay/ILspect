@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Mono.Cecil.Cil;
 
 namespace ILspect.ControlFlow
@@ -12,6 +13,8 @@ namespace ILspect.ControlFlow
     {
         public Instruction First { get; }
         public Instruction Last { get; internal set; }
+
+        public Instruction this[int index] => this.ElementAt(index);
 
         public InstructionSpan(Instruction first)
         {
@@ -31,10 +34,10 @@ namespace ILspect.ControlFlow
         private IEnumerable<Instruction> Enumerate()
         {
             var current = First;
-            while(current != null)
+            while (current != null)
             {
                 yield return current;
-                if(current == Last)
+                if (current == Last)
                 {
                     // We're done
                     yield break;

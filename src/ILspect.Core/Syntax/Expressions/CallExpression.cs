@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax.Expressions
 {
-    public class CallExpression : Expression
+    public class CallExpression : Expression, IEquatable<CallExpression>
     {
         public MethodReference Method { get; }
         public Expression Target { get; }
@@ -39,6 +40,28 @@ namespace ILspect.Syntax.Expressions
             {
                 return $"{Target}.{Method.Name}({args})";
             }
+        }
+
+        public override bool Equals(object obj) => obj is CallExpression e && Equals(e);
+
+        public override int GetHashCode()
+        {
+            var combiner = HashCodeCombiner.Start();
+            combiner.Add(base.GetHashCode());
+            combiner.Add(Method);
+            combiner.Add(Target);
+            combiner.Add(Arguments);
+            combiner.Add(Type);
+            return combiner.CombinedHash;
+        }
+
+        public bool Equals(CallExpression other)
+        {
+            return base.Equals(other) &&
+                Equals(Method, other.Method) &&
+                Equals(Target, other.Target) &&
+                Enumerable.SequenceEqual(Arguments, other.Arguments) &&
+                Type == other.Type;
         }
     }
 }

@@ -14,6 +14,9 @@ namespace ILspect.Syntax
         public IReadOnlyList<VariableDefinition> Locals { get; }
         public IReadOnlyList<Temporary> Temporaries => _temporaries.AsReadOnly();
 
+        public MethodVariables()
+            : this(Enumerable.Empty<ParameterDefinition>(), Enumerable.Empty<VariableDefinition>()) { }
+
         public MethodVariables(IEnumerable<ParameterDefinition> parameters, IEnumerable<VariableDefinition> locals)
         {
             Parameters = parameters.ToList().AsReadOnly();
@@ -24,7 +27,7 @@ namespace ILspect.Syntax
 
         public ParameterReference GetParameter(int index)
         {
-            if(index > Parameters.Count || index < 0)
+            if (index > Parameters.Count || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
@@ -33,7 +36,7 @@ namespace ILspect.Syntax
 
         public VariableReference GetLocal(int index)
         {
-            if(index > Locals.Count || index < 0)
+            if (index > Locals.Count || index < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }

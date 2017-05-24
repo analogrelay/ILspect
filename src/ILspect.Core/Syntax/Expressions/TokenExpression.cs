@@ -1,9 +1,10 @@
-﻿using Mono.Cecil;
+﻿using System;
+using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax.Expressions
 {
-    internal class TokenExpression : Expression
+    public class TokenExpression : Expression, IEquatable<TokenExpression>
     {
         public MemberReference Token { get; }
 
@@ -18,6 +19,22 @@ namespace ILspect.Syntax.Expressions
         public override string ToString()
         {
             return $"__ldtoken({Token.FullName})";
+        }
+
+        public override bool Equals(object obj) => obj is TokenExpression e && Equals(e);
+
+        public override int GetHashCode()
+        {
+            var combiner = HashCodeCombiner.Start();
+            combiner.Add(base.GetHashCode());
+            combiner.Add(Token);
+            return combiner.CombinedHash;
+        }
+
+        public bool Equals(TokenExpression other)
+        {
+            return base.Equals(other) &&
+                Equals(Token, other.Token);
         }
     }
 }

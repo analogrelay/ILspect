@@ -1,8 +1,9 @@
+using System;
 using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax.Expressions
 {
-    public class BinaryExpression : Expression
+    public class BinaryExpression : Expression, IEquatable<BinaryExpression>
     {
         public Expression Value1 { get; }
         public Expression Value2 { get; }
@@ -25,6 +26,30 @@ namespace ILspect.Syntax.Expressions
         public override string ToString()
         {
             return $"({Value1}) {Operator.GetSymbol()} ({Value2})";
+        }
+
+        public override bool Equals(object obj) => obj is BinaryExpression expr && Equals(expr);
+
+        public override int GetHashCode()
+        {
+            var combiner = new HashCodeCombiner();
+            combiner.Add(base.GetHashCode());
+            combiner.Add(Value1);
+            combiner.Add(Value2);
+            combiner.Add(Operator);
+            combiner.Add(WithOverflowDetection);
+            combiner.Add(Unsigned);
+            return combiner.CombinedHash;
+        }
+
+        public bool Equals(BinaryExpression other)
+        {
+            return base.Equals(other) &&
+                Equals(Value1, other.Value1) &&
+                Equals(Value2, other.Value2) &&
+                Operator == other.Operator &&
+                WithOverflowDetection == other.WithOverflowDetection &&
+                Unsigned == other.Unsigned;
         }
     }
 }

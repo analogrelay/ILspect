@@ -1,9 +1,10 @@
+using System;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax.Expressions
 {
-    public class DereferenceExpression : Expression
+    public class DereferenceExpression : Expression, IEquatable<DereferenceExpression>
     {
         public Expression Address { get; }
         public MetadataType Type { get; }
@@ -34,6 +35,26 @@ namespace ILspect.Syntax.Expressions
                 ObjectType.FullName :
                 Type.ToString();
             return $"*(({typeName}&){Address})";
+        }
+
+        public override bool Equals(object obj) => obj is DereferenceExpression e && Equals(e);
+
+        public override int GetHashCode()
+        {
+            var combiner = HashCodeCombiner.Start();
+            combiner.Add(base.GetHashCode());
+            combiner.Add(Address);
+            combiner.Add(Type);
+            combiner.Add(ObjectType);
+            return combiner.CombinedHash;
+        }
+
+        public bool Equals(DereferenceExpression other)
+        {
+            return base.Equals(other) &&
+                Equals(Address, other.Address) &&
+                Equals(ObjectType, other.ObjectType) &&
+                Type == other.Type;
         }
     }
 }

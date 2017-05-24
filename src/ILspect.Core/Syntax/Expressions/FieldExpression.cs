@@ -6,7 +6,7 @@ using Mono.Cecil.Cil;
 
 namespace ILspect.Syntax.Expressions
 {
-    public class FieldExpression : Expression
+    public class FieldExpression : Expression, IEquatable<FieldExpression>
     {
         public Expression Instance { get; }
         public FieldReference Field { get; }
@@ -30,6 +30,24 @@ namespace ILspect.Syntax.Expressions
             {
                 return $"{Instance}.{Field.Name}";
             }
+        }
+
+        public override bool Equals(object obj) => obj is FieldExpression e && Equals(e);
+
+        public override int GetHashCode()
+        {
+            var combiner = HashCodeCombiner.Start();
+            combiner.Add(base.GetHashCode());
+            combiner.Add(Instance);
+            combiner.Add(Field);
+            return combiner.CombinedHash;
+        }
+
+        public bool Equals(FieldExpression other)
+        {
+            return base.Equals(other) &&
+                Equals(Instance, other.Instance) &&
+                Equals(Field, other.Field);
         }
     }
 }
