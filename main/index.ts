@@ -5,6 +5,18 @@ import { app, BrowserWindow } from "electron";
 
 import { BuddyProcess } from "./BuddyProcess";
 
+import * as log from "winston";
+
+log.configure({
+  transports: [
+    new log.transports.Console({
+      colorize: true,
+      level: "info",
+      humanReadableUnhandledException: true
+    })
+  ]
+});
+
 const root = path.resolve(__dirname, "..", "..");
 const htmlDir = path.join(root, "html");
 const serverDir = path.join(root, "server");
@@ -15,10 +27,10 @@ let win: BrowserWindow | null;
 
 async function createWindow() {
   // Spawn the buddy process
-  console.log("Starting buddy process...");
+  log.info("Starting buddy process...");
   let buddy = new BuddyProcess(path.join(serverDir, "src", "ILspect.Server", "bin", "Debug", "netcoreapp2.0", "ILspect.Server.dll"));
   await buddy.start();
-  console.log(`Buddy process listening at url: ${buddy.url}`);
+  log.info("Buddy process listening", { url: buddy.url });
 
   // Create the browser window.
   win = new BrowserWindow({ width: 800, height: 600 });

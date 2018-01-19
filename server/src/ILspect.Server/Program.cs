@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ILspect.Server
 {
@@ -11,8 +13,13 @@ namespace ILspect.Server
         }
 
         public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+            new WebHostBuilder()
+                .UseKestrel()
                 .UseUrls("http://127.0.0.1:0")
+                .ConfigureLogging(builder =>
+                {
+                    builder.Services.AddSingleton<ILoggerProvider, JsonConsoleLoggerProvider>();
+                })
                 .UseStartup<Startup>()
                 .Build();
     }

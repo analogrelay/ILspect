@@ -2,6 +2,10 @@
 
 import { spawn, ChildProcess } from "child_process";
 
+import * as log from 'winston';
+
+const levelMap = [ 'silly', 'verbose', 'info', 'warn', 'error', 'error', 'error' ];
+
 export class BuddyProcess {
     private process: ChildProcess | null;
     public url: string | null;
@@ -13,14 +17,15 @@ export class BuddyProcess {
 
     public start(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
+            log.debug("Spawning buddy process", { applicationPath: this.applicationPath });
             this.process = spawn("dotnet", [this.applicationPath]);
             this.process.on("close", (code, signal) => {
-                console.log(`buddy process terminated with exit code: ${code}`);
+                log.log(code == 0 ? "debug" : "error", "Buddy process terminated", {code});
                 this.process = null;
-                reject(`process terminated with exit code: ${code}`);
+                reject(`Buddy process terminated with exit code: ${code}`);
             });
             this.process.on("error", error => {
-                console.log(`error starting buddy: ${error}`);
+                log.error("Error starting Buddy process", {error});
                 reject(error);
             });
             this.process.stdout.on("data", (chunk: string | Buffer) => {
@@ -29,7 +34,6 @@ export class BuddyProcess {
                 }
 
                 for (let line of chunk.split(/(?:\r\n|\r|\n)/g)) {
-                    console.log("Server: " + line);
                     if(line.startsWith("Now listening on: ")) {
                         if(this.process) {
                             // Remove the close handler that was going to fail this promise
@@ -43,6 +47,15 @@ export class BuddyProcess {
                         let url = line.substring(18);
                         this.url = url;
                         resolve();
+                    }
+                    else if(line.startsWith('{')) {
+                        let record = JSON.parse(line);
+                        if(record.log) {
+                            let level = record.log.logLevel < levelMap.length ? levelMap[record.log.logLevel] : "silly";
+                            let msg = record.category + ": " + record.log.formatted;
+                            log.log(level, msg);
+                        }
+                        // TODO: Begin/end scope
                     }
                 }
             });
