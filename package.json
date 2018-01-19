@@ -1,0 +1,32 @@
+{
+  "name": "ilspect",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "build": "npm run build:main",
+    "build:main": "tsc --project main/tsconfig.json",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prestart": "npm run build",
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anurse/ILspect.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/anurse/ILspect/issues"
+  },
+  "homepage": "https://github.com/anurse/ILspect#readme",
+  "devDependencies": {
+    "@types/es6-promisify": "^5.0.0",
+    "electron": "^1.7.10"
+  },
+  "dependencies": {
+    "tslib": "^1.9.0"
+  }
+}
