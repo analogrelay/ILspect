@@ -42,6 +42,6 @@ module.exports = {
                 return module.context && module.context.includes("node_modules");
             },
         }),
-        new ExtractTextWebpackPlugin("styles.css"),
+        new ExtractTextWebpackPlugin("styles.[chunkhash].css"),
     ]
 };
