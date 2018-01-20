@@ -5,10 +5,10 @@
   "description": "",
   "main": "dist/main/index.js",
   "scripts": {
-    "build": "npm run build:main",
+    "prepare": "dotnet restore server/ILspect.sln",
+    "build": "dotnet build server/ILspect.sln && npm run build:main && cd ./browser && npm run build",
     "build:main": "tsc --project main/tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prestart": "npm run build",
     "start": "electron ."
   },
   "repository": {

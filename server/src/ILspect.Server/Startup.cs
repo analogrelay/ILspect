@@ -1,3 +1,4 @@
+using ILspect.Server.Hubs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,7 @@ namespace ILspect.Server
 
             app.UseSignalR(routes =>
             {
+                routes.MapHub<Disassembler>("disassembler");
             });
         }
     }

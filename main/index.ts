@@ -18,7 +18,7 @@ log.configure({
 });
 
 const root = path.resolve(__dirname, "..", "..");
-const htmlDir = path.join(root, "html");
+const browserDir = path.join(root, "browser");
 const serverDir = path.join(root, "server");
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -37,7 +37,7 @@ async function createWindow() {
 
   // and load the index.html of the app.
   win.loadURL(url.format({
-    pathname: path.join(htmlDir, 'index.html'),
+    pathname: path.join(browserDir, 'dist', 'index.html'),
     query: {
       ["serverUrl"]: buddy.url
     },
