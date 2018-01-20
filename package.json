@@ -2,12 +2,15 @@
   "name": "ilspect",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "dependencies": {},
+  "main": "main/dist/index.js",
+  "dependencies": {
+    "electron": "^1.7.10"
+  },
   "devDependencies": {},
   "scripts": {
     "prepare": "dotnet restore server/ILspect.sln && cd ./browser && npm i && cd ../main && npm i",
-    "build": "dotnet build server/ILspect.sln && cd ./browser && npm run build && cd ../main && npm run build"
+    "build": "dotnet build server/ILspect.sln && cd ./browser && npm run build && cd ../main && npm run build",
+    "start": "electron ."
   },
   "repository": {
     "type": "git",

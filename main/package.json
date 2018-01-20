@@ -3,10 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "description": "",
-  "main": "dist/main/index.js",
   "scripts": {
     "build": "npm run build:main",
-    "build:main": "tsc --project main/tsconfig.json"
+    "build:main": "tsc --project ./tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -20,8 +19,7 @@
   },
   "homepage": "https://github.com/anurse/ILspect#readme",
   "devDependencies": {
-    "@types/winston": "^2.3.7",
-    "electron": "^1.7.10"
+    "@types/winston": "^2.3.7"
   },
   "dependencies": {
     "tslib": "^1.9.0",
