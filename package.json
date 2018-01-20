@@ -1,15 +1,13 @@
 {
   "name": "ilspect",
-  "private": true,
   "version": "1.0.0",
   "description": "",
-  "main": "dist/main/index.js",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
   "scripts": {
-    "prepare": "dotnet restore server/ILspect.sln",
-    "build": "dotnet build server/ILspect.sln && npm run build:main && cd ./browser && npm run build",
-    "build:main": "tsc --project main/tsconfig.json",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "prepare": "dotnet restore server/ILspect.sln && cd ./browser && npm i && cd ../main && npm i",
+    "build": "dotnet build server/ILspect.sln && cd ./browser && npm run build && cd ../main && npm run build"
   },
   "repository": {
     "type": "git",
@@ -21,14 +19,5 @@
   "bugs": {
     "url": "https://github.com/anurse/ILspect/issues"
   },
-  "homepage": "https://github.com/anurse/ILspect#readme",
-  "devDependencies": {
-    "@types/es6-promisify": "^5.0.0",
-    "@types/winston": "^2.3.7",
-    "electron": "^1.7.10"
-  },
-  "dependencies": {
-    "tslib": "^1.9.0",
-    "winston": "^2.4.0"
-  }
+  "homepage": "https://github.com/anurse/ILspect#readme"
 }

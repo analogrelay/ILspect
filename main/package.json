@@ -1,0 +1,30 @@
+{
+  "name": "main",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "build": "npm run build:main",
+    "build:main": "tsc --project main/tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anurse/ILspect.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/anurse/ILspect/issues"
+  },
+  "homepage": "https://github.com/anurse/ILspect#readme",
+  "devDependencies": {
+    "@types/winston": "^2.3.7",
+    "electron": "^1.7.10"
+  },
+  "dependencies": {
+    "tslib": "^1.9.0",
+    "winston": "^2.4.0"
+  }
+}
