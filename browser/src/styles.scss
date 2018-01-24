@@ -1,0 +1,29 @@
+@import '~bootstrap/dist/css/bootstrap';
+
+$fa-font-path: '~font-awesome/fonts/';
+@import '~font-awesome/scss/font-awesome';
+
+#split-rightPane {
+    position: absolute;
+    height: 100%;
+}
+
+#split-leftPane {
+    background-color: #cecece;
+    position: absolute;
+    height: 100%;
+}
+
+ul.tree-view {
+    list-style-type: none;
+    padding: 0;
+
+    & > li.tree-node {
+        list-style-type: none;
+        
+        // Covers nested trees
+        & > ul.tree-view {
+            padding-left: 1em;
+        }
+    }
+}

@@ -45,11 +45,6 @@ async function createWindow() {
     slashes: true
   }));
 
-  // Open the DevTools.
-  win.webContents.openDevTools({
-    mode: "detach"
-  });
-
   // Emitted when the window is closed.
   win.on('closed', () => {
     buddy.stop();
