@@ -1,32 +1,28 @@
 import "./styles.scss";
 
 import { HubConnection, MessagePackHubProtocol, TransportType } from "@aspnet/signalr-client";
+import { ipcRenderer } from "electron";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import { Provider } from "react-redux";
+import { applyMiddleware, createStore } from "redux";
+import thunk from "redux-thunk";
 
+import { addAssemblies } from "./actions";
 import { Application } from "./components/application";
+import reducer from "./reducers";
 import { getParameterByName } from "./utils";
 
-import { ipcRenderer } from "electron";
+const store = createStore(reducer, applyMiddleware(thunk));
 
-import { createStore } from "redux";
-
-import { Provider } from "react-redux";
-import { AddAssembliesAction } from "./actions";
-import reducer from "./reducers";
-
-const store = createStore(reducer);
+Next, create the disassembler and wire it up to things.
 
 ipcRenderer.on("assembly.add", (event: Event, paths: string[]) => {
-    store.dispatch(new AddAssembliesAction(paths));
+    store.dispatch(addAssemblies(paths));
 });
 
-async function run() {
-    ReactDOM.render(
-        <Provider store={store}>
-            <Application />
-        </Provider>,
-        document.getElementById("root"));
-}
-
-run();
+ReactDOM.render(
+    <Provider store={store}>
+        <Application />
+    </Provider>,
+    document.getElementById("root"));

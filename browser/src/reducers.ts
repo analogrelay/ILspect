@@ -1,5 +1,5 @@
-import { AnyAction, combineReducers } from "redux";
-import { AddAssembliesAction } from "./actions";
+import { combineReducers } from "redux";
+import { ActionTypes, AppAction } from "./actions";
 import { IApplicationState, IAssemblyState } from "./state";
 
 function getName(path: string): string {
@@ -11,16 +11,17 @@ function getName(path: string): string {
 }
 
 const reducer = combineReducers({
-    assemblies(state: IAssemblyState[] = [], action: AnyAction): IAssemblyState[] {
-        if (AddAssembliesAction.is(action)) {
-            return [].concat(state, action.paths.map((path) => {
-                return {
-                    name: getName(path),
-                    path,
-                };
-            }));
-        } else {
-            return state;
+    assemblies(state: IAssemblyState[] = [], action: AppAction): IAssemblyState[] {
+        switch (action.type) {
+            case ActionTypes.ADD_ASSEMBLIES:
+                return [].concat(state, action.paths.map((path) => {
+                    return {
+                        name: getName(path),
+                        path,
+                    };
+                }));
+            default:
+                return state;
         }
     },
 });
