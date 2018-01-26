@@ -1,11 +1,13 @@
 import * as path from 'path';
 import * as url from 'url';
 
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, Menu } from "electron";
 
 import { BuddyProcess } from "./BuddyProcess";
 
 import * as log from "winston";
+
+import createMenu from "./Menu";
 
 log.configure({
   transports: [
@@ -25,12 +27,14 @@ const serverDir = path.join(root, "server");
 // be closed automatically when the JavaScript object is garbage collected.
 let win: BrowserWindow | null;
 
-async function createWindow() {
+async function ready() {
   // Spawn the buddy process
   log.info("Starting buddy process...");
   let buddy = new BuddyProcess(path.join(serverDir, "src", "ILspect.Server", "bin", "Debug", "netcoreapp2.0", "ILspect.Server.dll"));
   await buddy.start();
   log.info("Buddy process listening", { url: buddy.url });
+
+  Menu.setApplicationMenu(createMenu());
 
   // Create the browser window.
   win = new BrowserWindow({ width: 800, height: 600 });
@@ -58,7 +62,7 @@ async function createWindow() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', () => { console.log("ready"); createWindow() });
+app.on('ready', () => ready());
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -73,6 +77,6 @@ app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (win === null) {
-    createWindow();
+    ready();
   }
 });

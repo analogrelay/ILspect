@@ -21,6 +21,10 @@ ul.tree-view {
     & > li.tree-node {
         list-style-type: none;
 
+        .tree-node-selected {
+            background-color: white;
+        }
+
         & > .tree-expander {
             margin-left: 10px;
         }
