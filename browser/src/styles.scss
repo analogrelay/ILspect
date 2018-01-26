@@ -20,6 +20,14 @@ ul.tree-view {
 
     & > li.tree-node {
         list-style-type: none;
+
+        & > .tree-expander {
+            margin-left: 10px;
+        }
+
+        & > .tree-selector {
+            margin-left: 10px;
+        }
         
         // Covers nested trees
         & > ul.tree-view {
