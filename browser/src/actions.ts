@@ -1,14 +1,13 @@
-import { AnyAction } from "redux";
+import { Action, AnyAction } from "redux";
+import { IAssemblyState } from "./state";
 
-export class AddAssemblyAction implements AnyAction {
-    static TYPE = "ADD_ASSEMBLY";
+export interface IAddAssembliesAction extends Action {
+    paths: string[];
+}
 
-    static is(action: AnyAction): action is AddAssemblyAction {
-        return action.type == AddAssemblyAction.TYPE;
-    }
-
-    public type: string = AddAssemblyAction.TYPE;
-
-    constructor(public path: string) {
-    }
+function addAssemblies(paths: string[]): IAddAssembliesAction {
+    return {
+        paths,
+        type: "ADD_ASSEMBLIES",
+    };
 }

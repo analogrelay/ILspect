@@ -1,21 +1,21 @@
-import { app, Menu, MenuItemConstructorOptions, dialog, BrowserWindow } from "electron";
+import { app, BrowserWindow, dialog, Menu, MenuItemConstructorOptions } from "electron";
 
 export default function createMenu(): Menu {
-    let template: MenuItemConstructorOptions[] = [
+    const template: MenuItemConstructorOptions[] = [
         {
             label: "File",
             submenu: [
                 {
-                    label: "Add Assembly...",
                     accelerator: "CommandOrControl+O",
+                    label: "Add Assembly...",
                     click(item, focusedWindow) {
                         dialog.showOpenDialog(focusedWindow, {
-                            title: "Add Assembly...",
                             filters: [
                                 { name: ".NET Assemblies", extensions: ["dll", "exe", "winmd"] },
                             ],
-                        }, paths => focusedWindow.webContents.send('assembly.add', paths));
-                    }
+                            title: "Add Assembly...",
+                        }, (paths) => focusedWindow.webContents.send("assembly.add", paths));
+                    },
                 },
             ],
         },
@@ -37,21 +37,21 @@ export default function createMenu(): Menu {
                 { role: "forcereload" },
             ],
         },
-    ]
+    ];
 
-    if (process.platform === 'darwin') {
+    if (process.platform === "darwin") {
         template.unshift({
             label: app.getName(),
             submenu: [
-                { role: 'about' },
-                { type: 'separator' },
-                { role: 'services', submenu: [] },
-                { type: 'separator' },
-                { role: 'hide' },
-                { role: 'hideothers' },
-                { role: 'unhide' },
-                { type: 'separator' },
-                { role: 'quit' },
+                { role: "about" },
+                { type: "separator" },
+                { role: "services", submenu: [] },
+                { type: "separator" },
+                { role: "hide" },
+                { role: "hideothers" },
+                { role: "unhide" },
+                { type: "separator" },
+                { role: "quit" },
             ],
         });
     }

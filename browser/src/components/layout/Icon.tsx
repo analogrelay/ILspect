@@ -1,17 +1,17 @@
-import * as React from 'react';
+import * as React from "react";
 
 type IconSize = "lg" | "2x" | "3x" | "4x" | "5x";
 type IconAnimation = "spin" | "pulse";
 
 export interface IconProps {
-    name: string,
-    size?: IconSize,
-    animation?: IconAnimation,
-    listItem?: boolean,
+    name: string;
+    size?: IconSize;
+    animation?: IconAnimation;
+    listItem?: boolean;
 }
 
 export class Icon extends React.Component<IconProps> {
-    render() {
+    public render() {
         let className = `fa fa-${this.props.name}`;
 
         if (this.props.size) {
@@ -26,6 +26,6 @@ export class Icon extends React.Component<IconProps> {
             className += " fa-li";
         }
 
-        return <span className={className}></span>
+        return <span className={className}></span>;
     }
 }

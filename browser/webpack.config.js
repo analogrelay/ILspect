@@ -9,14 +9,22 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPl
 const BUILTINS = ["electron"];
 
 module.exports = {
-    entry: path.join(__dirname, "src", "index.tsx"),
     devtool: "inline-source-map",
+    entry: path.join(__dirname, "src", "index.tsx"),
+    externals: [
+        function(context, request, callback) {
+            if (BUILTINS.indexOf(request) >= 0) {
+                return callback(null, `require('${request}')`);
+            }
+            return callback();
+        },
+    ],
     module: {
         rules: [
             {
+                exclude: /node_modules/,
                 test: /\.tsx?$/,
                 use: "ts-loader",
-                exclude: /node_modules/,
             },
             {
                 test: /\.scss$/,
@@ -36,21 +44,10 @@ module.exports = {
             },
         ],
     },
-    resolve: {
-        extensions: [".tsx", ".ts", ".js"],
-    },
     output: {
         filename: "[name].[chunkhash].js",
         path: path.resolve(__dirname, "dist"),
     },
-    externals: [
-        function(context, request, callback) {
-            if (BUILTINS.indexOf(request) >= 0) {
-                return callback(null, `require(${request})`);
-            }
-            return callback();
-        },
-    ],
     plugins: [
         // new BundleAnalyzerPlugin({
         //     analyzerMode: "static"
@@ -67,4 +64,7 @@ module.exports = {
         }),
         new ExtractTextWebpackPlugin("styles.[chunkhash].css"),
     ],
+    resolve: {
+        extensions: [".tsx", ".ts", ".js"],
+    },
 };

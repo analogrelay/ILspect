@@ -1,14 +1,15 @@
 // Manages the ASP.NET Core "buddy process"
 
-import { spawn, ChildProcess } from "child_process";
+import { ChildProcess, spawn } from "child_process";
 
-import * as log from 'winston';
+import * as log from "winston";
 
-const levelMap = ['silly', 'verbose', 'info', 'warn', 'error', 'error', 'error'];
+const levelMap = ["silly", "verbose", "info", "warn", "error", "error", "error"];
 
 export class BuddyProcess {
-    private process: ChildProcess | null;
     public url: string | null;
+
+    private process: ChildProcess | null;
 
     constructor(private applicationPath: string) {
         this.process = null;
@@ -20,11 +21,11 @@ export class BuddyProcess {
             log.debug("Spawning buddy process", { applicationPath: this.applicationPath });
             this.process = spawn("dotnet", [this.applicationPath]);
             this.process.on("close", (code, signal) => {
-                log.log(code == 0 ? "debug" : "error", "Buddy process terminated", { code });
+                log.log(code === 0 ? "debug" : "error", "Buddy process terminated", { code });
                 this.process = null;
                 reject(`Buddy process terminated with exit code: ${code}`);
             });
-            this.process.on("error", error => {
+            this.process.on("error", (error) => {
                 log.error("Error starting Buddy process", { error });
                 reject(error);
             });
@@ -36,7 +37,8 @@ export class BuddyProcess {
                 }
 
                 let lineEnd: number;
-                while (((lineEnd = chunk.indexOf('\r')) >= 0) || ((lineEnd = chunk.indexOf('\n')) >= 0)) {
+                // tslint:disable-next-line:no-conditional-assignment
+                while (((lineEnd = chunk.indexOf("\r")) >= 0) || ((lineEnd = chunk.indexOf("\n")) >= 0)) {
                     let line = chunk.slice(0, lineEnd).toString();
 
                     if (previousLine) {
@@ -45,11 +47,10 @@ export class BuddyProcess {
                     }
 
                     // If the line ending was a '\r' and it's followed by a '\n'
-                    if (chunk[lineEnd] == 0x0D && chunk.length > lineEnd + 1 && chunk[lineEnd] == 0x0A) {
+                    if (chunk[lineEnd] === 0x0D && chunk.length > lineEnd + 1 && chunk[lineEnd] === 0x0A) {
                         // Slice the extra '\n' off
                         chunk = chunk.slice(lineEnd + 2);
-                    }
-                    else {
+                    } else {
                         // Slice the newline off
                         chunk = chunk.slice(lineEnd + 1);
                     }
@@ -64,16 +65,17 @@ export class BuddyProcess {
                         }
 
                         // Parse the URL out
-                        let url = line.substring(18);
+                        const url = line.substring(18);
                         this.url = url;
                         resolve();
-                    }
-                    else if (line.startsWith('{')) {
+                    } else if (line.startsWith("{")) {
                         try {
-                            let record = JSON.parse(line);
+                            const record = JSON.parse(line);
                             if (record.log) {
-                                let level = record.log.logLevel < levelMap.length ? levelMap[record.log.logLevel] : "silly";
-                                let msg = record.category + ": " + record.log.formatted;
+                                const level = record.log.logLevel < levelMap.length ?
+                                    levelMap[record.log.logLevel] :
+                                    "silly";
+                                const msg = record.category + ": " + record.log.formatted;
                                 log.log(level, msg);
                             }
                         } catch (e) {
@@ -99,6 +101,7 @@ export class BuddyProcess {
 
     private processTerminated(code: number, signal: string) {
         // TODO: Signal this back to the app
+        // tslint:disable-next-line:no-console
         console.log(`buddy process terminated with exit code: ${code}`);
     }
 }

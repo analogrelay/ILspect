@@ -4,10 +4,11 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "npm run build:main",
+    "build": "npm run lint && npm run build:tsc",
     "lint": "tslint --project ./tsconfig.json",
+    "fix": "tslint --project ./tsconfig.json --fix",
     "watch": "tsc --project ./tsconfig.json --watch",
-    "build:main": "tsc --project ./tsconfig.json"
+    "build:tsc": "tsc --project ./tsconfig.json"
   },
   "repository": {
     "type": "git",
