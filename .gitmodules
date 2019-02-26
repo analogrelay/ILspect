@@ -1,0 +1,3 @@
+[submodule "vendor/ilspy-vscode"]
+	path = vendor/ilspy-vscode
+	url = git@github.com:anurse/ilspy-vscode.git

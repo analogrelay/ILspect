@@ -1,0 +1,21 @@
+{
+  "name": "ilspect-electron",
+  "version": "0.1.0",
+  "description": "ILSpect Electron Host",
+  "main": "dist/main.js",
+  "repository": "ssh://git@github.com/anurse/ilspect",
+  "author": "Andrew Stanton-Nurse <andrew@stanton-nurse.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "start": "electron ./dist/main.js"
+  },
+  "devDependencies": {
+    "electron": "^4.0.5",
+    "tslint": "^5.13.0",
+    "typescript": "^3.3.3333"
+  }
+}

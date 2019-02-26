@@ -1,0 +1,10 @@
+{
+  "name": "ilspect-web",
+  "version": "0.1.0",
+  "description": "ILspect Web Interface",
+  "main": "dist/index.js",
+  "repository": "git@github.com:anurse/ilspect.git",
+  "author": "Andrew Stanton-Nurse <andrew@stanton-nurse.com>",
+  "license": "MIT",
+  "private": true
+}
