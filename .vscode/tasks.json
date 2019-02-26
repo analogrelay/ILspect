@@ -1,0 +1,45 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Rebuild all",
+            "type": "npm",
+            "script": "build:all",
+            "path": "app/",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build 'ilspect.sln'",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/ilspect.sln"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Build 'app/'",
+            "type": "npm",
+            "script": "build",
+            "path": "app/",
+            "group": {
+                "kind": "build",
+                "isDefault": false,
+            }
+        },
+        {
+            "label": "Build 'web/'",
+            "type": "npm",
+            "script": "build",
+            "path": "web/",
+            "group": {
+                "kind": "build",
+                "isDefault": false,
+            }
+        }
+    ]
+}

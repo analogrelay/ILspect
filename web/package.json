@@ -6,5 +6,30 @@
   "repository": "git@github.com:anurse/ilspect.git",
   "author": "Andrew Stanton-Nurse <andrew@stanton-nurse.com>",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "cross-env TS_NODE_PROJECT=\"tsconfig.webpack.json\" webpack"
+  },
+  "devDependencies": {
+    "@types/react": "^16.8.5",
+    "@types/react-dom": "^16.8.2",
+    "@types/webpack": "^4.4.24",
+    "cross-env": "^5.2.0",
+    "rimraf": "^2.6.3",
+    "ts-loader": "^5.3.3",
+    "ts-node": "^8.0.2",
+    "tsconfig-paths": "^3.8.0",
+    "typescript": "^3.3.3333",
+    "webpack": "^4.29.5",
+    "webpack-cli": "^3.2.3"
+  },
+  "dependencies": {
+    "@types/clean-webpack-plugin": "^0.1.2",
+    "@types/html-webpack-plugin": "^3.2.0",
+    "clean-webpack-plugin": "^1.0.1",
+    "html-webpack-plugin": "^3.2.0",
+    "react": "^16.8.3",
+    "react-dom": "^16.8.3"
+  }
 }

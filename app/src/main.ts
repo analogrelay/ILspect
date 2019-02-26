@@ -1,12 +1,23 @@
 import { app, BrowserWindow } from "electron";
 import * as path from "path";
 
+import { Arguments, parseArguments } from "./args";
+
+const args = parseArguments(process.argv, console);
+
+console.debug(`Web Root: ${args.webRoot}`);
+console.debug(`Server Binary: ${args.serverBin}`);
+
 let mainWindow: Electron.BrowserWindow | null;
 
 function createWindow() {
     // Create the browser window.
     mainWindow = new BrowserWindow({
         height: 600,
+        webPreferences: {
+            nodeIntegration: false,
+            nodeIntegrationInWorker: false,
+        },
         width: 800,
     });
 

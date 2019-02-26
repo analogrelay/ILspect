@@ -8,13 +8,20 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "clean": "rimraf ./dist",
     "build": "tsc",
+    "build:all": "concurrently --names \"web,app,server\" \"yarn build:web\" \"yarn build\" \"yarn build:server\"",
+    "build:web": "yarn --cwd ../web build",
+    "build:server": "dotnet build ../ilspect.sln",
     "watch": "tsc -w",
     "lint": "tslint -c tslint.json -p tsconfig.json",
-    "start": "electron ./dist/main.js"
+    "prestart": "yarn build",
+    "start": "electron ./dist/main.js --webroot ../web/dist --server-bin ../vendor/ilspy-vscode/backend/src/ILSpy.Host/bin/Debug/netcoreapp2.2/ILSpy.Host.dll"
   },
   "devDependencies": {
+    "concurrently": "^4.1.0",
     "electron": "^4.0.5",
+    "rimraf": "^2.6.3",
     "tslint": "^5.13.0",
     "typescript": "^3.3.3333"
   }
